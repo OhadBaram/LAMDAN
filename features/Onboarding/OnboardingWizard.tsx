@@ -23,18 +23,21 @@ export function OnboardingWizard({ onComplete }: { onComplete: () => void }) {
 
     const handleProviderSelect = (providerKey: string) => {
         setSelectedProviderKey(providerKey);
-        setApiKey('');
-        setApiUrl(PROVIDER_INFO[providerKey]?.requiresEndpoint ? '' : '');
+        setApiKey(''); // Reset API key field
+        setApiUrl(PROVIDER_INFO[providerKey]?.requiresEndpoint ? '' : ''); // Reset API URL if required
         setStep(2);
     };
 
     const handleValidateAndSave = async () => {
-        if (!selectedProviderKey || !apiKey.trim() || (PROVIDER_INFO[selectedProviderKey]?.requiresEndpoint && !apiUrl.trim())) {
+        if (!selectedProviderKey ||
+            (selectedProviderKey !== 'google' && !apiKey.trim()) ||
+            (PROVIDER_INFO[selectedProviderKey]?.requiresEndpoint && !apiUrl.trim())
+        ) {
              openErrorDialog(
                 lang === 'he' ? 'קלט חסר' : 'Missing Input',
                 lang === 'he' ?
-                    `אנא הזן מפתח API${PROVIDER_INFO[selectedProviderKey || '']?.requiresEndpoint ? ' וכתובת Endpoint' : ''}.` :
-                    `Please enter an API Key${PROVIDER_INFO[selectedProviderKey || '']?.requiresEndpoint ? ' and Endpoint URL' : ''}.`
+                    `אנא הזן את כל השדות הנדרשים עבור ${PROVIDER_INFO[selectedProviderKey || '']?.name || 'הספק הנבחר'}.` :
+                    `Please enter all required fields for ${PROVIDER_INFO[selectedProviderKey || '']?.name || 'the selected provider'}.`
             );
             return;
         }
@@ -48,7 +51,7 @@ export function OnboardingWizard({ onComplete }: { onComplete: () => void }) {
             name: `${providerInfo.name} (Onboarding)`,
             provider: selectedProviderKey,
             modelId: providerInfo.defaultModel,
-            apiKey: apiKey,
+            apiKey: selectedProviderKey === 'google' ? '' : apiKey, // API Key not stored for Google
             apiUrl: apiUrl || undefined,
             costs: KNOWN_MODELS_PRICING[providerInfo.defaultModel] || { input: 0, output: 0 },
             isFreeTier: KNOWN_MODELS_PRICING[providerInfo.defaultModel]?.isFreeTier || false,
@@ -56,7 +59,7 @@ export function OnboardingWizard({ onComplete }: { onComplete: () => void }) {
             isValid: false, 
         };
 
-        const validation = await validateApiKey(modelConfig);
+        const validation = await validateApiKey(modelConfig); // For Google, this uses process.env.API_KEY
         if (validation.isValid) {
             await ApiSettingsStorage.upsert({ ...modelConfig, isValid: true, lastValidated: new Date().toISOString() });
             setValidationStatus('success');
@@ -73,12 +76,12 @@ export function OnboardingWizard({ onComplete }: { onComplete: () => void }) {
 
     const translations = {
         welcomeTitle: { he: "ברוכים הבאים ל-LUMINA!", en: "Welcome to LUMINA!" },
-        welcomeDesc: { he: "בוא נגדיר את מפתח ה-API הראשון שלך כדי להתחיל.", en: "Let's set up your first API key to get started." },
+        welcomeDesc: { he: "בוא נגדיר את חיבור ה-API הראשון שלך כדי להתחיל.", en: "Let's set up your first API connection to get started." },
         next: { he: "הבא", en: "Next" },
         selectProviderTitle: { he: "בחר ספק API", en: "Select API Provider" },
         selectProviderDesc: { he: "בחר את ספק ה-AI איתו תרצה להשתמש. תוכל להוסיף עוד מאוחר יותר.", en: "Choose the AI provider you want to use. You can add more later." },
-        apiKeyTitle: { he: "הזן מפתח API", en: "Enter API Key" },
-        apiKeyDesc: { he: (providerKey: string | null) => `הזן את מפתח ה-API שלך עבור ${providerKey ? PROVIDER_INFO[providerKey]?.name : ''}.`, en: (providerKey: string | null) => `Enter your API key for ${providerKey ? PROVIDER_INFO[providerKey]?.name : ''}.`},
+        apiKeyTitle: { he: "הגדר חיבור API", en: "Configure API Connection" },
+        apiKeyDesc: { he: (providerKey: string | null) => `הזן את הפרטים הנדרשים עבור ${providerKey ? PROVIDER_INFO[providerKey]?.name : ''}.`, en: (providerKey: string | null) => `Enter the required details for ${providerKey ? PROVIDER_INFO[providerKey]?.name : ''}.`},
         apiKeyLabel: { he: "מפתח API", en: "API Key"},
         apiEndpointLabel: { he: "כתובת API Endpoint", en: "API Endpoint URL"},
         validateAndSave: { he: "בדוק ושמור", en: "Validate & Save" },
@@ -86,6 +89,7 @@ export function OnboardingWizard({ onComplete }: { onComplete: () => void }) {
         validationSuccess: { he: "האימות הצליח! מעביר אותך לאפליקציה...", en: "Validation successful! Taking you to the app..." },
         validationErrorMsg: { he: "שגיאת אימות:", en: "Validation Error:" },
         videoGuide: { he: "מדריך וידאו לקבלת מפתח", en: "Video Guide for API Key"},
+        googleProviderNote: { he: "עבור Google Gemini, מפתח ה-API נטען אוטומטית מ משתנה סביבה בשרת שלך. אין צורך להזין אותו כאן.", en: "For Google Gemini, the API key is automatically loaded from an environment variable on your server. No need to enter it here."},
         back: { he: "חזור", en: "Back"},
         skipOnboarding: {he: "דלג על ההגדרה הראשונית (הגדרות מתקדמות)", en: "Skip Initial Setup (Advanced Settings)"},
     };
@@ -127,22 +131,33 @@ export function OnboardingWizard({ onComplete }: { onComplete: () => void }) {
                     <DialogContent className="p-6 space-y-4">
                         <DialogTitle>{translations.apiKeyTitle[currentLang]}</DialogTitle>
                         <DialogDescription>{translations.apiKeyDesc[currentLang](selectedProviderKey)}</DialogDescription>
-                        <div>
-                            <Label htmlFor="onboardingApiKey">{translations.apiKeyLabel[currentLang]}</Label>
-                            <Input id="onboardingApiKey" type="password" value={apiKey} onChange={e => setApiKey(e.target.value)} placeholder="sk-xxxxxxxxxx" />
-                        </div>
+                        
+                        {selectedProviderKey !== 'google' && (
+                            <div>
+                                <Label htmlFor="onboardingApiKey">{translations.apiKeyLabel[currentLang]}</Label>
+                                <Input id="onboardingApiKey" type="password" value={apiKey} onChange={e => setApiKey(e.target.value)} placeholder="sk-xxxxxxxxxx" />
+                            </div>
+                        )}
+
                         {currentProviderInfo?.requiresEndpoint && (
                             <div>
                                 <Label htmlFor="onboardingApiUrl">{translations.apiEndpointLabel[currentLang]}</Label>
                                 <Input id="onboardingApiUrl" value={apiUrl} onChange={e => setApiUrl(e.target.value)} placeholder="https://YOUR_RESOURCE.openai.azure.com"/>
                             </div>
                         )}
-                        {currentProviderInfo?.apiKeyUrl && (
+                        
+                        {selectedProviderKey === 'google' && (
+                             <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-md text-sm text-blue-700 dark:text-blue-300">
+                                {translations.googleProviderNote[currentLang]}
+                            </div>
+                        )}
+
+                        {currentProviderInfo?.apiKeyUrl && selectedProviderKey !== 'google' && (
                              <a href={currentProviderInfo.apiKeyUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-indigo-600 hover:underline flex items-center gap-1">
                                 <ExternalLink className="w-3 h-3"/> {lang === 'he' ? `איך מקבלים מפתח ${currentProviderInfo.name}?` : `How to get a ${currentProviderInfo.name} key?`}
                             </a>
                         )}
-                        {currentProviderInfo?.videoUrl && (
+                        {currentProviderInfo?.videoUrl && selectedProviderKey !== 'google' && ( // Also hide video guide if API key is not asked
                             <a href={currentProviderInfo.videoUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-indigo-600 hover:underline flex items-center gap-1">
                                 <Play className="w-3 h-3"/> {translations.videoGuide[currentLang]}
                             </a>

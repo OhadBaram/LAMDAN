@@ -26,24 +26,22 @@ export const Input: React.FC<InputProps> = (props) => {
         className, 
         value, 
         defaultValue, // Explicitly capture defaultValue from props
-        ...rest // All other props, potentially including other InputHTMLAttributes
+        ...rest // All other props
     } = props;
 
     const inputType = type || "text";
-    const baseClassName = `px-3 py-2.5 rounded-lg border bg-transparent border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none w-full transition-colors duration-150 ease-in-out placeholder-slate-400 dark:placeholder-slate-500 ${className || ''}`;
+    const baseClassName = `px-4 py-3 rounded-xl border bg-transparent border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 outline-none w-full transition-colors duration-150 ease-in-out placeholder-slate-400 dark:placeholder-slate-500 ${className || ''}`; // Adjusted padding, radius, border, focus
 
-    // domProps should not inadvertently re-introduce 'value' or 'defaultValue' if they exist in 'rest'
-    // However, 'value' and 'defaultValue' are top-level in InputHTMLAttributes, so they are captured above.
+    // domProps should not contain 'value' or 'defaultValue' as they are handled explicitly.
     const domProps: Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value' | 'defaultValue'> = rest;
-
 
     if (value !== undefined) {
         // Controlled: pass value, do not pass defaultValue.
         // React itself will ignore defaultValue if value is present on the DOM input.
-        // We ensure our custom component logic doesn't try to set both.
         return <input {...domProps} type={inputType} className={baseClassName} value={value === null ? '' : String(value)} />;
     } else {
-        // Uncontrolled: pass defaultValue (if exists from props), do not pass value.
+        // Uncontrolled: pass defaultValue (if it exists from props), do not pass value.
+        // If defaultValue from props is undefined, React handles it gracefully.
         return <input {...domProps} type={inputType} className={baseClassName} defaultValue={defaultValue} />;
     }
 };

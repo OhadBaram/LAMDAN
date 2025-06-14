@@ -42,26 +42,31 @@ function SettingsLayout(props: SettingsLayoutProps) {
     ];
 
     return (
-        <div className="container mx-auto max-w-7xl py-8 px-4 sm:px-6 lg:px-8"> 
-            <h1 className="text-3xl font-bold mb-8 text-slate-900 dark:text-slate-100">{lang === 'he' ? 'הגדרות' : 'Settings'}</h1>
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col md:flex-row gap-8">
-                <TabsList className={`flex md:flex-col md:border-b-0 md:pr-6 md:space-y-1 w-full md:w-1/4 lg:w-1/5 
-                                      ${lang === 'he' ? 'md:border-l md:pl-6' : 'md:border-r md:pr-6'} border-slate-200 dark:border-slate-700`}>
+        <div className="container mx-auto max-w-7xl py-6 md:py-8 px-2 sm:px-4 lg:px-6"> 
+            <h1 className="text-2xl sm:text-3xl font-bold mb-6 md:mb-8 text-slate-900 dark:text-slate-100">{lang === 'he' ? 'הגדרות' : 'Settings'}</h1>
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col gap-6 md:gap-8">
+                {/* Responsive TabsList: Horizontal scroll on mobile, vertical on desktop */}
+                <TabsList 
+                    className={`flex flex-row overflow-x-auto pb-2 md:pb-0 md:flex-col md:overflow-x-visible 
+                                md:border-b-0 md:space-y-1 w-full md:w-1/4 lg:w-1/5 
+                                ${lang === 'he' ? 'md:border-l md:pl-0 md:pr-4 lg:pr-6' : 'md:border-r md:pr-0 md:pl-4 lg:pl-6'} 
+                                border-slate-200 dark:border-slate-700 md:sticky md:top-20 md:max-h-[calc(100vh-10rem)] scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-600 scrollbar-track-transparent`}
+                >
                     {tabsConfig.map(tab => (
                         <TabsTrigger 
                             key={tab.id} 
                             value={tab.id} 
-                            className={`w-full justify-start text-left md:mb-1 px-3 py-2.5 rounded-md
+                            className={`flex-shrink-0 md:w-full justify-start text-left md:mb-1 px-3 py-2.5 rounded-lg text-sm md:text-base
                                         ${activeTab === tab.id 
-                                            ? 'bg-indigo-100 dark:bg-indigo-700/30 text-indigo-700 dark:text-indigo-300' 
-                                            : 'hover:bg-slate-100 dark:hover:bg-slate-700/50'
+                                            ? 'bg-indigo-100 dark:bg-indigo-700/40 text-indigo-700 dark:text-indigo-200 font-semibold' 
+                                            : 'hover:bg-slate-100 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300'
                                         }`}
                         >
-                            <tab.icon className="w-5 h-5 me-3 flex-shrink-0"/>{tab.label}
+                            <tab.icon className="w-4 h-4 md:w-5 md:h-5 me-2 md:me-3 flex-shrink-0"/>{tab.label}
                         </TabsTrigger>
                     ))}
                 </TabsList>
-                <div className="flex-1 min-h-0"> 
+                <div className="flex-1 min-w-0"> {/* Ensure content area can shrink on flex layouts */}
                     {tabsConfig.map(tab => (
                         <TabsContent key={tab.id} value={tab.id} className="h-full"> 
                             {children({ activeSettingsTab: tab.id })}
@@ -450,7 +455,7 @@ function ApiSettingsSection() {
             ...getInitialEditingModel(), 
             ...model, 
             name: model.name ?? '',
-            apiKey: model.apiKey ?? '',
+            apiKey: model.provider === 'google' ? '' : (model.apiKey ?? ''), // Clear API key for Google if editing
             apiUrl: model.apiUrl ?? '',
             modelSystemPrompt: model.modelSystemPrompt ?? '',
             isFreeTier: model.isFreeTier ?? false,
@@ -476,8 +481,10 @@ function ApiSettingsSection() {
     };
 
     const handleSaveModel = async () => {
-        if (!editingModel || !editingModel.name?.trim() || !editingModel.provider?.trim() || !editingModel.modelId?.trim() || (editingModel.provider !== 'google' && !(editingModel.apiKey||'').trim()) ) {
-             openErrorDialog(lang === 'he' ? 'שדות חסרים' : 'Missing Fields', lang === 'he' ? 'אנא מלא את כל שדות החובה (שם, ספק, מזהה מודל, ומפתח API אם לא Google).' : 'Please fill all required fields (Name, Provider, Model ID, and API Key unless Google).');
+        if (!editingModel || !editingModel.name?.trim() || !editingModel.provider?.trim() || !editingModel.modelId?.trim() || 
+            (editingModel.provider !== 'google' && !(editingModel.apiKey||'').trim()) 
+        ) {
+             openErrorDialog(lang === 'he' ? 'שדות חסרים' : 'Missing Fields', lang === 'he' ? 'אנא מלא את כל שדות החובה (שם, ספק, מזהה מודל, ומפתח API אם נדרש).' : 'Please fill all required fields (Name, Provider, Model ID, and API Key if required).');
             return;
         }
         setSavingModel(true);
@@ -486,13 +493,13 @@ function ApiSettingsSection() {
             name: editingModel.name,
             provider: editingModel.provider,
             modelId: editingModel.modelId.trim(),
-            apiKey: editingModel.apiKey || '', 
+            apiKey: editingModel.provider === 'google' ? '' : (editingModel.apiKey || ''), // API key is not stored for Google
             apiUrl: editingModel.apiUrl?.trim() || undefined,
             costs: editingModel.costs || KNOWN_MODELS_PRICING[editingModel.modelId.trim()] || { input: 0, output: 0 },
             isFreeTier: editingModel.isFreeTier || false,
             modelSystemPrompt: editingModel.modelSystemPrompt || '',
             isDefault: editingModel.isDefault || false,
-            isValid: editingModel.isValid || false,
+            isValid: editingModel.isValid || false, // Validation will update this
             lastValidated: editingModel.lastValidated
         };
 
@@ -513,6 +520,7 @@ function ApiSettingsSection() {
 
     const handleValidateModel = async (modelToValidate: ApiSetting) => {
         setValidatingModelId(modelToValidate.id);
+        // For Google, apiKey in modelToValidate will be empty, validateApiKey relies on process.env.API_KEY
         const result = await validateApiKey(modelToValidate);
         let updatedModel = { ...modelToValidate, isValid: result.isValid, lastValidated: new Date().toISOString() };
         if(result.error) {
@@ -682,6 +690,11 @@ function ApiSettingsSection() {
                         <div>
                             <Label htmlFor="apiKey">{lang === 'he' ? 'מפתח API' : 'API Key'} <span className="text-red-500">*</span></Label>
                             <Input id="apiKey" type="password" value={editingModel?.apiKey ?? ''} onChange={(e) => setEditingModel(p => ({...(p ?? getInitialEditingModel()), apiKey: e.target.value}))} placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxx"/>
+                            {editingModel?.provider && PROVIDER_INFO[editingModel.provider]?.apiKeyUrl && (
+                                <a href={PROVIDER_INFO[editingModel.provider]?.apiKeyUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-indigo-500 hover:underline flex items-center gap-1 mt-1">
+                                   <ExternalLink className="w-3 h-3"/> {lang === 'he' ? 'קבל מפתח API' : 'Get API Key'}
+                                </a>
+                            )}
                         </div>
                     )}
                      {PROVIDER_INFO[editingModel?.provider || '']?.requiresEndpoint && (
@@ -694,6 +707,11 @@ function ApiSettingsSection() {
                         <div>
                             <Label htmlFor="apiUrl">{lang === 'he' ? 'כתובת API Endpoint (אופציונלי, רק למקרים מיוחדים)' : 'API Endpoint URL (Optional, for special cases only)'}</Label>
                             <Input id="apiUrl" value={editingModel?.apiUrl ?? ''} onChange={(e) => setEditingModel(p => ({...(p ?? getInitialEditingModel()), apiUrl: e.target.value}))} placeholder={lang === 'he' ? 'השאר ריק עבור רוב הספקים' : 'Leave blank for most providers'}/>
+                        </div>
+                     )}
+                     {editingModel?.provider === 'google' && (
+                        <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-md text-sm text-blue-700 dark:text-blue-300">
+                            {lang === 'he' ? 'עבור Google Gemini, מפתח ה-API נטען אוטומטית מ משתנה הסביבה `API_KEY` בשרת שלך. אין צורך להזין אותו כאן.' : 'For Google Gemini, the API key is automatically loaded from the `API_KEY` environment variable on your server. No need to enter it here.'}
                         </div>
                      )}
                     <div>
@@ -984,7 +1002,9 @@ function UsageDashboard() {
 export function SettingsPage() {
     const { lang } = useAppContext();
     return (
-        <SettingsLayout>
+        // PageWrapper for settings might not need disablePadding, so remove it or set to false
+        // The overall padding for settings is handled by the container in SettingsLayout
+        <SettingsLayout> 
             {({ activeSettingsTab }) => {
                 switch (activeSettingsTab) {
                     case 'profile': return <><ProfileSettings /><div className="my-8 border-t border-slate-200 dark:border-slate-700"></div><SavedPromptsSettings /></>;

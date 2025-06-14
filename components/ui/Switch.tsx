@@ -12,30 +12,32 @@ export const Switch: React.FC<SwitchProps> = (props) => {
     checked: propChecked, // This is the main controlling prop for Switch's visual state
     onCheckedChange,
     className,
-    // Explicitly destructure value, defaultValue, and defaultChecked if they are passed
-    // to handle them separately from other ...restProps.
-    value: valueAttribute, // Potential HTML 'value' attribute, not related to checked state
+    value: valueAttribute, // Potential HTML 'value' attribute for the input element
     defaultValue: defaultValueAttribute, // Potential HTML 'defaultValue' attribute
-    defaultChecked: defaultCheckedAttribute, // HTML 'defaultChecked', conflicts with controlled 'checked'
+    defaultChecked: defaultCheckedAttribute, // HTML 'defaultChecked', conflicts with controlled 'checked' state
     ...restInputProps // All other InputHTMLAttributes
   } = props;
 
-  // Determine the actual checked state for the DOM input
+  // Determine the actual checked state for the DOM input (controlled by propChecked)
   const isChecked = (propChecked === null || propChecked === undefined) ? false : Boolean(propChecked);
 
-  // Prepare DOM attributes, filtering out conflicting ones
+  // Prepare DOM attributes, filtering out conflicting ones related to checked state
   const finalDomProps: React.InputHTMLAttributes<HTMLInputElement> = { ...restInputProps };
 
-  // Handle HTML 'value' and 'defaultValue' attributes (not related to checked state)
-  // Ensure only one of them is passed if they come from ...restInputProps
+  // Handle HTML 'value' and 'defaultValue' attributes (these are standard input attributes,
+  // separate from the 'checked' state of a checkbox).
+  // Ensure only one of them is passed if they come from ...restInputProps.
   if (valueAttribute !== undefined) {
     finalDomProps.value = valueAttribute;
     // If 'value' attribute is present, 'defaultValue' attribute is ignored by browsers/React.
+    // No need to explicitly delete defaultValueAttribute from finalDomProps if valueAttribute is set.
   } else if (defaultValueAttribute !== undefined) {
     finalDomProps.defaultValue = defaultValueAttribute;
   }
-  // 'defaultCheckedAttribute' is explicitly ignored because 'checked' prop makes this a controlled component
-  // regarding its checked state. Passing 'defaultChecked' with 'checked' causes React warnings.
+  // 'defaultCheckedAttribute' is explicitly ignored from spread props because 'checked={isChecked}'
+  // makes this a controlled component regarding its checked state.
+  // Passing 'defaultChecked' along with 'checked' causes React warnings.
+  // The 'defaultChecked' prop is destructured above and not spread via finalDomProps.
 
   return (
     <input

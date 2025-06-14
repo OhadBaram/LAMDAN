@@ -1,5 +1,6 @@
+
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Paperclip, X, Plus, Sparkles, SendHorizontal, Loader2, Mic, MicOff } from "lucide-react";
+import { Paperclip, X, Plus, Sparkles, SendHorizontal, Loader2, Mic, MicOff, Info } from "lucide-react"; // Changed Sparkles to Info
 import { useAppContext, ChatMessageItem, InvokeLLM } from '../../contexts/AppContext';
 import { useUserSettings } from '../../contexts/UserSettingsContext';
 
@@ -17,7 +18,7 @@ import { FilePreview } from './FilePreview';
 
 
 export function ChatPage() {
-  const { lang, apiSettings, recordTokenUsage, speak, continuousConversation, setContinuousConversation, isListening, startListening, stopListening, transcript, setTranscript, clearTranscript, isSidebarOpen, setIsSidebarOpen, openErrorDialog, ChatHistoryStorage, InvokeLLM: InvokeLLMFromContext, theme } = useAppContext(); // Added theme
+  const { lang, apiSettings, recordTokenUsage, speak, continuousConversation, setContinuousConversation, isListening, startListening, stopListening, transcript, setTranscript, clearTranscript, openErrorDialog, ChatHistoryStorage, InvokeLLM: InvokeLLMFromContext, theme } = useAppContext(); // Removed isSidebarOpen, setIsSidebarOpen
   const { userProfile, activePersonaId, personas, activeSpaceId, spaces, savedPrompts } = useUserSettings();
 
   const [currentChatId, setCurrentChatId] = useState(`chat-${Date.now()}`);
@@ -28,6 +29,7 @@ export function ChatPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [attachedFiles, setAttachedFiles] = useState<Array<{ id: string; name: string; type: string; dataUrl: string; content: string }>>([]);
   const [showSavedPromptsDialog, setShowSavedPromptsDialog] = useState(false);
+  const [isChatInfoPanelOpen, setIsChatInfoPanelOpen] = useState(false); // Local state for chat info panel
 
   const [currentModelId, setCurrentModelId] = useState<string | null>(null);
   const [currentConversationCost, setCurrentConversationCost] = useState(0);
@@ -222,12 +224,12 @@ export function ChatPage() {
 
   const currentPersonaName = personas.find(p => p.id === activePersonaId)?.name || (lang === 'he' ? "ברירת מחדל" : "Default");
   const chatAreaBg = theme === 'dark' 
-    ? (userProfile?.chatBgColor && userProfile.chatBgColor !== '#f3f4f6' && userProfile.chatBgColor !== '#f4f6f8' ? userProfile.chatBgColor : '#1f2937') // Dark slate if default
-    : (userProfile?.chatBgColor || '#f4f6f8'); // Light slate if default
+    ? (userProfile?.chatBgColor && userProfile.chatBgColor !== '#f3f4f6' && userProfile.chatBgColor !== '#f4f6f8' ? userProfile.chatBgColor : '#27272a')
+    : (userProfile?.chatBgColor || '#ffffff'); 
 
 
   return (
-    <div className={`flex flex-col h-full bg-white dark:bg-slate-800`}> {/* ChatPage fills height from main */}
+    <div className="flex flex-col h-full bg-white dark:bg-gray-900 relative"> {/* Added relative for panel positioning */}
       {/* Top bar for chat controls, above message list */}
       <div className={`px-4 py-2 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between sticky top-0 bg-white dark:bg-slate-800 z-10`}>
         <div className="flex items-center gap-2">
@@ -241,7 +243,7 @@ export function ChatPage() {
                         id="model-select-chat"
                         value={currentModelId}
                         onChange={(e) => setCurrentModelId(e.target.value)}
-                        className="text-xs p-1.5 min-w-[150px] rounded-md"
+                        className="text-xs p-1.5 min-w-[120px] sm:min-w-[150px] rounded-md" // Select uses rounded-xl by default, this is a specific smaller override
                         disabled={isLoading}
                     >
                         {validModels.map(model => <option key={model.id} value={model.id}>{model.name}</option>)}
@@ -249,13 +251,12 @@ export function ChatPage() {
                 </div>
             )}
         </div>
-        <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen(!isSidebarOpen)} title={lang === 'he' ? 'הצג/הסתר מידע שיחה' : 'Toggle Conversation Info'} className="rounded-full">
-            <Sparkles className="w-5 h-5"/>
+        <Button variant="ghost" size="icon" onClick={() => setIsChatInfoPanelOpen(!isChatInfoPanelOpen)} title={lang === 'he' ? 'הצג/הסתר מידע שיחה' : 'Toggle Conversation Info'} className="rounded-full">
+            <Info className="w-5 h-5"/> {/* Changed icon */}
         </Button>
       </div>
 
-      <div className="flex flex-1 overflow-hidden relative"> {/* Container for messages and sidebar */}
-        <div className="flex-1 flex flex-col overflow-hidden"> {/* Main chat area */}
+      <div className="flex-1 flex flex-col overflow-hidden"> {/* Main chat area */}
             <div 
               className="flex-1 overflow-y-auto p-4 md:p-6" 
               style={{ backgroundColor: chatAreaBg }}
@@ -308,73 +309,86 @@ export function ChatPage() {
                     </Button>
                 </form>
             </div>
-        </div>
-        
-        {/* Chat Info Sidebar */}
-        <aside className={`absolute top-0 ${lang === 'he' ? 'left-0 border-r' : 'right-0 border-l'} bottom-0 w-72 bg-slate-50 dark:bg-slate-800 shadow-xl transition-transform duration-300 ease-in-out p-4 overflow-y-auto z-20 transform ${isSidebarOpen ? 'translate-x-0' : (lang === 'he' ? '-translate-x-full' : 'translate-x-full')} border-slate-200 dark:border-slate-700`}>
-            <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">{lang === 'he' ? 'מידע שיחה' : 'Conversation Info'}</h3>
-                <Button onClick={() => setIsSidebarOpen(false)} variant="ghost" size="icon" className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 rounded-full">
-                    <X className="w-5 h-5" />
-                </Button>
-            </div>
-            <div className="space-y-4 text-sm">
-                <Card className="bg-white dark:bg-slate-700/50">
-                    <CardContent className="pt-4 space-y-3">
-                        <div>
-                            <Label htmlFor="active-model-display" className="text-slate-600 dark:text-slate-300">{lang === 'he' ? 'מודל פעיל:' : 'Active Model:'}</Label>
-                            {currentModelId && apiSettings.find(m => m.id === currentModelId) ?
-                                <p id="active-model-display" className="text-indigo-600 dark:text-indigo-400 font-medium">{apiSettings.find(m => m.id === currentModelId)?.name || 'N/A'}</p> :
-                                <p id="active-model-display" className="text-red-500">{lang === 'he' ? 'לא נבחר מודל תקין' : 'No valid model selected'}</p>
-                            }
-                        </div>
-                        <div>
-                            <Label htmlFor="active-persona-display" className="text-slate-600 dark:text-slate-300">{lang === 'he' ? 'פרסונה פעילה:' : 'Active Persona:'}</Label>
-                            <p id="active-persona-display" className="font-medium text-slate-700 dark:text-slate-200">{currentPersonaName}</p>
-                        </div>
-                        {activeSpaceId && activeSpace && (
-                            <div>
-                                <Label htmlFor="active-space-display" className="text-slate-600 dark:text-slate-300">{lang === 'he' ? 'מרחב פעיל:' : 'Active Space:'}</Label>
-                                <p id="active-space-display" className="font-medium text-slate-700 dark:text-slate-200">{activeSpace.name}</p>
-                                <p className="text-xs text-slate-400 dark:text-slate-500">{lang === 'he' ? `(${(activeSpace.files || []).length} קבצים)` : `(${(activeSpace.files || []).length} files)`}</p>
-                            </div>
-                        )}
-                        <div className="border-t border-slate-200 dark:border-slate-600 pt-3">
-                            <Label htmlFor="chat-cost-display" className="text-slate-600 dark:text-slate-300">{lang === 'he' ? 'עלות שיחה נוכחית:' : 'Current Chat Cost:'}</Label>
-                            <p id="chat-cost-display" className="font-medium text-slate-700 dark:text-slate-200">${currentConversationCost.toFixed(5)}</p>
-                        </div>
-                        <div>
-                            <Label htmlFor="chat-tokens-display" className="text-slate-600 dark:text-slate-300">{lang === 'he' ? 'טוקנים בשיחה (נכנס/יוצא):' : 'Chat Tokens (In/Out):'}</Label>
-                            <p id="chat-tokens-display" className="font-medium text-slate-700 dark:text-slate-200">{currentConversationTokens.incoming.toLocaleString()} / {currentConversationTokens.outgoing.toLocaleString()}</p>
-                        </div>
-                        <div className="pt-2">
-                             <Label htmlFor="continuous-conv-toggle" className="text-slate-600 dark:text-slate-300 flex items-center cursor-pointer w-full">
-                                <Switch id="continuous-conv-toggle" checked={continuousConversation} onCheckedChange={handleContinuousConversationToggle} />
-                                <span className="ms-2">{lang === 'he' ? 'שיחה רציפה' : 'Continuous Conversation'}</span>
-                            </Label>
-                        </div>
-                    </CardContent>
-                </Card>
-                
-                {userProfile?.systemPrompt && (
-                    <Card className="bg-white dark:bg-slate-700/50">
-                        <CardHeader className="p-3"><CardTitle className="text-sm font-medium">{lang === 'he' ? 'הנחיית מערכת (משתמש):' : 'System Prompt (User):'}</CardTitle></CardHeader>
-                        <CardContent className="p-3 text-xs max-h-28 overflow-y-auto text-slate-600 dark:text-slate-300">
-                            {userProfile.systemPrompt}
-                        </CardContent>
-                    </Card>
-                )}
-                {personas.find(p => p.id === activePersonaId)?.prompt && (
-                     <Card className="bg-white dark:bg-slate-700/50">
-                        <CardHeader className="p-3"><CardTitle className="text-sm font-medium">{lang === 'he' ? 'הנחיית מערכת (פרסונה):' : 'System Prompt (Persona):'}</CardTitle></CardHeader>
-                        <CardContent className="p-3 text-xs max-h-28 overflow-y-auto text-slate-600 dark:text-slate-300">
-                            {personas.find(p => p.id === activePersonaId)?.prompt}
-                        </CardContent>
-                    </Card>
-                )}
-            </div>
-        </aside>
       </div>
+        
+      {/* Chat Info Panel (Off-canvas) */}
+      <div 
+        className={`fixed inset-y-0 ${lang === 'he' ? 'left-0 border-r' : 'right-0 border-l'} 
+                    w-72 sm:w-80 bg-slate-50 dark:bg-slate-800 shadow-2xl 
+                    transition-transform duration-300 ease-in-out z-30 transform 
+                    ${isChatInfoPanelOpen ? 'translate-x-0' : (lang === 'he' ? '-translate-x-full' : 'translate-x-full')}
+                    border-slate-200 dark:border-slate-700 flex flex-col`}
+      >
+          <div className="flex justify-between items-center p-4 border-b border-slate-200 dark:border-slate-700">
+              <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">{lang === 'he' ? 'מידע שיחה' : 'Conversation Info'}</h3>
+              <Button onClick={() => setIsChatInfoPanelOpen(false)} variant="ghost" size="icon" className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 rounded-full">
+                  <X className="w-5 h-5" />
+              </Button>
+          </div>
+          <div className="p-4 space-y-4 text-sm overflow-y-auto flex-1">
+              <Card className="bg-white dark:bg-slate-700/50">
+                  <CardContent className="pt-4 space-y-3">
+                      <div>
+                          <Label htmlFor="active-model-display" className="text-slate-600 dark:text-slate-300">{lang === 'he' ? 'מודל פעיל:' : 'Active Model:'}</Label>
+                          {currentModelId && apiSettings.find(m => m.id === currentModelId) ?
+                              <p id="active-model-display" className="text-indigo-600 dark:text-indigo-400 font-medium">{apiSettings.find(m => m.id === currentModelId)?.name || 'N/A'}</p> :
+                              <p id="active-model-display" className="text-red-500">{lang === 'he' ? 'לא נבחר מודל תקין' : 'No valid model selected'}</p>
+                          }
+                      </div>
+                      <div>
+                          <Label htmlFor="active-persona-display" className="text-slate-600 dark:text-slate-300">{lang === 'he' ? 'פרסונה פעילה:' : 'Active Persona:'}</Label>
+                          <p id="active-persona-display" className="font-medium text-slate-700 dark:text-slate-200">{currentPersonaName}</p>
+                      </div>
+                      {activeSpaceId && activeSpace && (
+                          <div>
+                              <Label htmlFor="active-space-display" className="text-slate-600 dark:text-slate-300">{lang === 'he' ? 'מרחב פעיל:' : 'Active Space:'}</Label>
+                              <p id="active-space-display" className="font-medium text-slate-700 dark:text-slate-200">{activeSpace.name}</p>
+                              <p className="text-xs text-slate-400 dark:text-slate-500">{lang === 'he' ? `(${(activeSpace.files || []).length} קבצים)` : `(${(activeSpace.files || []).length} files)`}</p>
+                          </div>
+                      )}
+                      <div className="border-t border-slate-200 dark:border-slate-600 pt-3">
+                          <Label htmlFor="chat-cost-display" className="text-slate-600 dark:text-slate-300">{lang === 'he' ? 'עלות שיחה נוכחית:' : 'Current Chat Cost:'}</Label>
+                          <p id="chat-cost-display" className="font-medium text-slate-700 dark:text-slate-200">${currentConversationCost.toFixed(5)}</p>
+                      </div>
+                      <div>
+                          <Label htmlFor="chat-tokens-display" className="text-slate-600 dark:text-slate-300">{lang === 'he' ? 'טוקנים בשיחה (נכנס/יוצא):' : 'Chat Tokens (In/Out):'}</Label>
+                          <p id="chat-tokens-display" className="font-medium text-slate-700 dark:text-slate-200">{currentConversationTokens.incoming.toLocaleString()} / {currentConversationTokens.outgoing.toLocaleString()}</p>
+                      </div>
+                      <div className="pt-2">
+                           <Label htmlFor="continuous-conv-toggle" className="text-slate-600 dark:text-slate-300 flex items-center cursor-pointer w-full">
+                              <Switch id="continuous-conv-toggle" checked={continuousConversation} onCheckedChange={handleContinuousConversationToggle} />
+                              <span className="ms-2">{lang === 'he' ? 'שיחה רציפה' : 'Continuous Conversation'}</span>
+                          </Label>
+                      </div>
+                  </CardContent>
+              </Card>
+              
+              {userProfile?.systemPrompt && (
+                  <Card className="bg-white dark:bg-slate-700/50">
+                      <CardHeader className="p-3"><CardTitle className="text-sm font-medium">{lang === 'he' ? 'הנחיית מערכת (משתמש):' : 'System Prompt (User):'}</CardTitle></CardHeader>
+                      <CardContent className="p-3 text-xs max-h-28 overflow-y-auto text-slate-600 dark:text-slate-300">
+                          {userProfile.systemPrompt}
+                      </CardContent>
+                  </Card>
+              )}
+              {personas.find(p => p.id === activePersonaId)?.prompt && (
+                   <Card className="bg-white dark:bg-slate-700/50">
+                      <CardHeader className="p-3"><CardTitle className="text-sm font-medium">{lang === 'he' ? 'הנחיית מערכת (פרסונה):' : 'System Prompt (Persona):'}</CardTitle></CardHeader>
+                      <CardContent className="p-3 text-xs max-h-28 overflow-y-auto text-slate-600 dark:text-slate-300">
+                          {personas.find(p => p.id === activePersonaId)?.prompt}
+                      </CardContent>
+                  </Card>
+              )}
+          </div>
+      </div>
+       {/* Backdrop for off-canvas panel */}
+      {isChatInfoPanelOpen && (
+        <div 
+            className="fixed inset-0 bg-black/30 z-20 md:hidden" 
+            onClick={() => setIsChatInfoPanelOpen(false)}
+        />
+      )}
+
 
       <Dialog open={showSavedPromptsDialog} onOpenChange={setShowSavedPromptsDialog} size="lg">
         <DialogHeader>

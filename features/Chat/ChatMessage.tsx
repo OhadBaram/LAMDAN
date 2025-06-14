@@ -15,9 +15,9 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, onSpeak }) =>
     const isUser = message.role === 'user';
     const alignClass = isUser ? 'justify-end' : 'justify-start';
     
-    const bubbleBaseStyle = "max-w-xl md:max-w-2xl p-3.5 rounded-xl shadow-md";
-    const userBubbleStyle = "bg-indigo-600 text-white rounded-br-lg";
-    const botBubbleStyle = "bg-slate-200 dark:bg-slate-700 text-slate-800 dark:text-slate-100 rounded-bl-lg";
+    const bubbleBaseStyle = "max-w-xl md:max-w-2xl p-3.5 rounded-2xl shadow-md"; // rounded-xl to rounded-2xl
+    const userBubbleStyle = "bg-indigo-500 text-white"; // bg-indigo-600, removed rounded-br-lg for global rounding
+    const botBubbleStyle = "bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-600"; // Updated bot bubble style
     const errorBubbleStyle = "bg-red-100 dark:bg-red-800/60 border border-red-500 dark:border-red-600";
     
     const bubbleClass = isUser ? userBubbleStyle : botBubbleStyle;
@@ -39,8 +39,8 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, onSpeak }) =>
                 <p
                     className={`whitespace-pre-wrap leading-relaxed ${message.isError ? (isUser ? 'text-red-50' : 'text-red-700 dark:text-red-200') : ''}`}
                     style={{
-                        fontSize: `${userProfile?.chatFontSize || 15}px`, // Slightly increased default font size
-                        color: isUser ? undefined : (message.isError ? undefined : (theme === 'dark' ? userProfile?.chatFontColor || '#e2e8f0' : userProfile?.chatFontColor || '#1e293b')) // Ensure contrast based on theme
+                        fontSize: `${userProfile?.chatFontSize || 15}px`, 
+                        color: isUser ? undefined : (message.isError ? undefined : (theme === 'dark' ? userProfile?.chatFontColor || '#e2e8f0' : userProfile?.chatFontColor || '#1e293b'))
                     }}
                 >
                     {message.content}

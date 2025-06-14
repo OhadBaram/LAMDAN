@@ -1,3 +1,4 @@
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -20,4 +21,31 @@ body {
 /* Ensure html and body take full height for flex layouts to work correctly */
 html, body, #root {
   height: 100%;
+}
+
+/* Custom scrollbar utilities (optional, if you want thin scrollbars) */
+@layer utilities {
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: theme('colors.slate.300') theme('colors.transparent');
+  }
+  .dark .scrollbar-thin {
+    scrollbar-color: theme('colors.slate.600') theme('colors.transparent');
+  }
+  .scrollbar-thumb-slate-300::-webkit-scrollbar-thumb {
+    background-color: theme('colors.slate.300');
+    border-radius: 4px;
+  }
+  .dark .scrollbar-thumb-slate-600::-webkit-scrollbar-thumb {
+    background-color: theme('colors.slate.600');
+     border-radius: 4px;
+  }
+  .scrollbar-track-transparent::-webkit-scrollbar-track {
+    background-color: theme('colors.transparent');
+  }
+   /* For Webkit browsers (Chrome, Safari) */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
 }

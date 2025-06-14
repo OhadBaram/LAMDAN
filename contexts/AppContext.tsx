@@ -416,8 +416,8 @@ interface AppContextType {
     setCurrentPageGlobal: (page: string) => void;
     showOnboarding: boolean;
     setShowOnboarding: (show: boolean) => void;
-    isSidebarOpen: boolean;
-    setIsSidebarOpen: (open: boolean) => void;
+    // isSidebarOpen: boolean; // Removed
+    // setIsSidebarOpen: (open: boolean) => void; // Removed
     activeVoice: SpeechSynthesisVoice | null;
     setActiveVoice: (voice: SpeechSynthesisVoice | null) => void;
     availableVoices: SpeechSynthesisVoice[];
@@ -459,7 +459,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const [tokenUsage, setTokenUsageState] = useState<TokenUsage[]>([]);
     const [currentPage, setCurrentPageGlobal] = useState('chat');
     const [showOnboarding, setShowOnboarding] = useState(false);
-    const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+    // const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Removed
 
     const [activeVoice, setActiveVoice] = useState<SpeechSynthesisVoice | null>(null);
     const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
@@ -738,7 +738,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         tokenUsage, loadTokenUsage: loadTokenUsage,
         currentPage, setCurrentPageGlobal,
         showOnboarding, setShowOnboarding,
-        isSidebarOpen, setIsSidebarOpen,
+        // isSidebarOpen, setIsSidebarOpen, // Removed
         activeVoice, setActiveVoice, availableVoices, loadVoices, speak, stopSpeak, isSpeaking,
         continuousConversation, setContinuousConversation,
         isListening, startListening, stopListening, transcript, setTranscript, clearTranscript,

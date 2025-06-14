@@ -1,6 +1,7 @@
+
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from "react";
 import ReactDOM from 'react-dom/client';
-import { Bot, User as UserIcon, Moon, Sun, Cpu, SendHorizontal, Search, MessageSquare, Paperclip, X, Upload, Languages, Loader2, Copy, FileText, Image as ImageIcon, ExternalLink, Share, UploadCloud, Download, Link as LinkIcon, Server, Plus, Check, Trash, ArrowRight, LayoutGrid, CheckCircle, XCircle, AlertCircle, Lock, Unlock, Cloud, RefreshCw, File as FileIconPkg, FileSpreadsheet, Palette, Type, Settings as SettingsIcon, Star, Calendar, ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Sparkles, Brain, SlidersHorizontal, Users, Zap, Briefcase, ChevronDown, ChevronUp, GripVertical, Trash2, Edit3, Eye, Play, StopCircle, Mic, MicOff, Volume2, VolumeX, Maximize, Minimize, LogOut, DollarSign } from "lucide-react";
+import { Bot, User as UserIcon, Moon, Sun, Cpu, SendHorizontal, Search, MessageSquare, Paperclip, X, Upload, Languages, Loader2, Copy, FileText, Image as ImageIcon, ExternalLink, Share, UploadCloud, Download, Link as LinkIcon, Server, Plus, Check, Trash, ArrowRight, LayoutGrid, CheckCircle, XCircle, AlertCircle, Lock, Unlock, Cloud, RefreshCw, File as FileIconPkg, FileSpreadsheet, Palette, Type, Settings as SettingsIcon, Star, Calendar, ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Sparkles, Brain, SlidersHorizontal, Users, Zap, Briefcase, ChevronDown, ChevronUp, GripVertical, Trash2, Edit3, Eye, Play, StopCircle, Mic, MicOff, Volume2, VolumeX, Maximize, Minimize, LogOut, DollarSign, Menu } from "lucide-react"; // Added Menu icon
 
 import './index.css'; // Import global CSS
 
@@ -35,14 +36,14 @@ const App: React.FC = () => {
     setCurrentPageGlobal,
     showOnboarding,
     setShowOnboarding,
-    isSidebarOpen,
-    setIsSidebarOpen,
     errorDialog,
     setErrorDialog,
     changeLanguage,
     toggleTheme
-  } = useAppContext();
+  } = useAppContext(); // Removed isSidebarOpen, setIsSidebarOpen
   const { userProfile } = useUserSettings();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+
 
   const navItems = [
     { id: 'chat', label: lang === 'he' ? 'צ\'אט' : 'Chat', icon: MessageSquare },
@@ -70,69 +71,92 @@ const App: React.FC = () => {
     }
   };
 
+  const NavLink: React.FC<{item: typeof navItems[0], isMobile?: boolean}> = ({ item, isMobile }) => (
+    <Button
+      variant={currentPage === item.id ? 'default' : (isMobile ? 'ghost' : 'link')} // 'link' for desktop header, 'ghost' for mobile dropdown
+      onClick={() => { setCurrentPageGlobal(item.id); setIsMobileMenuOpen(false); }}
+      className={`w-full justify-start text-base 
+                  ${isMobile ? 'px-4 py-3 rounded-lg' : 'px-3 py-2 rounded-lg text-sm'}
+                  ${currentPage === item.id 
+                      ? (isMobile ? 'bg-indigo-100 dark:bg-indigo-700/60 text-indigo-700 dark:text-indigo-200' : 'bg-white/20 hover:bg-white/30 text-white font-semibold')
+                      : (isMobile 
+                          ? `text-slate-700 dark:text-slate-200 hover:bg-slate-200 dark:hover:bg-slate-700` 
+                          : `text-white/80 hover:text-white hover:bg-white/10 active:bg-white/20`)
+                  }`}
+    >
+      <item.icon className={`w-5 h-5 ${isMobile ? 'me-3' : 'me-1.5'} flex-shrink-0`} />
+      {item.label}
+    </Button>
+  );
+
+
   return (
     <div className={`flex flex-col h-screen font-sans ${theme}`}>
       <header
-        className="flex items-center justify-between p-4 shadow-lg text-white sticky top-0 z-40"
+        className="flex items-center justify-between p-3 md:p-4 shadow-lg text-white sticky top-0 z-50"
         style={{ backgroundColor: userProfile?.headerBgColor || '#2c3e50', color: userProfile?.headerTitleColor || '#ecf0f1' }}
       >
-        <div className="flex items-center gap-3">
-            <Button variant="ghost" size="icon" onClick={() => setIsSidebarOpen(!isSidebarOpen)} className="md:hidden text-inherit hover:bg-white/10 rounded-full">
-                <LayoutGrid className="w-6 h-6"/>
-            </Button>
-            <Cpu className="w-8 h-8"/>
-            <h1 className="text-2xl font-bold tracking-tight">{userProfile?.botName || 'LUMINA'}</h1>
+        <div className="flex items-center gap-2 md:gap-3">
+            <Cpu className="w-7 h-7 md:w-8 md:h-8"/>
+            <h1 className="text-xl md:text-2xl font-bold tracking-tight">{userProfile?.botName || 'LUMINA'}</h1>
         </div>
-        <div className="flex items-center gap-2">
+
+        {/* Desktop Navigation */}
+        <nav className="hidden md:flex items-center gap-1">
+            {navItems.map(item => (
+               <NavLink key={item.id} item={item} />
+            ))}
+        </nav>
+
+        <div className="flex items-center gap-1.5 md:gap-2">
           <Button
             variant="ghost"
-            size="icon"
+            size="default" // Adjusted size
             onClick={() => changeLanguage(lang === 'he' ? 'en' : 'he')}
             title={lang === 'he' ? 'שנה שפה לאנגלית' : 'Change Language to Hebrew'}
-            className="text-inherit hover:bg-white/10 rounded-full"
+            className="text-inherit hover:bg-white/20 active:bg-white/30 rounded-lg px-2.5 py-1.5 md:px-3 md:py-2"
           >
-            <Languages className="w-5 h-5"/>
+            <Languages className="w-5 h-5 md:w-5 md:h-5"/>
+            <span className="hidden sm:inline ms-1.5 text-xs md:text-sm">{lang === 'he' ? 'English' : 'עברית'}</span>
           </Button>
           <Button
             variant="ghost"
-            size="icon"
+            size="default" // Adjusted size
             onClick={toggleTheme}
             title={lang === 'he' ? 'שנה ערכת נושא' : 'Toggle Theme'}
-            className="text-inherit hover:bg-white/10 rounded-full"
+            className="text-inherit hover:bg-white/20 active:bg-white/30 rounded-lg px-2.5 py-1.5 md:px-3 md:py-2"
           >
-            {theme === 'light' ? <Moon className="w-5 h-5"/> : <Sun className="w-5 h-5"/>}
+            {theme === 'light' ? <Moon className="w-5 h-5 md:w-5 md:h-5"/> : <Sun className="w-5 h-5 md:w-5 md:h-5"/>}
+            <span className="hidden sm:inline ms-1.5 text-xs md:text-sm">{theme === 'light' ? (lang === 'he' ? 'כהה' : 'Dark') : (lang === 'he' ? 'בהיר' : 'Light')}</span>
           </Button>
+          {/* Mobile Menu Button */}
+          <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="md:hidden text-inherit hover:bg-white/20 active:bg-white/30 rounded-full">
+                <Menu className="w-6 h-6"/>
+            </Button>
         </div>
       </header>
-
-      <div className="flex flex-1 overflow-hidden" dir={lang === 'he' ? 'rtl' : 'ltr'}>
-        <aside className={`fixed md:sticky top-16 md:top-0 ${lang === 'he' ? 'right-0 border-l' : 'left-0 border-r'} border-slate-200 dark:border-slate-700 h-[calc(100vh-4rem)] md:h-full w-64 bg-slate-50 dark:bg-slate-800 p-4 transition-transform duration-300 ease-in-out z-30 ${isSidebarOpen ? 'translate-x-0' : (lang === 'he' ? 'translate-x-full md:translate-x-0' : '-translate-x-full md:translate-x-0')}`}>
-            <nav className="flex flex-col gap-2 pt-2">
+      
+      {/* Mobile Navigation Menu (Dropdown) */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden absolute top-16 left-0 right-0 bg-slate-50 dark:bg-slate-800 shadow-xl z-40 p-4 border-b border-slate-200 dark:border-slate-700">
+            <nav className="flex flex-col gap-2">
                 {navItems.map(item => (
-                    <Button
-                        key={item.id}
-                        variant={currentPage === item.id ? 'default' : 'ghost'}
-                        onClick={() => {setCurrentPageGlobal(item.id); setIsSidebarOpen(false);}}
-                        className={`w-full justify-start text-base px-3 py-2.5 rounded-lg
-                                    ${currentPage === item.id 
-                                        ? 'bg-indigo-500 text-white shadow-md hover:bg-indigo-600' 
-                                        : `text-slate-700 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700`
-                                    }`}
-                    >
-                        <item.icon className="w-5 h-5 me-3 flex-shrink-0"/>
-                        {item.label}
-                    </Button>
+                    <NavLink key={item.id} item={item} isMobile={true} />
                 ))}
             </nav>
-        </aside>
+        </div>
+      )}
 
-        <main className={`flex-1 flex flex-col overflow-y-auto bg-slate-100 dark:bg-slate-900 transition-all duration-300 ease-in-out ${isSidebarOpen && lang === 'he' ? 'md:mr-64' : ''} ${isSidebarOpen && lang !== 'he' ? 'md:ml-64' : ''}`}>
+
+      <div className="flex flex-1 overflow-hidden" dir={lang === 'he' ? 'rtl' : 'ltr'}>
+        {/* Sidebar removed */}
+        <main className="flex-1 flex flex-col overflow-y-auto bg-gray-100 dark:bg-gray-950">
              { (showOnboarding || apiSettings.length === 0 || !apiSettings.some(s=>s.isValid)) ? (
-                <div className="flex-1 flex items-center justify-center">
+                <div className="flex-1 flex items-center justify-center p-4">
                     <OnboardingWizard onComplete={handleCompleteOnboarding} />
                 </div>
             ) : (
-                 <PageWrapper disablePadding={currentPage === 'chat' || currentPage === 'settings'}>
+                 <PageWrapper disablePadding={currentPage === 'chat'}> {/* Settings page might not need full disablePadding like chat */}
                     {renderPage()}
                 </PageWrapper>
             )}
