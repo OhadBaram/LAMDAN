@@ -529,14 +529,14 @@ function AppProviderInternal({ children }: { children: React.ReactNode }) {
         const initializeApp = async () => {
             await loadApiSettings();
             await loadTokenUsage();
-            // Gamification updates (streak and session reset) after user settings might be loaded
-            if (userSettings.userProfile) { // Check if userProfile is loaded
+            // Gamification updates (streak and session reset)
+            if (userSettings.userProfile) { // Check if userProfile is available
                  await userSettings.updateStreak();
                  await userSettings.resetSessionActivity(); // Reset on app load (new session)
             }
         };
         initializeApp();
-    }, [userSettings.userProfile]); // Depend on userProfile from UserSettingsContext to ensure it's loaded
+    }, []); // Removed userSettings.userProfile from dependency array
 
 
     const recordTokenUsage = async (provider: string, modelId: string, incoming: number, outgoing: number, cost: number) => {
