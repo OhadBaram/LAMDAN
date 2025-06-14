@@ -20,8 +20,12 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
 }
 
 export const Input: React.FC<InputProps> = ({ className, type, value: propValue, ...restProps }) => {
+    // Destructure defaultValue out of restProps to prevent it from being spread if 'value' is also present
+    const { defaultValue, ...otherRestProps } = restProps;
+
     // Ensure the value passed to the DOM input is always a string.
     // Convert numbers to string, and null/undefined to an empty string.
+    // This makes the input behave as controlled if propValue is anything other than undefined.
     const inputValue = (propValue === null || propValue === undefined) ? '' : String(propValue);
     
     return (
@@ -29,7 +33,7 @@ export const Input: React.FC<InputProps> = ({ className, type, value: propValue,
             type={type || "text"} 
             className={`px-3 py-2.5 rounded-lg border bg-transparent border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none w-full transition-colors duration-150 ease-in-out placeholder-slate-400 dark:placeholder-slate-500 ${className || ''}`} 
             value={inputValue} 
-            {...restProps} 
+            {...otherRestProps} // Spread otherRestProps which does not include defaultValue
         />
     );
 };

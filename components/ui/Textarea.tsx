@@ -15,6 +15,9 @@ export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextArea
 }
 
 export const Textarea: React.FC<TextareaProps> = ({ className, value: propValue, ...props }) => {
+    // Destructure defaultValue out of props to prevent it from being spread if 'value' is also present
+    const { defaultValue, ...otherProps } = props;
+
     // Ensure the value passed to the DOM textarea is always a string.
     const textareaValue = (propValue === null || propValue === undefined) ? '' : String(propValue);
 
@@ -22,7 +25,7 @@ export const Textarea: React.FC<TextareaProps> = ({ className, value: propValue,
         <textarea 
             className={`px-3 py-2.5 rounded-lg border bg-transparent border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none w-full transition-colors duration-150 ease-in-out placeholder-slate-400 dark:placeholder-slate-500 ${className || ''}`} 
             value={textareaValue}
-            {...props} 
+            {...otherProps} // Spread otherProps which does not include defaultValue
         />
     );
 };
