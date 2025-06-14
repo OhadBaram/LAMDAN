@@ -60,6 +60,7 @@ const App: React.FC = () => {
   ] as const; // Added 'as const' for featureKey type safety
 
   const handlePageChange = (pageId: typeof navItems[number]['id']) => {
+    console.log('handlePageChange called with pageId:', pageId); // DEBUG LOG
     setCurrentPageGlobal(pageId);
     setIsMobileMenuOpen(false);
     const navItem = navItems.find(item => item.id === pageId);
@@ -70,8 +71,11 @@ const App: React.FC = () => {
 
 
   const handleCompleteOnboarding = async () => {
+    console.log('handleCompleteOnboarding triggered in App.tsx'); // DEBUG LOG
     setShowOnboarding(false);
+    console.log('setShowOnboarding(false) called in App.tsx'); // DEBUG LOG
     await loadApiSettings();
+    console.log('loadApiSettings finished after onboarding completion in App.tsx'); // DEBUG LOG
   };
 
   const renderPage = () => {
@@ -97,9 +101,9 @@ const App: React.FC = () => {
   const NavLink: React.FC<{item: typeof navItems[number], isMobile?: boolean}> = ({ item, isMobile }) => (
     <Button
       variant={'ghost'} 
-      onClick={() => handlePageChange(item.id)}
-      className={`w-full justify-start text-base transition-std
-                  ${isMobile ? 'px-3 py-2.5 rounded-md' : 'px-2 py-1.5 rounded-md text-sm'}
+      onClick={() => { console.log('NavLink clicked for item:', item.id); handlePageChange(item.id); }} // DEBUG LOG
+      className={`justify-start text-base transition-std
+                  ${isMobile ? 'w-full px-3 py-2.5 rounded-md' : 'px-2 py-1.5 rounded-md text-sm'}
                   ${currentPage === item.id 
                       ? (isMobile ? 'bg-[var(--bg-primary)] text-[var(--accent)] font-medium' : 'bg-white/10 text-white font-medium') // Desktop active retains some contrast on dark header
                       : (isMobile 
@@ -133,14 +137,14 @@ const App: React.FC = () => {
         className="flex items-center justify-between p-3 shadow-md text-white sticky top-0 z-50 bg-[var(--bg-secondary)] border-b border-[var(--border)]"
       >
         <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className="md:hidden text-white hover:bg-white/10 active:bg-white/20 rounded-md p-1.5">
+            <Button variant="ghost" size="icon" onClick={() => { console.log('Mobile menu button clicked. Current state:', isMobileMenuOpen); setIsMobileMenuOpen(!isMobileMenuOpen);}} className="md:hidden text-white hover:bg-white/10 active:bg-white/20 rounded-md p-1.5"> {/* DEBUG LOG */}
                 <Menu className="w-5 h-5"/>
             </Button>
             <h1 className="text-lg font-medium tracking-tight text-[var(--text-primary)]">{userProfile?.botName || 'LUMINA'}</h1>
         </div>
 
         {/* Desktop Navigation (Simplified to match ChatGPT's focused approach) */}
-        <nav className="hidden md:flex items-center gap-0.5">
+        <nav className="hidden md:flex items-center gap-1.5"> {/* Increased gap from 0.5 to 1.5 */}
             {navItems.filter(item => ['chat', 'settings'].includes(item.id)).map(item => ( // Example: Only show Chat & Settings directly in header
                <NavLink key={item.id} item={item} />
             ))}
@@ -188,10 +192,13 @@ const App: React.FC = () => {
             onClick={() => setIsMobileMenuOpen(false)}
         >
             <div 
-                className="absolute top-0 left-0 h-full w-64 bg-[var(--bg-secondary)] shadow-xl p-4 border-r border-[var(--border)] transition-std"
+                className={`absolute top-0 h-full w-64 bg-[var(--bg-secondary)] shadow-xl p-4 border-[var(--border)] transition-std 
+                            ${lang === 'he' ? 'right-0 border-l' : 'left-0 border-r'}`}
                 onClick={(e) => e.stopPropagation()}
             >
-                <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)} className="absolute top-2 right-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-1.5">
+                <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)} 
+                        className={`absolute top-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-1.5 
+                                    ${lang === 'he' ? 'left-2' : 'right-2'}`}>
                     <X className="w-5 h-5"/>
                 </Button>
                 <div className="mt-8 flex flex-col gap-1.5">

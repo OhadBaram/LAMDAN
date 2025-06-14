@@ -1,4 +1,5 @@
 
+
 import React, { useState } from "react";
 import { Cpu, Loader2, ExternalLink, Play } from "lucide-react";
 import { useAppContext, ApiSetting, KNOWN_MODELS_PRICING, PROVIDER_INFO } from '../../contexts/AppContext';
@@ -174,22 +175,22 @@ export function OnboardingWizard({ onComplete }: { onComplete: () => void }) {
             case 0:
                 return (
                     <>
-                         <Button variant="ghost" size="sm" onClick={onComplete} className="me-auto text-xs">{translations.skipOnboarding[currentLang]}</Button>
-                         <Button onClick={() => setStep(1)} variant="default">{translations.next[currentLang]}</Button>
+                         <Button variant="ghost" size="sm" onClick={() => { console.log('Skip Onboarding button clicked'); onComplete(); }} className="me-auto text-xs">{translations.skipOnboarding[currentLang]}</Button> {/* DEBUG LOG */}
+                         <Button onClick={() => { console.log('Next button clicked from step 0'); setStep(1);}} variant="default">{translations.next[currentLang]}</Button> {/* DEBUG LOG */}
                     </>
                 );
             case 1:
                  return (
                     <>
-                        <Button variant="ghost" onClick={() => setStep(0)}>{translations.back[currentLang]}</Button>
-                        <Button variant="ghost" size="sm" onClick={onComplete} className="text-xs">{translations.skipOnboarding[currentLang]}</Button>
+                        <Button variant="ghost" onClick={() => { console.log('Back button clicked from step 1'); setStep(0);}}>{translations.back[currentLang]}</Button> {/* DEBUG LOG */}
+                        <Button variant="ghost" size="sm" onClick={() => { console.log('Skip Onboarding button clicked from step 1'); onComplete(); }} className="text-xs">{translations.skipOnboarding[currentLang]}</Button> {/* DEBUG LOG */}
                     </>
                  );
             case 2:
                 return (
                     <>
-                        <Button variant="ghost" onClick={() => setStep(1)} disabled={isValidating}>{translations.back[currentLang]}</Button>
-                        <Button onClick={handleValidateAndSave} disabled={isValidating || validationStatus === 'success'} variant="default">
+                        <Button variant="ghost" onClick={() => { console.log('Back button clicked from step 2'); setStep(1);}} disabled={isValidating}>{translations.back[currentLang]}</Button> {/* DEBUG LOG */}
+                        <Button onClick={() => { console.log('Validate & Save button clicked'); handleValidateAndSave(); }} disabled={isValidating || validationStatus === 'success'} variant="default"> {/* DEBUG LOG */}
                             {isValidating ? <Loader2 className="w-4 h-4 animate-spin me-1.5"/> : null}
                             {validationStatus === 'success' ? translations.validationSuccess[currentLang] :
                              isValidating ? translations.validating[currentLang] : translations.validateAndSave[currentLang]}
