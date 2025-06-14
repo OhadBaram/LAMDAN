@@ -322,33 +322,33 @@ function AppearanceSettings() {
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <Label htmlFor="headerBgColor">{lang === 'he' ? 'צבע רקע כותרת' : 'Header Background Color'}</Label>
-                        <Input id="headerBgColor" type="color" value={customization.headerBgColor || '#2c3e50'} onChange={(e) => handleCustomizationChange('headerBgColor', e.target.value)} className="h-10"/>
+                        <Input id="headerBgColor" type="color" value={customization.headerBgColor ?? '#2c3e50'} onChange={(e) => handleCustomizationChange('headerBgColor', e.target.value)} className="h-10"/>
                     </div>
                     <div>
                         <Label htmlFor="headerTitleColor">{lang === 'he' ? 'צבע טקסט כותרת' : 'Header Title Color'}</Label>
-                        <Input id="headerTitleColor" type="color" value={customization.headerTitleColor || '#ecf0f1'} onChange={(e) => handleCustomizationChange('headerTitleColor', e.target.value)} className="h-10"/>
+                        <Input id="headerTitleColor" type="color" value={customization.headerTitleColor ?? '#ecf0f1'} onChange={(e) => handleCustomizationChange('headerTitleColor', e.target.value)} className="h-10"/>
                     </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <Label htmlFor="chatBgColor">{lang === 'he' ? 'צבע רקע צ\'אט' : 'Chat Background Color'}</Label>
-                        <Input id="chatBgColor" type="color" value={customization.chatBgColor || '#f4f6f8'} onChange={(e) => handleCustomizationChange('chatBgColor', e.target.value)} className="h-10"/>
+                        <Input id="chatBgColor" type="color" value={customization.chatBgColor ?? '#f4f6f8'} onChange={(e) => handleCustomizationChange('chatBgColor', e.target.value)} className="h-10"/>
                     </div>
                     <div>
                         <Label htmlFor="chatFontColor">{lang === 'he' ? 'צבע גופן צ\'אט (תשובות בוט)' : 'Chat Font Color (Bot Replies)'}</Label>
-                        <Input id="chatFontColor" type="color" value={customization.chatFontColor || '#34495e'} onChange={(e) => handleCustomizationChange('chatFontColor', e.target.value)} className="h-10"/>
+                        <Input id="chatFontColor" type="color" value={customization.chatFontColor ?? '#34495e'} onChange={(e) => handleCustomizationChange('chatFontColor', e.target.value)} className="h-10"/>
                     </div>
                 </div>
                 <div>
                     <Label htmlFor="chatFontSize">{lang === 'he' ? 'גודל גופן צ\'אט (פיקסלים)' : 'Chat Font Size (pixels)'}</Label>
-                    <Input id="chatFontSize" type="number" min={10} max={24} value={customization.chatFontSize || 14} onChange={(e) => handleCustomizationChange('chatFontSize', parseInt(e.target.value))} />
+                    <Input id="chatFontSize" type="number" min={10} max={24} value={customization.chatFontSize ?? 14} onChange={(e) => handleCustomizationChange('chatFontSize', parseInt(e.target.value))} />
                 </div>
                 <div>
                     <Label htmlFor="botVoice">{lang === 'he' ? 'קול הבוט' : 'Bot Voice'}</Label>
                     <div className="flex items-center gap-2">
                         <Select
                             id="botVoice"
-                            value={customization.botVoiceURI || ''}
+                            value={customization.botVoiceURI ?? ''} // Ensure Select handles null/undefined
                             onChange={handleVoiceChange}
                             disabled={currentLangVoices.length === 0}
                             className="flex-grow"
@@ -487,11 +487,11 @@ function ApiSettingsSection() {
                         {isGoogleTiered && <p className="text-xs text-yellow-600 dark:text-yellow-400">{lang === 'he' ? 'לתמחור מדורג של Gemini 1.5 Pro, עיין בתיעוד הרשמי והזן את המחיר הרלוונטי ביותר עבורך או השאר ריק לשימוש בתמחור ברירת מחדל.' : 'For Gemini 1.5 Pro tiered pricing, consult official docs and enter the most relevant rate, or leave blank for default.'}</p>}
                         <div>
                             <Label htmlFor="inputCost" className="text-xs">{lang === 'he' ? 'עלות קלט (Input)' : 'Input Cost'}</Label>
-                            <Input id="inputCost" type="number" step="0.01" value={costs?.input === undefined ? '' : costs.input} onChange={e => handleCostChange('input', e.target.value)} placeholder={knownPricing?.input?.toFixed(2) || "e.g., 0.50"} className="text-xs p-1.5 h-auto" />
+                            <Input id="inputCost" type="number" step="0.01" value={costs?.input ?? ''} onChange={e => handleCostChange('input', e.target.value)} placeholder={knownPricing?.input?.toFixed(2) || "e.g., 0.50"} className="text-xs p-1.5 h-auto" />
                         </div>
                         <div>
                             <Label htmlFor="outputCost" className="text-xs">{lang === 'he' ? 'עלות פלט (Output)' : 'Output Cost'}</Label>
-                            <Input id="outputCost" type="number" step="0.01" value={costs?.output === undefined ? '' : costs.output} onChange={e => handleCostChange('output', e.target.value)} placeholder={knownPricing?.output?.toFixed(2) || "e.g., 1.50"} className="text-xs p-1.5 h-auto"/>
+                            <Input id="outputCost" type="number" step="0.01" value={costs?.output ?? ''} onChange={e => handleCostChange('output', e.target.value)} placeholder={knownPricing?.output?.toFixed(2) || "e.g., 1.50"} className="text-xs p-1.5 h-auto"/>
                         </div>
                     </div>
                 )}
