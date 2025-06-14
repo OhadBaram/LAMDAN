@@ -1,12 +1,11 @@
-
 import React, { useState, useEffect, useRef } from "react";
-import { User as UserIcon, Palette, Server, Users, TrendingUp, Plus, Edit3, Trash2, GripVertical, Star, Calendar, ChevronLeft, ChevronRight, DollarSign, ChevronDown, ChevronUp, CheckCircle, XCircle, Loader2, Check, Play, ExternalLink, Cpu } from "lucide-react";
+import { User as UserIcon, Palette, Server, Users, TrendingUp, Plus, Edit3, Trash2, GripVertical, Star, Calendar, ChevronLeft, ChevronRight, DollarSign, ChevronDown, ChevronUp, CheckCircle, XCircle, Loader2, Check, Play, ExternalLink, Cpu, TrendingDown } from "lucide-react";
 import { format, endOfMonth, eachDayOfInterval, getDay, addMonths, isSameMonth } from "date-fns";
 import startOfMonth from 'date-fns/startOfMonth';
 import subMonths from 'date-fns/subMonths';
 import parseISO from 'date-fns/parseISO';
-import he from 'date-fns/locale/he';
-import enUS from 'date-fns/locale/enUS';
+import { he } from 'date-fns/locale/he';
+import { enUS } from 'date-fns/locale/enUS';
 
 import { useAppContext, ApiSetting, KNOWN_MODELS_PRICING, PROVIDER_INFO } from '../../contexts/AppContext';
 import { useUserSettings, initialAppCustomizationData, SavedPrompt, Persona, AppCustomization, CostManagement } from '../../contexts/UserSettingsContext';
@@ -24,7 +23,6 @@ import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/Ta
 import { Table, TableHeader, TableHead, TableBody, TableRow, TableCell } from '../../components/ui/Table';
 
 
-// SettingsLayoutProps should be defined here or imported if defined elsewhere globally
 interface SettingsLayoutProps {
     children: (props: { activeSettingsTab: string }) => React.ReactNode;
 }
@@ -43,19 +41,28 @@ function SettingsLayout(props: SettingsLayoutProps) {
     ];
 
     return (
-        <div className="container mx-auto max-w-7xl">
-            <h1 className="text-3xl font-bold mb-6 text-gray-900 dark:text-white">{lang === 'he' ? 'הגדרות' : 'Settings'}</h1>
+        <div className="container mx-auto max-w-7xl py-8 px-4 sm:px-6 lg:px-8"> {/* Added padding to container */}
+            <h1 className="text-3xl font-bold mb-8 text-slate-900 dark:text-slate-100">{lang === 'he' ? 'הגדרות' : 'Settings'}</h1>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col md:flex-row gap-8">
-                <TabsList className="flex md:flex-col md:border-b-0 md:border-r md:pr-6 border-gray-200 dark:border-gray-700 w-full md:w-1/5">
+                <TabsList className={`flex md:flex-col md:border-b-0 md:pr-6 md:space-y-1 w-full md:w-1/4 lg:w-1/5 
+                                      ${lang === 'he' ? 'md:border-l md:pl-6' : 'md:border-r md:pr-6'} border-slate-200 dark:border-slate-700`}>
                     {tabsConfig.map(tab => (
-                        <TabsTrigger key={tab.id} value={tab.id} className="w-full justify-start text-left md:mb-1">
-                            <tab.icon className="w-4 h-4 me-2 flex-shrink-0"/>{tab.label}
+                        <TabsTrigger 
+                            key={tab.id} 
+                            value={tab.id} 
+                            className={`w-full justify-start text-left md:mb-1 px-3 py-2.5 rounded-md
+                                        ${activeTab === tab.id 
+                                            ? 'bg-indigo-100 dark:bg-indigo-700/30 text-indigo-700 dark:text-indigo-300' 
+                                            : 'hover:bg-slate-100 dark:hover:bg-slate-700/50'
+                                        }`}
+                        >
+                            <tab.icon className="w-5 h-5 me-3 flex-shrink-0"/>{tab.label}
                         </TabsTrigger>
                     ))}
                 </TabsList>
-                <div className="flex-1">
+                <div className="flex-1 min-h-0"> {/* Added min-h-0 to ensure flex-1 works correctly */}
                     {tabsConfig.map(tab => (
-                        <TabsContent key={tab.id} value={tab.id}>
+                        <TabsContent key={tab.id} value={tab.id} className="h-full"> {/* Ensure TabsContent can fill height */}
                             {children({ activeSettingsTab: tab.id })}
                         </TabsContent>
                     ))}
@@ -107,7 +114,7 @@ function ProfileSettings() {
                     </div>
                     <div>
                         <Label htmlFor="userImage">{lang === 'he' ? 'תמונת פרופיל (משתמש)' : 'User Profile Image'}</Label>
-                        <Input id="userImage" type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setImage)} />
+                        <Input id="userImage" type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setImage)} className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"/>
                         {image && <img src={image} alt="User Preview" className="w-20 h-20 rounded-full mt-2 object-cover"/>}
                     </div>
                 </div>
@@ -118,7 +125,7 @@ function ProfileSettings() {
                     </div>
                     <div>
                         <Label htmlFor="botImage">{lang === 'he' ? 'תמונת פרופיל (בוט)' : 'Bot Profile Image'}</Label>
-                        <Input id="botImage" type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setBotImage)} />
+                        <Input id="botImage" type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setBotImage)} className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"/>
                         {botImage && <img src={botImage} alt="Bot Preview" className="w-20 h-20 rounded-full mt-2 object-cover"/>}
                     </div>
                 </div>
@@ -178,9 +185,9 @@ function SavedPromptsSettings() {
 
     return (
         <Card>
-            <CardHeader className="flex justify-between items-center">
+            <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <CardTitle>{lang === 'he' ? 'ניהול הנחיות שמורות' : 'Manage Saved Prompts'}</CardTitle>
-                <Button onClick={handleAddNewPrompt}><Plus className="w-4 h-4 me-2"/>{lang === 'he' ? 'הוסף הנחיה' : 'Add Prompt'}</Button>
+                <Button onClick={handleAddNewPrompt} size="sm"><Plus className="w-4 h-4 me-2"/>{lang === 'he' ? 'הוסף הנחיה' : 'Add Prompt'}</Button>
             </CardHeader>
             <CardContent>
                 {savedPrompts.length > 0 ? (
@@ -193,16 +200,16 @@ function SavedPromptsSettings() {
                                 onDragEnter={() => dragOverItem.current = index}
                                 onDragEnd={handleDragSort}
                                 onDragOver={(e) => e.preventDefault()}
-                                className="p-4 border dark:border-gray-700 rounded-lg flex items-center justify-between group cursor-grab active:cursor-grabbing"
+                                className="p-4 border border-slate-200 dark:border-slate-700 rounded-lg flex items-center justify-between group cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow bg-slate-50 dark:bg-slate-700/30"
                             >
-                                <div className="flex items-center">
-                                    <GripVertical className="w-5 h-5 text-gray-400 dark:text-gray-500 me-3 invisible group-hover:visible" />
-                                    <div>
-                                        <h4 className="font-semibold text-gray-800 dark:text-gray-100">{prompt.title}</h4>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-md">{prompt.content}</p>
+                                <div className="flex items-center flex-1 min-w-0">
+                                    <GripVertical className="w-5 h-5 text-slate-400 dark:text-slate-500 me-3 invisible group-hover:visible flex-shrink-0" />
+                                    <div className="flex-1 min-w-0">
+                                        <h4 className="font-semibold text-slate-800 dark:text-slate-100 truncate">{prompt.title}</h4>
+                                        <p className="text-sm text-slate-500 dark:text-slate-400 truncate">{prompt.content}</p>
                                     </div>
                                 </div>
-                                <div className="space-x-2 flex-shrink-0">
+                                <div className="space-x-2 flex-shrink-0 ms-2">
                                     <Button size="sm" variant="outline" onClick={() => handleEditPrompt(prompt)}><Edit3 className="w-3 h-3 me-1"/>{lang === 'he' ? 'ערוך' : 'Edit'}</Button>
                                     <Button size="sm" variant="destructive" onClick={() => handleDeletePrompt(prompt.id)}><Trash2 className="w-3 h-3 me-1"/>{lang === 'he' ? 'מחק' : 'Delete'}</Button>
                                 </div>
@@ -210,7 +217,7 @@ function SavedPromptsSettings() {
                         ))}
                     </ul>
                 ) : (
-                    <p className="text-center text-gray-500 dark:text-gray-400 py-8">{lang === 'he' ? 'אין הנחיות שמורות.' : 'No saved prompts yet.'}</p>
+                    <p className="text-center text-slate-500 dark:text-slate-400 py-8">{lang === 'he' ? 'אין הנחיות שמורות.' : 'No saved prompts yet.'}</p>
                 )}
             </CardContent>
 
@@ -308,28 +315,28 @@ function AppearanceSettings() {
         <Card>
             <CardHeader><CardTitle>{lang === 'he' ? 'התאמה אישית של מראה וקול' : 'Appearance & Voice Customization'}</CardTitle></CardHeader>
             <CardContent className="space-y-6">
-                 <div className="flex items-center justify-between">
+                 <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-700/30">
                     <Label htmlFor="theme-switch" className="mb-0">{lang === 'he' ? 'ערכת נושא כהה' : 'Dark Theme'}</Label>
                     <Switch id="theme-switch" checked={theme === 'dark'} onCheckedChange={toggleTheme} />
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <Label htmlFor="headerBgColor">{lang === 'he' ? 'צבע רקע כותרת' : 'Header Background Color'}</Label>
-                        <Input id="headerBgColor" type="color" value={customization.headerBgColor || '#1e3a8a'} onChange={(e) => handleCustomizationChange('headerBgColor', e.target.value)} />
+                        <Input id="headerBgColor" type="color" value={customization.headerBgColor || '#2c3e50'} onChange={(e) => handleCustomizationChange('headerBgColor', e.target.value)} className="h-10"/>
                     </div>
                     <div>
                         <Label htmlFor="headerTitleColor">{lang === 'he' ? 'צבע טקסט כותרת' : 'Header Title Color'}</Label>
-                        <Input id="headerTitleColor" type="color" value={customization.headerTitleColor || '#ffffff'} onChange={(e) => handleCustomizationChange('headerTitleColor', e.target.value)} />
+                        <Input id="headerTitleColor" type="color" value={customization.headerTitleColor || '#ecf0f1'} onChange={(e) => handleCustomizationChange('headerTitleColor', e.target.value)} className="h-10"/>
                     </div>
                 </div>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div>
                         <Label htmlFor="chatBgColor">{lang === 'he' ? 'צבע רקע צ\'אט' : 'Chat Background Color'}</Label>
-                        <Input id="chatBgColor" type="color" value={customization.chatBgColor || '#f3f4f6'} onChange={(e) => handleCustomizationChange('chatBgColor', e.target.value)} />
+                        <Input id="chatBgColor" type="color" value={customization.chatBgColor || '#f4f6f8'} onChange={(e) => handleCustomizationChange('chatBgColor', e.target.value)} className="h-10"/>
                     </div>
                     <div>
                         <Label htmlFor="chatFontColor">{lang === 'he' ? 'צבע גופן צ\'אט (תשובות בוט)' : 'Chat Font Color (Bot Replies)'}</Label>
-                        <Input id="chatFontColor" type="color" value={customization.chatFontColor || '#1f2937'} onChange={(e) => handleCustomizationChange('chatFontColor', e.target.value)} />
+                        <Input id="chatFontColor" type="color" value={customization.chatFontColor || '#34495e'} onChange={(e) => handleCustomizationChange('chatFontColor', e.target.value)} className="h-10"/>
                     </div>
                 </div>
                 <div>
@@ -408,8 +415,8 @@ function ApiSettingsSection() {
     };
 
     const handleSaveModel = async () => {
-        if (!editingModel || !editingModel.name?.trim() || !editingModel.provider?.trim() || !editingModel.modelId?.trim() || !editingModel.apiKey?.trim()) {
-             openErrorDialog(lang === 'he' ? 'שדות חסרים' : 'Missing Fields', lang === 'he' ? 'אנא מלא את כל שדות החובה (שם, ספק, מזהה מודל, מפתח API).' : 'Please fill all required fields (Name, Provider, Model ID, API Key).');
+        if (!editingModel || !editingModel.name?.trim() || !editingModel.provider?.trim() || !editingModel.modelId?.trim() || (editingModel.provider !== 'google' && !editingModel.apiKey?.trim()) ) {
+             openErrorDialog(lang === 'he' ? 'שדות חסרים' : 'Missing Fields', lang === 'he' ? 'אנא מלא את כל שדות החובה (שם, ספק, מזהה מודל, ומפתח API אם לא Google).' : 'Please fill all required fields (Name, Provider, Model ID, and API Key unless Google).');
             return;
         }
         setSavingModel(true);
@@ -418,7 +425,7 @@ function ApiSettingsSection() {
             name: editingModel.name,
             provider: editingModel.provider,
             modelId: editingModel.modelId.trim(),
-            apiKey: editingModel.apiKey,
+            apiKey: editingModel.apiKey || '', // API key can be empty for Google as it uses process.env
             apiUrl: editingModel.apiUrl?.trim() || undefined,
             costs: editingModel.costs || KNOWN_MODELS_PRICING[editingModel.modelId.trim()] || { input: 0, output: 0 },
             isFreeTier: editingModel.isFreeTier || false,
@@ -470,21 +477,21 @@ function ApiSettingsSection() {
 
         return (
             <div className="mt-2 text-sm">
-                <Button variant="ghost" onClick={() => setIsOpen(!isOpen)} className="text-xs px-2 py-1 mb-1 w-full justify-start">
+                <Button variant="ghost" onClick={() => setIsOpen(!isOpen)} className="text-xs px-2 py-1.5 mb-1 w-full justify-start text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-md">
                     {isOpen ? <ChevronUp className="w-3 h-3 me-1"/> : <ChevronDown className="w-3 h-3 me-1"/>}
                     {lang === 'he' ? 'ערוך עלויות (למיליון טוקנים)' : 'Edit Costs (per 1M tokens)'}
-                    {knownPricing && <span className="ms-1 text-gray-400 text-xs">({lang === 'he' ? 'מוכר:' : 'Known:'} I:{knownPricing.input.toFixed(2)} O:{knownPricing.output.toFixed(2)})</span>}
+                    {knownPricing && <span className="ms-1 text-slate-400 dark:text-slate-500 text-xs">({lang === 'he' ? 'מוכר:' : 'Known:'} I:{knownPricing.input.toFixed(2)} O:{knownPricing.output.toFixed(2)})</span>}
                 </Button>
                 {isOpen && (
-                    <div className="p-3 border dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700/50 space-y-2">
+                    <div className="p-3 border border-slate-200 dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-700/50 space-y-2">
                         {isGoogleTiered && <p className="text-xs text-yellow-600 dark:text-yellow-400">{lang === 'he' ? 'לתמחור מדורג של Gemini 1.5 Pro, עיין בתיעוד הרשמי והזן את המחיר הרלוונטי ביותר עבורך או השאר ריק לשימוש בתמחור ברירת מחדל.' : 'For Gemini 1.5 Pro tiered pricing, consult official docs and enter the most relevant rate, or leave blank for default.'}</p>}
                         <div>
                             <Label htmlFor="inputCost" className="text-xs">{lang === 'he' ? 'עלות קלט (Input)' : 'Input Cost'}</Label>
-                            <Input id="inputCost" type="number" step="0.01" value={costs?.input === undefined ? '' : costs.input} onChange={e => handleCostChange('input', e.target.value)} placeholder={knownPricing?.input?.toFixed(2) || "e.g., 0.50"} className="text-xs p-1" />
+                            <Input id="inputCost" type="number" step="0.01" value={costs?.input === undefined ? '' : costs.input} onChange={e => handleCostChange('input', e.target.value)} placeholder={knownPricing?.input?.toFixed(2) || "e.g., 0.50"} className="text-xs p-1.5 h-auto" />
                         </div>
                         <div>
                             <Label htmlFor="outputCost" className="text-xs">{lang === 'he' ? 'עלות פלט (Output)' : 'Output Cost'}</Label>
-                            <Input id="outputCost" type="number" step="0.01" value={costs?.output === undefined ? '' : costs.output} onChange={e => handleCostChange('output', e.target.value)} placeholder={knownPricing?.output?.toFixed(2) || "e.g., 1.50"} className="text-xs p-1"/>
+                            <Input id="outputCost" type="number" step="0.01" value={costs?.output === undefined ? '' : costs.output} onChange={e => handleCostChange('output', e.target.value)} placeholder={knownPricing?.output?.toFixed(2) || "e.g., 1.50"} className="text-xs p-1.5 h-auto"/>
                         </div>
                     </div>
                 )}
@@ -495,9 +502,9 @@ function ApiSettingsSection() {
 
     return (
         <Card>
-            <CardHeader className="flex justify-between items-center">
+            <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <CardTitle>{lang === 'he' ? 'ניהול מודלי API' : 'API Model Management'}</CardTitle>
-                <Button onClick={handleAddNewModel}><Plus className="w-4 h-4 me-2"/>{lang === 'he' ? 'הוסף מודל חדש' : 'Add New Model'}</Button>
+                <Button onClick={handleAddNewModel} size="sm"><Plus className="w-4 h-4 me-2"/>{lang === 'he' ? 'הוסף מודל חדש' : 'Add New Model'}</Button>
             </CardHeader>
             <CardContent>
                 {apiSettings.length > 0 ? (
@@ -508,7 +515,7 @@ function ApiSettingsSection() {
                             <TableHead>{lang === 'he' ? 'מזהה מודל' : 'Model ID'}</TableHead>
                             <TableHead>{lang === 'he' ? 'סטטוס' : 'Status'}</TableHead>
                             <TableHead>{lang === 'he' ? 'עלויות (I/O)' : 'Costs (I/O)'}</TableHead>
-                            <TableHead> </TableHead>
+                            <TableHead className="text-right">{lang === 'he' ? 'פעולות' : 'Actions'}</TableHead>
                         </TableRow></TableHeader>
                         <TableBody>
                             {apiSettings.map(model => (
@@ -516,28 +523,28 @@ function ApiSettingsSection() {
                                     <TableCell>
                                         <div className="flex items-center gap-2">
                                         {model.name}
-                                        {model.isDefault && <Star className="w-4 h-4 text-yellow-400" title={lang === 'he' ? 'ברירת מחדל' : 'Default'}/>}
-                                        {model.isFreeTier && <Cpu className="w-4 h-4 text-green-400" title={lang === 'he' ? 'שכבה חינמית זמינה' : 'Free tier available'}/>}
+                                        {model.isDefault && <span title={lang === 'he' ? 'ברירת מחדל' : 'Default'}><Star className="w-4 h-4 text-yellow-400" /></span>}
+                                        {model.isFreeTier && <span title={lang === 'he' ? 'שכבה חינמית זמינה' : 'Free tier available'}><Cpu className="w-4 h-4 text-green-500" /></span>}
                                         </div>
                                     </TableCell>
                                     <TableCell>{PROVIDER_INFO[model.provider]?.name || model.provider}</TableCell>
                                     <TableCell className="font-mono text-xs">{model.modelId}</TableCell>
                                     <TableCell>
                                         {model.isValid ?
-                                            <span className="flex items-center text-green-500"><CheckCircle className="w-4 h-4 me-1"/> {lang === 'he' ? 'תקין' : 'Valid'}</span> :
-                                            <span className="flex items-center text-red-500"><XCircle className="w-4 h-4 me-1"/> {lang === 'he' ? 'לא תקין' : 'Invalid'}</span>}
-                                        {model.lastValidated && <p className="text-xs text-gray-400">{lang === 'he' ? 'נבדק לאחרונה: ' : 'Last validated: '}{new Date(model.lastValidated).toLocaleDateString()}</p>}
+                                            <span className="flex items-center text-green-600 dark:text-green-400"><CheckCircle className="w-4 h-4 me-1"/> {lang === 'he' ? 'תקין' : 'Valid'}</span> :
+                                            <span className="flex items-center text-red-600 dark:text-red-400"><XCircle className="w-4 h-4 me-1"/> {lang === 'he' ? 'לא תקין' : 'Invalid'}</span>}
+                                        {model.lastValidated && <p className="text-xs text-slate-400 dark:text-slate-500">{lang === 'he' ? 'נבדק: ' : 'Validated: '}{new Date(model.lastValidated).toLocaleDateString()}</p>}
                                     </TableCell>
                                     <TableCell className="text-xs">
                                         I: ${model.costs?.input?.toFixed(2) ?? KNOWN_MODELS_PRICING[model.modelId]?.input?.toFixed(2) ?? 'N/A'}<br/>
                                         O: ${model.costs?.output?.toFixed(2) ?? KNOWN_MODELS_PRICING[model.modelId]?.output?.toFixed(2) ?? 'N/A'}
                                     </TableCell>
                                     <TableCell className="text-right">
-                                        <div className="flex justify-end gap-1 flex-wrap">
+                                        <div className="flex justify-end gap-1.5 flex-wrap">
                                         <Button size="sm" variant="outline" onClick={() => handleValidateModel(model)} disabled={validatingModelId === model.id}>
                                             {validatingModelId === model.id ? <Loader2 className="w-4 h-4 animate-spin"/> : <Check className="w-3 h-3 me-1"/>} {lang === 'he' ? 'בדוק' : 'Validate'}
                                         </Button>
-                                        <Button size="sm" variant="outline" onClick={() => handleSetDefault(model.id)} disabled={model.isDefault}>{lang === 'he' ? 'קבע כברירת מחדל' : 'Set Default'}</Button>
+                                        <Button size="sm" variant="outline" onClick={() => handleSetDefault(model.id)} disabled={model.isDefault}>{lang === 'he' ? 'ברירת מחדל' : 'Set Default'}</Button>
                                         <Button size="sm" variant="outline" onClick={() => handleEditModel(model)}><Edit3 className="w-3 h-3 me-1"/>{lang === 'he' ? 'ערוך' : 'Edit'}</Button>
                                         <Button size="sm" variant="destructive" onClick={() => handleDeleteConfirm(model.id)}><Trash2 className="w-3 h-3 me-1"/>{lang === 'he' ? 'מחק' : 'Delete'}</Button>
                                         </div>
@@ -547,7 +554,7 @@ function ApiSettingsSection() {
                         </TableBody>
                     </Table>
                 ) : (
-                    <p className="text-center text-gray-500 dark:text-gray-400 py-8">{lang === 'he' ? 'לא הוגדרו מודלים. לחץ על "הוסף מודל חדש" כדי להתחיל.' : 'No models configured. Click "Add New Model" to start.'}</p>
+                    <p className="text-center text-slate-500 dark:text-slate-400 py-8">{lang === 'he' ? 'לא הוגדרו מודלים. לחץ על "הוסף מודל חדש" כדי להתחיל.' : 'No models configured. Click "Add New Model" to start.'}</p>
                 )}
             </CardContent>
             <Dialog open={showAddModelDialog} onOpenChange={setShowAddModelDialog} size="lg">
@@ -580,7 +587,7 @@ function ApiSettingsSection() {
                             ))}
                         </Select>
                         {editingModel?.provider && PROVIDER_INFO[editingModel.provider]?.note && (
-                            <p className="text-xs text-gray-500 mt-1">{PROVIDER_INFO[editingModel.provider]?.note}</p>
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{PROVIDER_INFO[editingModel.provider]?.note}</p>
                         )}
                     </div>
                      {editingModel?.provider && (
@@ -609,10 +616,12 @@ function ApiSettingsSection() {
                             )}
                         </div>
                     )}
-                    <div>
-                        <Label htmlFor="apiKey">{lang === 'he' ? 'מפתח API' : 'API Key'} <span className="text-red-500">*</span></Label>
-                        <Input id="apiKey" type="password" value={editingModel?.apiKey || ''} onChange={(e) => setEditingModel(p => ({...p, apiKey: e.target.value}))} placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxx"/>
-                    </div>
+                    {editingModel?.provider !== 'google' && (
+                        <div>
+                            <Label htmlFor="apiKey">{lang === 'he' ? 'מפתח API' : 'API Key'} <span className="text-red-500">*</span></Label>
+                            <Input id="apiKey" type="password" value={editingModel?.apiKey || ''} onChange={(e) => setEditingModel(p => ({...p, apiKey: e.target.value}))} placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxx"/>
+                        </div>
+                    )}
                      {PROVIDER_INFO[editingModel?.provider || '']?.requiresEndpoint && (
                          <div>
                             <Label htmlFor="apiUrl">{lang === 'he' ? 'כתובת API Endpoint (נדרש עבור Azure)' : 'API Endpoint URL (Required for Azure)'}</Label>
@@ -636,7 +645,7 @@ function ApiSettingsSection() {
                         provider={editingModel?.provider}
                     />
                      <div className="flex items-center gap-2 mt-2">
-                        <input type="checkbox" id="isFreeTier" checked={editingModel?.isFreeTier || false} onChange={(e) => setEditingModel(p => ({...p, isFreeTier: e.target.checked}))} className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"/>
+                        <Switch id="isFreeTier" checked={editingModel?.isFreeTier || false} onCheckedChange={(checked) => setEditingModel(p => ({...p, isFreeTier: checked}))} />
                         <Label htmlFor="isFreeTier" className="mb-0 text-sm">{lang === 'he' ? 'סמן אם למודל זה יש שכבה חינמית משמעותית' : 'Mark if this model has a significant free tier'}</Label>
                     </div>
 
@@ -712,9 +721,9 @@ function PersonasSettings() {
 
     return (
         <Card>
-            <CardHeader className="flex justify-between items-center">
+            <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
                 <CardTitle>{lang === 'he' ? 'ניהול פרסונות' : 'Manage Personas'}</CardTitle>
-                <Button onClick={handleAddNewPersona}><Plus className="w-4 h-4 me-2"/>{lang === 'he' ? 'הוסף פרסונה' : 'Add Persona'}</Button>
+                <Button onClick={handleAddNewPersona} size="sm"><Plus className="w-4 h-4 me-2"/>{lang === 'he' ? 'הוסף פרסונה' : 'Add Persona'}</Button>
             </CardHeader>
             <CardContent>
                 {personas.length > 0 ? (
@@ -727,20 +736,21 @@ function PersonasSettings() {
                                 onDragEnter={() => dragOverItem.current = index}
                                 onDragEnd={handleDragSort}
                                 onDragOver={(e) => e.preventDefault()}
-                                className={`p-4 border dark:border-gray-700 rounded-lg flex items-center justify-between group cursor-grab active:cursor-grabbing ${activePersonaId === persona.id ? 'ring-2 ring-indigo-500 bg-indigo-50 dark:bg-indigo-900/30' : ''}`}
+                                className={`p-4 border border-slate-200 dark:border-slate-700 rounded-lg flex items-center justify-between group cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow
+                                            ${activePersonaId === persona.id ? 'ring-2 ring-indigo-500 bg-indigo-50 dark:bg-indigo-900/40' : 'bg-slate-50 dark:bg-slate-700/30'}`}
                             >
-                                <div className="flex items-center">
-                                    <GripVertical className="w-5 h-5 text-gray-400 dark:text-gray-500 me-3 invisible group-hover:visible" />
-                                    <div>
-                                        <h4 className="font-semibold text-gray-800 dark:text-gray-100 flex items-center">
+                                <div className="flex items-center flex-1 min-w-0">
+                                    <GripVertical className="w-5 h-5 text-slate-400 dark:text-slate-500 me-3 invisible group-hover:visible flex-shrink-0" />
+                                    <div className="flex-1 min-w-0">
+                                        <h4 className="font-semibold text-slate-800 dark:text-slate-100 flex items-center truncate">
                                             {persona.name}
-                                            {persona.isDefault && <Star className="w-4 h-4 text-yellow-400 ms-2" title={lang === 'he' ? 'פרסונת ברירת מחדל' : 'Default Persona'}/>}
+                                            {persona.isDefault && <span title={lang === 'he' ? 'פרסונת ברירת מחדל' : 'Default Persona'}><Star className="w-4 h-4 text-yellow-400 ms-2" /></span>}
                                         </h4>
-                                        <p className="text-sm text-gray-500 dark:text-gray-400 truncate max-w-md">{persona.prompt}</p>
+                                        <p className="text-sm text-slate-500 dark:text-slate-400 truncate">{persona.prompt}</p>
                                     </div>
                                 </div>
-                                <div className="space-x-2 flex-shrink-0">
-                                    {!persona.isDefault && <Button size="sm" variant="outline" onClick={() => handleSetDefaultPersona(persona.id)}>{lang === 'he' ? 'קבע כברירת מחדל' : 'Set Default'}</Button>}
+                                <div className="space-x-2 flex-shrink-0 ms-2">
+                                    {!persona.isDefault && <Button size="sm" variant="outline" onClick={() => handleSetDefaultPersona(persona.id)}>{lang === 'he' ? 'ברירת מחדל' : 'Set Default'}</Button>}
                                     <Button size="sm" variant="outline" onClick={() => handleEditPersona(persona)}><Edit3 className="w-3 h-3 me-1"/>{lang === 'he' ? 'ערוך' : 'Edit'}</Button>
                                     <Button size="sm" variant="destructive" onClick={() => handleDeletePersona(persona.id)} disabled={personas.length === 1 && persona.isDefault}><Trash2 className="w-3 h-3 me-1"/>{lang === 'he' ? 'מחק' : 'Delete'}</Button>
                                 </div>
@@ -748,7 +758,7 @@ function PersonasSettings() {
                         ))}
                     </ul>
                 ) : (
-                    <p className="text-center text-gray-500 dark:text-gray-400 py-8">{lang === 'he' ? 'אין פרסונות שמורות.' : 'No saved personas yet.'}</p>
+                    <p className="text-center text-slate-500 dark:text-slate-400 py-8">{lang === 'he' ? 'אין פרסונות שמורות.' : 'No saved personas yet.'}</p>
                 )}
             </CardContent>
             <Dialog open={showPersonaDialog} onOpenChange={setShowPersonaDialog} size="md">
@@ -765,7 +775,7 @@ function PersonasSettings() {
                         <Textarea id="personaPrompt" value={editingPersona?.prompt || ''} onChange={(e) => setEditingPersona(p => ({...p, prompt: e.target.value}))} rows={5}/>
                     </div>
                     <div className="flex items-center gap-2">
-                        <input type="checkbox" id="personaIsDefault" checked={editingPersona?.isDefault || false} onChange={(e) => setEditingPersona(p => ({...p, isDefault: e.target.checked}))} className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"/>
+                        <Switch id="personaIsDefault" checked={editingPersona?.isDefault || false} onCheckedChange={(checked) => setEditingPersona(p => ({...p, isDefault: checked}))} />
                         <Label htmlFor="personaIsDefault" className="mb-0 text-sm">{lang === 'he' ? 'קבע כפרסונת ברירת מחדל' : 'Set as default persona'}</Label>
                     </div>
                 </DialogContent>
@@ -778,7 +788,7 @@ function PersonasSettings() {
     );
 }
 
-interface CalendarViewProps { // Moved this interface inside or just before where it's used
+interface CalendarViewProps { 
     date: Date;
     data: {[key: number]: { incomingTokens: number; outgoingTokens: number; cost: number }};
     lang: string;
@@ -795,27 +805,27 @@ function CalendarView({ date, data, lang }: CalendarViewProps) {
     if (startingDayIndex < 0) startingDayIndex += 7;
 
     return (
-        <div className="grid grid-cols-7 gap-1 sm:gap-2">
-            {daysOfWeek.map(day => <div key={day} className="text-center font-medium text-xs text-gray-500 dark:text-gray-400 py-2">{day}</div>)}
-            {Array.from({ length: startingDayIndex }).map((_, i) => <div key={`empty-${i}`} className="border border-gray-100 dark:border-gray-700/50 rounded-md min-h-[100px] sm:min-h-[120px]"></div>)}
-            {daysInMonth.map((day) => {
-                const dayNumber = day.getDate();
+        <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
+            {daysOfWeek.map(day => <div key={day} className="text-center font-medium text-xs text-slate-500 dark:text-slate-400 py-2">{day}</div>)}
+            {Array.from({ length: startingDayIndex }).map((_, i) => <div key={`empty-${i}`} className="border border-slate-100 dark:border-slate-700/50 rounded-lg min-h-[100px] sm:min-h-[120px]"></div>)}
+            {daysInMonth.map((dayInstance) => {
+                const dayNumber = dayInstance.getDate();
                 const dayData = data[dayNumber];
                 return (
-                    <div key={day.toString()} className="border border-gray-200 dark:border-gray-700 rounded-md min-h-[100px] sm:min-h-[120px] p-1.5 sm:p-2 flex flex-col bg-gray-50 dark:bg-gray-800/60 hover:shadow-md transition-shadow">
-                        <span className="font-semibold text-sm text-gray-800 dark:text-gray-200">{dayNumber}</span>
+                    <div key={dayInstance.toString()} className="border border-slate-200 dark:border-slate-700 rounded-lg min-h-[100px] sm:min-h-[120px] p-2 sm:p-2.5 flex flex-col bg-white dark:bg-slate-800 hover:shadow-lg transition-shadow">
+                        <span className="font-semibold text-sm text-slate-800 dark:text-slate-200">{dayNumber}</span>
                         {dayData && (
-                            <div className="text-xs mt-1 space-y-0.5 flex-grow flex flex-col justify-end">
-                                <div className="flex items-center gap-1 text-blue-500 dark:text-blue-400" title={lang === 'he' ? 'טוקנים נכנסים' : 'Incoming Tokens'}>
-                                    <TrendingUp className="w-3 h-3 flex-shrink-0 transform rotate-180"/> {/* For incoming, arrow should point down or in */}
+                            <div className="text-xs mt-1 space-y-1 flex-grow flex flex-col justify-end">
+                                <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400" title={lang === 'he' ? 'טוקנים נכנסים' : 'Incoming Tokens'}>
+                                    <TrendingDown className="w-3.5 h-3.5 flex-shrink-0"/>
                                     <span className="truncate">{dayData.incomingTokens.toLocaleString()}</span>
                                 </div>
-                                <div className="flex items-center gap-1 text-green-500 dark:text-green-400" title={lang === 'he' ? 'טוקנים יוצאים' : 'Outgoing Tokens'}>
-                                    <TrendingUp className="w-3 h-3 flex-shrink-0"/> 
+                                <div className="flex items-center gap-1 text-green-600 dark:text-green-400" title={lang === 'he' ? 'טוקנים יוצאים' : 'Outgoing Tokens'}>
+                                    <TrendingUp className="w-3.5 h-3.5 flex-shrink-0"/> 
                                     <span className="truncate">{dayData.outgoingTokens.toLocaleString()}</span>
                                 </div>
-                                <div className="flex items-center gap-1 text-purple-500 dark:text-purple-400" title={lang === 'he' ? 'עלות' : 'Cost'}>
-                                    <DollarSign className="w-3 h-3 flex-shrink-0"/> <span className="truncate">${dayData.cost.toFixed(3)}</span>
+                                <div className="flex items-center gap-1 text-purple-600 dark:text-purple-400" title={lang === 'he' ? 'עלות' : 'Cost'}>
+                                    <DollarSign className="w-3.5 h-3.5 flex-shrink-0"/> <span className="truncate">${dayData.cost.toFixed(3)}</span>
                                 </div>
                             </div>
                         )}
@@ -826,8 +836,8 @@ function CalendarView({ date, data, lang }: CalendarViewProps) {
     );
 }
 
-function UsageDashboard() { // Note: CalendarView is defined above or should be imported
-    const { lang, tokenUsage, apiSettings } = useAppContext();
+function UsageDashboard() {
+    const { lang, tokenUsage } = useAppContext(); // apiSettings removed as not directly used here
     const [currentDate, setCurrentDate] = useState(new Date());
 
     const filteredData = tokenUsage.filter(d => {
@@ -860,23 +870,23 @@ function UsageDashboard() { // Note: CalendarView is defined above or should be 
             <CardContent>
                 <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
                     <div className="flex items-center gap-2">
-                        <Button variant="outline" size="icon" onClick={() => setCurrentDate(subMonths(currentDate, 1))}><ChevronLeft/></Button>
-                        <h3 className="text-lg font-semibold w-40 text-center">{format(currentDate, 'MMMM yyyy', { locale: lang === 'he' ? he : enUS })}</h3>
-                        <Button variant="outline" size="icon" onClick={() => setCurrentDate(addMonths(currentDate, 1))}><ChevronRight/></Button>
+                        <Button variant="outline" size="icon" onClick={() => setCurrentDate(subMonths(currentDate, 1))} className="rounded-full"><ChevronLeft/></Button>
+                        <h3 className="text-xl font-semibold w-48 text-center text-slate-700 dark:text-slate-200">{format(currentDate, 'MMMM yyyy', { locale: lang === 'he' ? he : enUS })}</h3>
+                        <Button variant="outline" size="icon" onClick={() => setCurrentDate(addMonths(currentDate, 1))} className="rounded-full"><ChevronRight/></Button>
                     </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6 text-center">
-                    <Card className="bg-blue-50 dark:bg-blue-900/30">
-                        <CardHeader className="pb-2"><CardTitle className="text-sm text-blue-700 dark:text-blue-300">{lang === 'he' ? 'סה"כ טוקנים נכנסים (חודשי)' : 'Total Incoming Tokens (Monthly)'}</CardTitle></CardHeader>
-                        <CardContent><p className="text-2xl font-bold text-blue-600 dark:text-blue-400">{monthlyTotal.incomingTokens.toLocaleString()}</p></CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 text-center">
+                    <Card className="bg-blue-50 dark:bg-blue-900/40 border-blue-200 dark:border-blue-700">
+                        <CardHeader className="pb-2 pt-4"><CardTitle className="text-sm font-medium text-blue-700 dark:text-blue-300">{lang === 'he' ? 'סה"כ טוקנים נכנסים (חודשי)' : 'Total Incoming Tokens (Monthly)'}</CardTitle></CardHeader>
+                        <CardContent className="pb-4"><p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{monthlyTotal.incomingTokens.toLocaleString()}</p></CardContent>
                     </Card>
-                     <Card className="bg-green-50 dark:bg-green-900/30">
-                        <CardHeader className="pb-2"><CardTitle className="text-sm text-green-700 dark:text-green-300">{lang === 'he' ? 'סה"כ טוקנים יוצאים (חודשי)' : 'Total Outgoing Tokens (Monthly)'}</CardTitle></CardHeader>
-                        <CardContent><p className="text-2xl font-bold text-green-600 dark:text-green-400">{monthlyTotal.outgoingTokens.toLocaleString()}</p></CardContent>
+                     <Card className="bg-green-50 dark:bg-green-900/40 border-green-200 dark:border-green-700">
+                        <CardHeader className="pb-2 pt-4"><CardTitle className="text-sm font-medium text-green-700 dark:text-green-300">{lang === 'he' ? 'סה"כ טוקנים יוצאים (חודשי)' : 'Total Outgoing Tokens (Monthly)'}</CardTitle></CardHeader>
+                        <CardContent className="pb-4"><p className="text-3xl font-bold text-green-600 dark:text-green-400">{monthlyTotal.outgoingTokens.toLocaleString()}</p></CardContent>
                     </Card>
-                     <Card className="bg-purple-50 dark:bg-purple-900/30">
-                        <CardHeader className="pb-2"><CardTitle className="text-sm text-purple-700 dark:text-purple-300">{lang === 'he' ? 'סה"כ עלות (חודשי)' : 'Total Cost (Monthly)'}</CardTitle></CardHeader>
-                        <CardContent><p className="text-2xl font-bold text-purple-600 dark:text-purple-400">${monthlyTotal.cost.toFixed(2)}</p></CardContent>
+                     <Card className="bg-purple-50 dark:bg-purple-900/40 border-purple-200 dark:border-purple-700">
+                        <CardHeader className="pb-2 pt-4"><CardTitle className="text-sm font-medium text-purple-700 dark:text-purple-300">{lang === 'he' ? 'סה"כ עלות (חודשי)' : 'Total Cost (Monthly)'}</CardTitle></CardHeader>
+                        <CardContent className="pb-4"><p className="text-3xl font-bold text-purple-600 dark:text-purple-400">${monthlyTotal.cost.toFixed(2)}</p></CardContent>
                     </Card>
                 </div>
                 <CalendarView date={currentDate} data={dataByDay} lang={lang} />
@@ -888,17 +898,18 @@ function UsageDashboard() { // Note: CalendarView is defined above or should be 
 
 export function SettingsPage() {
     const { lang } = useAppContext();
-    // This component will now use the SettingsLayout and render the correct sub-component
     return (
-        <SettingsLayout children={({ activeSettingsTab }) => {
-            switch (activeSettingsTab) {
-                case 'profile': return <><ProfileSettings /><div className="my-6 border-t dark:border-gray-700"></div><SavedPromptsSettings /></>;
-                case 'appearance': return <AppearanceSettings />;
-                case 'api': return <ApiSettingsSection />;
-                case 'personas': return <PersonasSettings />;
-                case 'usage': return <UsageDashboard />;
-                default: return <div>{lang === 'he' ? 'בחר קטגוריה' : 'Select a category'}</div>;
-            }
-        }}/>
+        <SettingsLayout>
+            {({ activeSettingsTab }) => {
+                switch (activeSettingsTab) {
+                    case 'profile': return <><ProfileSettings /><div className="my-8 border-t border-slate-200 dark:border-slate-700"></div><SavedPromptsSettings /></>;
+                    case 'appearance': return <AppearanceSettings />;
+                    case 'api': return <ApiSettingsSection />;
+                    case 'personas': return <PersonasSettings />;
+                    case 'usage': return <UsageDashboard />;
+                    default: return <div className="p-6 text-center text-slate-500">{lang === 'he' ? 'בחר קטגוריה מהתפריט' : 'Select a category from the menu'}</div>;
+                }
+            }}
+        </SettingsLayout>
     );
 }

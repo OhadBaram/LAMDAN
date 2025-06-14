@@ -1,4 +1,3 @@
-
 import React from 'react';
 
 export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElement> {
@@ -12,4 +11,4 @@ export interface SelectProps extends React.SelectHTMLAttributes<HTMLSelectElemen
     style?: React.CSSProperties;
 }
 
-export const Select: React.FC<SelectProps> = ({ children, className, ...props }) => <select className={`p-2 rounded-md border bg-gray-50 dark:bg-gray-700 border-gray-300 dark:border-gray-600 focus:ring-2 focus:ring-indigo-500 outline-none ${className || ''}`} {...props}>{children}</select>;
+export const Select: React.FC<SelectProps> = ({ children, className, ...props }) => <select className={`px-3 py-2.5 rounded-lg border bg-slate-50 dark:bg-slate-700 border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none w-full transition-colors duration-150 ease-in-out ${className || ''}`} {...props}>{children}</select>;

@@ -1,5 +1,5 @@
 {
-  "name": "app",
+  "name": "lamdan",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -11,9 +11,10 @@
   "dependencies": {
     "react": "^19.1.0",
     "lucide-react": "^0.514.0",
-"date-fns": "2.30.0",
+    "date-fns": "^3.6.0",
     "react-dom": "^19.1.0",
-    "recharts": "^2.15.3"
+    "recharts": "^2.15.3",
+    "@google/genai": "^1.5.1"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",

@@ -14,7 +14,20 @@ export interface CostManagement { dailyBudget: number; weeklyBudget: number; mon
 
 
 // --- Storage Instances (specific to UserSettingsContext) ---
-export const initialAppCustomizationData: AppCustomization = { headerBgColor: '#1e3a8a', headerTitleColor: '#ffffff', chatBgColor: '#f3f4f6', chatFontColor: '#1f2937', chatFontSize: 14, botVoiceURI: null, userName: 'User', userImage: null, botName: 'LUMINA', botImage: null, systemPrompt: 'You are a helpful AI assistant.' };
+export const initialAppCustomizationData: AppCustomization = { 
+    headerBgColor: '#2c3e50', // Darker, more modern blue-gray
+    headerTitleColor: '#ecf0f1', // Light gray/white for contrast
+    chatBgColor: '#f4f6f8', // Slightly off-white/light gray
+    chatFontColor: '#34495e', // Darker gray for text
+    chatFontSize: 14, 
+    botVoiceURI: null, 
+    userName: 'User', 
+    userImage: null, 
+    botName: 'LUMINA', 
+    botImage: null, 
+    systemPrompt: 'You are a helpful AI assistant.' 
+};
+
 const AppCustomizationStorage = mockStorage<AppCustomization>('app_customization_v2', initialAppCustomizationData);
 const SavedPromptsStorage = mockStorage<SavedPrompt>('saved_prompts_v2', [
     { id: 'news_il', title: 'חדשות אחרונות בישראל', content: 'מהן החדשות האחרונות בישראל ביממה האחרונה?', order: 0 },
