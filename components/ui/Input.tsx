@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
@@ -19,9 +20,9 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
 }
 
 export const Input: React.FC<InputProps> = ({ className, type, value: propValue, ...restProps }) => {
-    // Ensure the value passed to the DOM input is never null or undefined. Default to empty string.
-    // This helps prevent React error #137 for controlled inputs.
-    const inputValue = (propValue === null || propValue === undefined) ? '' : propValue;
+    // Ensure the value passed to the DOM input is always a string.
+    // Convert numbers to string, and null/undefined to an empty string.
+    const inputValue = (propValue === null || propValue === undefined) ? '' : String(propValue);
     
     return (
         <input 
