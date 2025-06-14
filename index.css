@@ -4,54 +4,99 @@
 
 @layer base {
   :root {
-    /* Gemini-like Light Theme (Default) */
-    --bg-primary-light: #FFFFFF;
-    --bg-secondary-light: #f8f9fa; /* Sidebar background */
-    --bg-tertiary-light: #f1f3f4; /* Prompt bar background, Model version tag */
-    --text-primary-light: #3c4043; /* Main text, Model name */
-    --text-secondary-light: #5f6368; /* Secondary text, Icons, PRO tag, Model version text */
-    --text-placeholder-light: #70757a; /* Prompt bar placeholder */
-    --accent-primary-light: #1a73e8; /* Blue for New Chat icon, Send button, Links */
-    --accent-secondary-light: #A8D8B9; /* Turquoise for Profile icon */
-    --accent-online-light: #34A853; /* Green dot for online status */
-    --border-light: #e0e0e0; /* General borders, e.g., model selector */
-    --border-sidebar-light: #dee2e6; /* Sidebar border */
-    --gradient-start-light: #4285F4; /* Welcome message gradient */
-    --gradient-end-light: #D9308B;   /* Welcome message gradient */
+    /* New Chatbot UI / Gemini-like Theme (Light - Default) */
+    --bg-main-new: #FFFFFF; /* Page background, chat area */
+    --bg-sidebar-new: #F8F9FA; /* Sidebar background */
+    --bg-input-new: #F1F3F4; /* Input bar background, some buttons */
+    --bg-user-message-new: #E8EAED; /* User chat bubble */
+    --bg-bot-message-new: #FFFFFF; /* Bot chat bubble (on --bg-main-new) */
+    --bg-header-new: #FFFFFF; /* Header background */
     
-    /* Dark Theme Variables (current ones, will be used when .dark is active) */
-    --bg-primary-dark: #202123;
-    --bg-secondary-dark: #343541;
-    --text-primary-dark: #FFFFFF;
-    --text-secondary-dark: #A9A9A9;
-    --accent-dark: #10A37F;
-    --border-dark: #4D4D4F;
+    --color-primary-new: #1A73E8; /* Primary blue for buttons, send icon, active states. Gemini's spec often uses this. */
+    --color-secondary-new: #4DB6AC; /* Soft turquoise (currently not heavily used, available) */
+    --color-profile-icon-bg: #A8D8B9; /* Profile icon background (desaturated green/teal) */
+    --color-online-dot: #34A853; /* Green for online status */
 
-    /* Common System Colors (can be overridden by theme if needed) */
+    --text-headings-new: #202124; /* Dark gray for titles (was #000000, aligning with body text family) */
+    --text-normal-new: #202124; /* Main body text */
+    --text-muted-new: #5F6368; /* Timestamps, helper text, inactive icons */
+    --text-placeholder-new: #70757A; /* Placeholder text in input */
+    --text-on-primary-new: #FFFFFF; /* Text on primary-colored buttons */
+
+    --border-light-new: #DADCE0; /* Main border color (e.g., bot messages, header bottom) */
+    --border-sidebar-new: #DADCE0; /* Sidebar border */
+    
+    --gradient-start-new: #4285F4; /* For welcome message gradient - original blue */
+    --gradient-end-new: #7E57C2; /* For welcome message gradient - purple */
+
+    /* Generic UI variables mapped to new theme */
+    --bg-primary: var(--bg-main-new);
+    --bg-secondary: var(--bg-sidebar-new); /* Using sidebar bg for general secondary elements */
+    --bg-tertiary: var(--bg-input-new);
+    --text-primary: var(--text-normal-new);
+    --text-secondary: var(--text-muted-new);
+    --text-placeholder: var(--text-placeholder-new);
+    --accent: var(--color-primary-new);
+    --border: var(--border-light-new);
+
+    /* --- Dark Theme Variables (Preserved) --- */
+    --bg-primary-dark: #1e293b;
+    --bg-secondary-dark: #2c3e50;
+    --text-primary-dark: #e2e8f0;
+    --text-secondary-dark: #94a3b8;
+    --accent-dark: #38bdf8;
+    --border-dark: #475569;
+    /* --- End Dark Theme Variables --- */
+
+    /* Common System Colors */
     --success: #28A745;
     --error: #DC3545;
     --warning: #FFC107;
 
-    /* Assign default theme (light) */
-    --bg-primary: var(--bg-primary-light);
-    --bg-secondary: var(--bg-secondary-light);
-    --bg-tertiary: var(--bg-tertiary-light);
-    --text-primary: var(--text-primary-light);
-    --text-secondary: var(--text-secondary-light);
-    --text-placeholder: var(--text-placeholder-light);
-    --accent: var(--accent-primary-light); /* Main accent will be blue */
-    --border: var(--border-light);
+    /* Specific UI Element Variables (New Spec) */
+    --sidebar-width-desktop: 280px;
+    --button-border-radius: 8px; /* Consistent button rounding */
+    --input-border-radius: 28px; /* For the new prompt bar */
+    --message-border-radius: 16px; /* Chat message bubbles */
+    --header-height: 64px; /* Approximate header height */
+
+    /* Typography from Spec (Mostly covered by Tailwind defaults with Inter) */
+    --font-size-h1: 24px;
+    --font-weight-h1: 700;
+    --font-size-h2: 18px;
+    --font-weight-h2: 500;
+    --font-size-body: 16px;
+    --font-weight-body: 400;
+    --font-size-muted: 12px;
+    --font-weight-muted: 400;
   }
 
   html.dark {
     --bg-primary: var(--bg-primary-dark);
     --bg-secondary: var(--bg-secondary-dark);
-    --bg-tertiary: var(--bg-secondary-dark); /* Dark equivalent for prompt bar etc. */
+    --bg-tertiary: var(--bg-secondary-dark); /* Map to a dark equivalent */
     --text-primary: var(--text-primary-dark);
     --text-secondary: var(--text-secondary-dark);
     --text-placeholder: var(--text-secondary-dark);
-    --accent: var(--accent-dark); /* Dark theme accent */
+    --accent: var(--accent-dark);
     --border: var(--border-dark);
+
+    /* Adjust new theme variables for dark mode if necessary */
+    --bg-main-new: var(--bg-primary-dark);
+    --bg-sidebar-new: var(--bg-secondary-dark);
+    --bg-input-new: var(--bg-secondary-dark); 
+    --bg-user-message-new: #374151; /* Darker user message */
+    --bg-bot-message-new: var(--bg-secondary-dark); /* Bot message on dark bg */
+    --bg-header-new: var(--bg-primary-dark);
+
+    --text-headings-new: var(--text-primary-dark);
+    --text-normal-new: var(--text-primary-dark);
+    --text-muted-new: var(--text-secondary-dark);
+    --text-placeholder-new: var(--text-secondary-dark);
+    
+    --border-light-new: var(--border-dark);
+    --border-sidebar-new: var(--border-dark);
+    --border-bot-message-new: var(--border-dark);
   }
 }
 
@@ -65,33 +110,32 @@ body {
   background-color: var(--bg-primary);
   color: var(--text-primary);
   line-height: 1.6;
+  font-size: var(--font-size-body); 
 }
 
 html, body, #root {
   height: 100%;
+  overflow-x: hidden;
 }
 
-h1, .h1 { font-size: 24px; font-weight: 700; }
-h2, .h2 { font-size: 20px; font-weight: 700; }
-h3, .h3 { font-size: 18px; font-weight: 500; }
-p, .p { font-size: 16px; font-weight: 400; } /* Matches new prompt bar & model name */
-small, .small { font-size: 14px; font-weight: 400; } /* Sidebar links */
-.text-xs { font-size: 12px; } /* Model version, Agent/Recent titles */
-.text-xxs { font-size: 10px; } /* PRO tag, Location text */
-
+/* Typography (applied via CSS vars or Tailwind classes) */
+h1, .h1 { font-size: var(--font-size-h1); font-weight: var(--font-weight-h1); color: var(--text-headings-new); } 
+h2, .h2 { font-size: var(--font-size-h2); font-weight: var(--font-weight-h2); color: var(--text-headings-new); }
+p, .p { font-size: var(--font-size-body); font-weight: var(--font-weight-body); color: var(--text-normal-new); }
+small, .small { font-size: var(--font-size-muted); font-weight: var(--font-weight-muted); color: var(--text-muted-new); }
 
 /* Custom scrollbar utilities */
 @layer utilities {
   .scrollbar-thin {
     scrollbar-width: thin;
-    scrollbar-color: var(--text-secondary) transparent;
+    scrollbar-color: var(--text-muted-new) transparent;
   }
   .scrollbar-thin::-webkit-scrollbar {
-    width: 6px; /* Slightly thinner for a cleaner look */
+    width: 6px;
     height: 6px;
   }
   .scrollbar-thin::-webkit-scrollbar-thumb {
-    background-color: var(--text-secondary);
+    background-color: var(--text-muted-new);
     border-radius: 3px;
   }
   .scrollbar-thin::-webkit-scrollbar-track {
@@ -99,14 +143,15 @@ small, .small { font-size: 14px; font-weight: 400; } /* Sidebar links */
   }
 }
 
+/* Message appearance animation */
 .message-appear {
-  animation: fadeInSlideUp 0.2s ease-out forwards;
+  animation: fadeInSlideUp 0.3s ease-out forwards;
 }
 
 @keyframes fadeInSlideUp {
   from {
     opacity: 0;
-    transform: translateY(8px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -114,232 +159,335 @@ small, .small { font-size: 14px; font-weight: 400; } /* Sidebar links */
   }
 }
 
-.transition-std {
-  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 200ms;
+/* --- New Chatbot UI / Gemini Specific Styles --- */
+
+/* Header */
+.chatbot-ui-fixed-header {
+  position: sticky; /* Changed from fixed to sticky to work with main flex container */
+  top: 0;
+  z-index: 50;
+  background-color: var(--bg-header-new);
+  border-bottom: 1px solid var(--border-light-new);
+  height: var(--header-height);
 }
 
-/* Specific styles for the new "Gemini-like" UI elements */
-.gemini-header-icon {
-  color: #5f6368; /* Dark gray for header icons */
+/* Sidebar */
+.chatbot-ui-sidebar {
+  background-color: var(--bg-sidebar-new);
+  border-left: 1px solid var(--border-sidebar-new); /* For RTL */
+  /* width is controlled by inline classes and --sidebar-width-desktop */
+  /* padding is controlled by inline classes */
+  display: flex;
+  flex-direction: column;
+  transition: transform 0.3s ease-in-out, width 0.3s ease-in-out, opacity 0.3s ease-in-out, visibility 0.3s ease-in-out;
+  z-index: 40; /* Adjusted z-index */
 }
-.gemini-header-icon svg { /* Ensure Lucide icons inherit color */
-  stroke: currentColor;
+html[dir="ltr"] .chatbot-ui-sidebar {
+  border-left: none;
+  border-right: 1px solid var(--border-sidebar-new);
 }
 
-.gemini-profile-icon {
-  background-color: var(--accent-secondary-light); /* Turquoise */
-  color: white;
+.chatbot-ui-new-chat-button {
+  background-color: transparent; /* Button itself is transparent/matches sidebar */
+  color: var(--color-primary-new); /* Text color is blue */
+  border: 1px solid var(--color-primary-new);
+  padding: 10px 15px; /* Adjusted padding */
+  border-radius: var(--button-border-radius);
+  font-size: var(--font-size-body);
+  font-weight: 500; 
+  cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
+  width: 100%;
+  /* margin-bottom: 24px; controlled by spacing in index.tsx */
+}
+.chatbot-ui-new-chat-button:hover {
+  background-color: var(--color-primary-new);
+  color: var(--text-on-primary-new);
+}
+.chatbot-ui-new-chat-button .new-chat-plus-icon svg {
+  /* stroke: var(--color-primary-new); Plus icon color already blue */
+}
+.chatbot-ui-new-chat-button:hover .new-chat-plus-icon svg {
+   stroke: var(--text-on-primary-new); /* Plus icon white on hover */
+}
+
+
+.chatbot-ui-history-title {
+  font-size: var(--font-size-muted);
+  color: var(--text-muted-new);
+  text-transform: uppercase;
+  font-weight: 500;
+  margin-bottom: 12px;
+  padding: 0 5px;
+}
+
+.chatbot-ui-sidebar-link {
+  display: flex;
+  align-items: center;
+  gap: 10px; /* Space between icon and text */
+  padding: 10px 12px; /* Consistent padding */
+  font-size: 14px;
+  color: var(--text-normal-new);
+  border-radius: var(--button-border-radius);
+  transition: background-color 0.2s ease, color 0.2s ease;
+}
+.chatbot-ui-sidebar-link:hover {
+  background-color: var(--bg-input-new);
+  color: var(--text-headings-new);
+}
+.chatbot-ui-sidebar-link.active {
+  background-color: var(--color-primary-new);
+  color: var(--text-on-primary-new);
+  font-weight: 500;
+}
+.chatbot-ui-sidebar-link.active svg {
+  stroke: var(--text-on-primary-new); /* Ensure icon color matches text on active link */
+}
+.chatbot-ui-sidebar-link svg {
+  width: 18px; /* Slightly larger icons in nav */
+  height: 18px;
+  stroke: var(--text-muted-new); /* Default icon color */
+}
+.chatbot-ui-sidebar-link:hover svg {
+  stroke: var(--text-headings-new);
+}
+
+
+.chatbot-ui-sidebar-footer-link {
+  font-size: 14px;
+  color: var(--text-muted-new);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 12px;
+  border-radius: var(--button-border-radius);
+}
+.chatbot-ui-sidebar-footer-link:hover,
+.chatbot-ui-sidebar-footer-link.active {
+  background-color: var(--bg-input-new);
+  color: var(--text-normal-new);
+}
+.chatbot-ui-sidebar-footer-link svg {
+  stroke: var(--text-muted-new);
+}
+.chatbot-ui-sidebar-footer-link:hover svg {
+   stroke: var(--text-normal-new);
+}
+
+
+/* Chat Area */
+.chatbot-ui-chat-header-title {
+  font-size: var(--font-size-h1);
+  font-weight: var(--font-weight-h1);
+  color: var(--text-headings-new);
+}
+
+/* Input Bar */
+.chatbot-ui-input-bar-container {
+  background-color: var(--bg-main-new); /* Match chat area background */
+  border-top: 1px solid var(--border-light-new);
+  padding: 12px 16px; 
+  box-shadow: 0 -2px 8px rgba(0,0,0,0.04);
+}
+
+.chatbot-ui-input-bar {
+  display: flex;
+  align-items: flex-end; 
+  background-color: var(--bg-input-new);
+  border-radius: var(--input-border-radius);
+  padding: 6px 8px 6px 12px; /* Adjusted padding: T, R, B, L */
+  box-shadow: 0 1px 2px rgba(0,0,0,0.06);
+}
+html[dir="rtl"] .chatbot-ui-input-bar {
+  padding: 6px 12px 6px 8px; /* RTL padding */
+}
+
+
+.chatbot-ui-input-bar-textarea {
+  flex-grow: 1;
+  border: none;
+  background: transparent;
+  padding: 10px 8px; /* Inner padding for text area */
+  font-size: var(--font-size-body);
+  color: var(--text-normal-new);
+  resize: none;
+  outline: none;
+  max-height: 150px; /* Increased max height */
+  overflow-y: auto;
+  line-height: 1.5;
+  scrollbar-width: none; /* Hide scrollbar for cleaner look if possible */
+}
+.chatbot-ui-input-bar-textarea::-webkit-scrollbar {
+    display: none; /* Hide scrollbar for WebKit */
+}
+.chatbot-ui-input-bar-textarea::placeholder {
+  color: var(--text-placeholder-new);
+}
+
+.chatbot-ui-input-icon-button {
+  background: none;
+  border: none;
+  color: var(--text-muted-new);
+  padding: 8px; 
+  cursor: pointer;
+  align-self: center; /* Vertically center with single-line textarea */
   border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px; /* Consistent size for icon buttons */
+  height: 38px;
+}
+.chatbot-ui-input-icon-button:hover {
+  background-color: rgba(0,0,0,0.05); /* Subtle hover for icon buttons */
+  color: var(--color-primary-new);
+}
+.chatbot-ui-input-icon-button svg {
+  width: 20px;
+  height: 20px;
+}
+
+.chatbot-ui-send-button {
+  background-color: var(--color-primary-new) !important;
+  color: var(--text-on-primary-new) !important;
+  border-radius: 50%;
+  width: 40px; 
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  flex-shrink: 0;
+  align-self: flex-end; /* Align to bottom for multiline text */
+  margin-bottom: 2px; /* Fine-tune vertical alignment with textarea */
+  margin-left: 6px; /* LTR spacing */
+}
+html[dir="rtl"] .chatbot-ui-send-button {
+  margin-left: 0;
+  margin-right: 6px; /* RTL spacing */
+}
+.chatbot-ui-send-button.hidden { /* To hide when input is empty */
+  transform: scale(0.8);
+  opacity: 0;
+  pointer-events: none;
+  width: 0; /* Collapse width when hidden */
+  margin-left: 0; margin-right: 0; /* Remove margin when hidden */
+}
+.chatbot-ui-send-button {
+  transition: transform 0.2s ease, opacity 0.2s ease, width 0.2s ease, margin 0.2s ease;
+}
+
+/* Thinking Indicator */
+.chatbot-ui-thinking-indicator {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 12px; /* Match message bubble padding */
+  background-color: var(--bg-bot-message-new);
+  border: 1px solid var(--border-bot-message-new);
+  border-radius: var(--message-border-radius);
+  max-width: fit-content;
+  align-self: flex-start; /* Or flex-end based on bot's side */
+}
+html[dir="ltr"] .chatbot-ui-thinking-indicator { align-self: flex-end; }
+html[dir="rtl"] .chatbot-ui-thinking-indicator { align-self: flex-start; }
+
+.chatbot-ui-thinking-indicator .dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  animation: chatbot-ui-thinkingDots 1.4s infinite ease-in-out both;
+}
+.chatbot-ui-thinking-indicator .dot:nth-child(1) { background: linear-gradient(90deg, var(--gradient-start-new), var(--color-secondary-new)); animation-delay: -0.32s; }
+.chatbot-ui-thinking-indicator .dot:nth-child(2) { background: linear-gradient(90deg, var(--color-secondary-new), var(--gradient-end-new)); animation-delay: -0.16s; }
+.chatbot-ui-thinking-indicator .dot:nth-child(3) { background: linear-gradient(90deg, var(--gradient-end-new), var(--gradient-start-new)); }
+
+
+@keyframes chatbot-ui-thinkingDots {
+  0%, 80%, 100% { transform: scale(0); }
+  40% { transform: scale(1.0); }
+}
+
+.chatbot-ui-thinking-indicator span {
+  font-size: var(--font-size-body); /* Body size for thinking text */
+  color: var(--text-normal-new);
+}
+
+/* Overlay for mobile sidebar */
+.chatbot-ui-sidebar-overlay {
+    display: none; /* Hidden by default */
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0,0,0,0.5); /* Darker overlay */
+    z-index: 35; /* Below sidebar, above content */
+    opacity: 0;
+    transition: opacity 0.3s ease-in-out;
+}
+.chatbot-ui-sidebar-overlay.open {
+    display: block;
+    opacity: 1;
+}
+
+/* Profile Icon in Header */
+.gemini-profile-icon-container {
   width: 32px;
   height: 32px;
-  font-size: 16px; /* For the letter */
+  border-radius: 50%;
+  background-color: var(--color-profile-icon-bg);
+  color: var(--text-on-primary-new); /* Assuming white text on this bg */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 14px; /* Slightly smaller initial for 32px size */
   font-weight: 500;
   position: relative;
+  cursor: pointer;
 }
 .gemini-profile-online-dot {
   position: absolute;
-  bottom: 1px;
-  right: 1px;
-  width: 8px;
-  height: 8px;
-  background-color: var(--accent-online-light); /* Green */
+  bottom: 0px;
+  right: 0px;
+  width: 10px; /* Slightly larger dot */
+  height: 10px;
+  background-color: var(--color-online-dot);
   border-radius: 50%;
-  border: 1.5px solid var(--bg-primary-light); /* White border */
+  border: 2px solid var(--bg-header-new); /* Border matches header background */
 }
 
-.gemini-pro-tag {
-  font-size: 10px;
-  color: #5f6368; /* Dark gray */
-  text-transform: uppercase;
-  font-weight: 500; /* More noticeable */
-}
-
-.gemini-model-selector {
+/* Header Model Selector Placeholder */
+.gemini-model-selector-placeholder {
   display: flex;
   align-items: center;
-  padding: 4px 8px;
-  border: 1px solid var(--border-light);
-  border-radius: 8px; /* Rounded corners */
+  gap: 8px;
+  padding: 6px 10px; /* Adjusted padding */
+  border: 1px solid var(--border-light-new);
+  border-radius: var(--button-border-radius);
+  background-color: var(--bg-main-new); /* Match page bg if on header */
 }
-.gemini-model-name {
-  font-size: 16px;
-  color: var(--text-primary-light);
-  margin-right: 8px;
+.gemini-model-name-placeholder {
+  font-size: 14px; /* Slightly smaller than body for distinction */
+  color: var(--text-normal-new); /* Was #3c4043, using variable */
+  font-weight: 500;
 }
-.gemini-model-version-tag {
-  background-color: var(--bg-tertiary-light); /* Light gray tag */
-  color: var(--text-secondary-light); /* Medium gray text */
+.gemini-model-version-tag-placeholder {
+  background-color: var(--bg-input-new); /* Light gray tag bg */
+  color: var(--text-muted-new); /* Muted text for tag */
   font-size: 12px;
   padding: 2px 6px;
-  border-radius: 4px; /* Rounded corners for tag */
+  border-radius: 4px; /* Smaller radius for tag */
+  font-weight: 500;
 }
 
-.gemini-sidebar {
-  background-color: var(--bg-secondary-light); /* Very light gray */
-  border-left: 1px solid var(--border-sidebar-light); /* For RTL, this will be border-right */
-}
-html[dir="rtl"] .gemini-sidebar {
-  border-left: none;
-  border-right: 1px solid var(--border-sidebar-light);
+/* Helper for disabled state visual */
+.gemini-disabled-visual {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
-.gemini-sidebar-button {
-  background-color: var(--bg-primary-light); /* White */
-  color: var(--text-primary-light);
-  font-size: 14px;
-  padding: 8px 12px;
-  border-radius: 8px; /* Rounded corners */
-  box-shadow: 0 1px 2px 0 rgba(0,0,0,0.03), 0 1px 6px -1px rgba(0,0,0,0.02), 0 2px 4px 0 rgba(0,0,0,0.02); /* Subtle shadow */
-}
-.gemini-sidebar-button-icon {
-  color: var(--accent-primary-light); /* Blue for plus icon */
-  width: 20px;
-  height: 20px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-right: 8px; /* margin-left for LTR */
-}
-html[dir="ltr"] .gemini-sidebar-button-icon {
-  margin-right: 0;
-  margin-left: 8px;
-}
-
-.gemini-sidebar-section-title {
-  font-size: 12px;
-  color: var(--text-secondary-light); /* Gray */
-  padding: 8px 12px;
-  text-transform: uppercase;
-}
-.gemini-sidebar-link {
-  font-size: 14px;
-  color: var(--text-primary-light); /* Darker gray for links */
-  padding: 8px 12px;
-  border-radius: 4px;
-  display: flex;
-  align-items: center;
-}
-.gemini-sidebar-link:hover {
-  background-color: var(--bg-tertiary-light); /* Light gray hover */
-}
-.gemini-sidebar-link.active {
-  background-color: var(--accent-primary-light); /* Blue active */
-  color: white;
-}
-.gemini-sidebar-link .lucide {
-  margin-right: 10px; /* margin-left for LTR */
-  width: 18px;
-  height: 18px;
-}
-html[dir="ltr"] .gemini-sidebar-link .lucide {
-  margin-right: 0;
-  margin-left: 10px;
-}
-
-.gemini-sidebar-theme-toggle button {
-  padding: 6px;
-  border-radius: 50%;
-}
-.gemini-sidebar-theme-toggle button.active {
-  background-color: #e8eaed; /* Light gray for active theme icon */
-}
-
-.gemini-location-text {
-  font-size: 11px;
-  color: var(--text-secondary-light); /* Medium gray */
-}
-.gemini-location-link {
-  font-size: 11px;
-  color: var(--accent-primary-light); /* Blue */
-}
-
-.gemini-welcome-text {
-  font-size: 56px;
-  font-weight: 600; /* Bolder */
-  background-image: linear-gradient(to left, var(--gradient-start-light), var(--gradient-end-light)); /* RTL: right to left */
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  text-align: center;
-}
-html[dir="ltr"] .gemini-welcome-text {
-  background-image: linear-gradient(to right, var(--gradient-start-light), var(--gradient-end-light));
-}
-
-.gemini-prompt-bar {
-  background-color: var(--bg-tertiary-light); /* Light gray */
-  border-radius: 28px; /* Very rounded */
-  padding: 8px 12px 8px 16px; /* Asymmetric for send button */
-  box-shadow: 0 1px 2px 0 rgba(0,0,0,0.03), 0 1px 6px -1px rgba(0,0,0,0.02), 0 2px 4px 0 rgba(0,0,0,0.02);
-}
-html[dir="rtl"] .gemini-prompt-bar {
-  padding: 8px 16px 8px 12px;
-}
-
-.gemini-prompt-bar textarea {
-  background-color: transparent;
-  border: none;
-  color: var(--text-primary-light);
-  font-size: 16px;
-  resize: none;
-  outline: none;
-  flex: 1;
-  padding: 8px 0; /* Vertical padding */
-  line-height: 1.5; /* Ensure good line height */
-}
-.gemini-prompt-bar textarea::placeholder {
-  color: var(--text-placeholder-light); /* Medium gray placeholder */
-}
-.gemini-prompt-bar-icon {
-  color: #5f6368; /* Dark gray for icons */
-  width: 20px; /* Consistent icon size */
-  height: 20px;
-  cursor: pointer;
-}
-.gemini-prompt-bar-tag {
-  color: #5f6368;
-  font-size: 13px;
-  padding: 4px 8px;
-  border-radius: 12px;
-  background-color: rgba(0,0,0,0.04); /* Slightly darker than bar for contrast */
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  cursor: pointer;
-}
-.gemini-prompt-bar-tag .lucide {
-  width: 16px;
-  height: 16px;
-}
-.gemini-send-button {
-  background-color: var(--accent-primary-light); /* Blue */
-  color: white;
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-}
-.gemini-send-button .lucide {
-  width: 20px;
-  height: 20px;
-}
-
-
-/* Adjustments for RTL */
-html[dir="rtl"] .gemini-sidebar-button-icon {
-  margin-right: 0;
-  margin-left: 8px;
-}
-html[dir="rtl"] .gemini-sidebar-link .lucide {
-  margin-right: 0;
-  margin-left: 10px;
+/* Ensure Button component uses correct radius if not overridden */
+button {
+  border-radius: var(--button-border-radius);
 }

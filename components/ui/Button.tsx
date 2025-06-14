@@ -15,37 +15,33 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 }
 
 export const Button: React.FC<ButtonProps> = ({ children, className, variant = 'default', size = 'default', ...props }) => {
-    // Gemini-like buttons are often subtly rounded (4-8px)
-    // Using rounded-md (6px) or rounded-lg (8px) from Tailwind
-    const baseStyle = "font-medium rounded-md transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/50 focus:ring-opacity-50 flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]";
+    const baseStyle = "font-medium rounded-[var(--button-border-radius)] transition-all duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-[var(--color-primary-new)]/50 focus:ring-opacity-50 flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed active:transform active:scale-[0.98]";
     
     let variantStyle = "";
     switch(variant) {
-        case 'default': // Primary button for Gemini-like UI will use --accent-primary-light (blue)
-            variantStyle = "bg-[var(--accent-primary-light)] hover:brightness-95 active:brightness-90 text-white"; 
+        case 'default': // Primary button
+            variantStyle = "bg-[var(--color-primary-new)] hover:brightness-[.95] active:brightness-[.90] text-[var(--text-on-primary-new)]"; 
             break;
-        case 'outline': // Secondary button
-            variantStyle = "bg-transparent border border-[var(--border)] text-[var(--text-primary)] hover:bg-[var(--bg-tertiary)]"; // Use --bg-tertiary for hover on outline
+        case 'outline': // Secondary button (used for history, some dialog actions)
+            variantStyle = "bg-transparent border border-[var(--border-light-new)] text-[var(--text-normal-new)] hover:bg-[var(--bg-input-new)]";
             break;
-        case 'ghost':
-            variantStyle = "bg-transparent text-[var(--text-primary)] hover:bg-[var(--border)] active:bg-[var(--border)]"; // For less prominent actions
+        case 'ghost': // For less prominent actions, icons
+            variantStyle = "bg-transparent text-[var(--text-muted-new)] hover:bg-[var(--bg-input-new)] hover:text-[var(--color-primary-new)] active:bg-[var(--bg-input-new)]";
             break;
         case 'destructive':
-            variantStyle = "bg-[var(--error)] hover:brightness-95 active:brightness-90 text-white";
+            variantStyle = "bg-[var(--error)] hover:brightness-[.95] active:brightness-[.90] text-white";
             break;
         case 'link':
-            variantStyle = "bg-transparent text-[var(--accent-primary-light)] hover:underline";
+            variantStyle = "bg-transparent text-[var(--color-primary-new)] hover:underline";
             break;
     }
 
-    // Sizes based on Gemini-like UI (usually slightly smaller padding)
-    let sizeStyle = "px-3 py-2 text-sm"; // Default
-    if (size === "sm") sizeStyle = "px-2.5 py-1.5 text-xs"; 
-    if (size === "lg") sizeStyle = "px-4 py-2 text-base"; 
+    let sizeStyle = "px-3.5 py-2 text-[var(--font-size-body)]"; 
+    if (size === "sm") sizeStyle = "px-3 py-1.5 text-sm"; 
+    if (size === "lg") sizeStyle = "px-5 py-2.5 text-lg"; 
     if (size === "icon") sizeStyle = "p-2"; 
 
-    if (variant === 'link' && size === 'default') sizeStyle = "p-0";
-
+    if (variant === 'link' && size === 'default') sizeStyle = "p-0"; // Links usually don't have padding
 
     const finalClassName = `${baseStyle} ${variantStyle} ${sizeStyle} ${className || ''}`;
     return <button className={finalClassName.trim()} {...props}>{children}</button>;

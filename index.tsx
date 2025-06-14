@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from "react";
 import ReactDOM from 'react-dom/client';
-import { Bot, User as UserIcon, Moon, Sun, Cpu, SendHorizontal, Search, MessageSquare, Paperclip, X, Upload, Languages, Loader2, Copy, FileText, Image as ImageIcon, ExternalLink, Share, UploadCloud, Download, Link as LinkIcon, Server, Plus, Check, Trash, ArrowRight, LayoutGrid, CheckCircle, XCircle, AlertCircle, Lock, Unlock, Cloud, RefreshCw, File as FileIconPkg, FileSpreadsheet, Palette, Type, Settings as SettingsIcon, Star, Calendar, ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Sparkles, Brain, SlidersHorizontal, Users, Zap, Briefcase, ChevronDown, ChevronUp, GripVertical, Trash2, Edit3, Eye, Play, StopCircle, Mic, MicOff, Volume2, VolumeX, Maximize, Minimize, LogOut, DollarSign, Menu, Database, Award, Activity, ShieldCheck, HelpCircle, MessageCircleQuestion } from "lucide-react";
+import { Bot, User as UserIcon, Moon, Sun, Cpu, SendHorizontal, Search, MessageSquare, Paperclip, X, Upload, Languages, Loader2, Copy, FileText, Image as ImageIcon, ExternalLink, Share, UploadCloud, Download, Link as LinkIcon, Server, Plus, Check, Trash, ArrowRight, LayoutGrid, CheckCircle, XCircle, AlertCircle, Lock, Unlock, Cloud, RefreshCw, File as FileIconPkg, FileSpreadsheet, Palette, Type, Settings as SettingsIcon, Star, Calendar, ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Sparkles, Brain, SlidersHorizontal, Users, Zap, Briefcase, ChevronDown, ChevronUp, GripVertical, Trash2, Edit3, Eye, Play, StopCircle, Mic, MicOff, Volume2, VolumeX, Maximize, Minimize, LogOut, DollarSign, Menu, Database, Award, Activity, ShieldCheck, HelpCircle, MessageCircleQuestionIcon as MessageCircleQuestion } from "lucide-react";
 
 import './index.css'; 
 
@@ -14,129 +14,152 @@ import { AlertDialog, AlertDialogContent as AlertDialogContentComponent, AlertDi
 
 import { ChatPage } from './features/Chat/ChatPage';
 import { SettingsPage } from './features/Settings/SettingsPage';
-// The following pages will now be routed through SettingsPage as tabs
-// import { CockpitPage } from './features/Cockpit/CockpitPage';
-// import { ArenaPage } from './features/Arena/ArenaPage';
-// import { SpacesPage } from './features/Spaces/SpacesPage';
-// import { AgentArenaPage } from './features/AgentArena/AgentArenaPage';
-// import { KnowledgeBasePage } from './features/KnowledgeBase/KnowledgeBasePage'; 
 import { OnboardingWizard } from './features/Onboarding/OnboardingWizard';
 import { PageWrapper } from './components/layout/PageWrapper';
 
-// SidePanel Component (New for Gemini-like UI)
+// Sidebar Component (New Chatbot UI Style)
 const SidePanel: React.FC<{
   isOpen: boolean;
   onClose: () => void;
-  onNavigate: (pageId: 'chat' | 'settings') => void;
-  currentNavPage: 'chat' | 'settings';
-}> = ({ isOpen, onClose, onNavigate, currentNavPage }) => {
+  onNavigate: (pageId: string) => void; 
+  currentNavPage: string;
+  navItems: Array<{ id: string; labelKey: { he: string; en: string }; icon: React.ElementType }>;
+}> = ({ isOpen, onClose, onNavigate, currentNavPage, navItems }) => {
   const { lang, theme, toggleTheme } = useAppContext();
   const { userProfile } = useUserSettings();
 
-  const handleSettingsNavigation = () => {
-    onNavigate('settings');
-    // onClose(); // Close panel after navigating to settings
+  const handleNavigation = (pageId: string) => {
+    onNavigate(pageId);
+    if (window.innerWidth < 768) { 
+        onClose();
+    }
   };
-  const handleChatNavigation = () => {
-    onNavigate('chat');
-    // onClose();
-  }
+  
+  const isLightThemeActive = theme === 'light';
 
   return (
     <>
-      {/* Backdrop for mobile */}
-      {isOpen && (
+      {isOpen && window.innerWidth < 768 && (
         <div 
-          className="fixed inset-0 z-30 bg-black/30 md:hidden"
+          className="chatbot-ui-sidebar-overlay open"
           onClick={onClose}
+          aria-hidden="true"
         />
       )}
-      <div 
-        className={`fixed inset-y-0 h-full shadow-lg transition-transform duration-300 ease-in-out z-40 flex flex-col gemini-sidebar
-                    ${lang === 'he' ? 'right-0 border-l' : 'left-0 border-r'} 
-                    ${isOpen ? 'translate-x-0 w-72' : (lang === 'he' ? 'translate-x-full w-72' : '-translate-x-full w-72')}
-                    md:relative md:translate-x-0 md:border-r md:w-72 ${isOpen ? 'md:w-72' : 'md:w-0 md:invisible md:opacity-0 md:p-0 md:border-none'}`}
+      <aside 
+        className={`chatbot-ui-sidebar fixed inset-y-0 h-full shadow-lg 
+                    ${lang === 'he' ? 'right-0' : 'left-0'} 
+                    ${isOpen ? 'translate-x-0 w-72 md:w-[var(--sidebar-width-desktop)]' : (lang === 'he' ? 'translate-x-full w-72 md:w-0' : '-translate-x-full w-72 md:w-0')}
+                    md:relative md:translate-x-0 md:w-[var(--sidebar-width-desktop)] ${isOpen ? 'md:w-[var(--sidebar-width-desktop)]' : 'md:w-0 md:invisible md:opacity-0 md:p-0 md:border-none'}`}
+        aria-hidden={!isOpen && window.innerWidth >= 768 ? 'true' : undefined}
+        tabIndex={isOpen ? 0 : -1}
       >
-        <div className={`flex-1 overflow-y-auto scrollbar-thin ${isOpen ? 'p-3' : 'p-0'}`}>
+        <div className={`flex-1 overflow-y-auto scrollbar-thin ${isOpen ? 'p-4' : 'p-0'}`}>
           {isOpen && (
             <>
-              <div className="mb-4">
-                <Button onClick={handleChatNavigation} className="w-full gemini-sidebar-button">
-                  <span className="gemini-sidebar-button-icon"><Plus /></span>
-                  {lang === 'he' ? 'שיחה חדשה' : 'New Chat'}
+              <div className="mb-5"> 
+                <Button onClick={() => handleNavigation('chat')} className="chatbot-ui-new-chat-button w-full">
+                  <span className="new-chat-plus-icon"><Plus strokeWidth={2.5} size={18}/></span>
+                  {lang === 'he' ? 'צ\'אט חדש' : 'New Chat'}
                 </Button>
               </div>
 
-              {/* Placeholder for Agents - visual only */}
-              <div className="mb-4">
-                <h3 className="gemini-sidebar-section-title">Agents</h3>
-                {/* Example Agent items - replace with dynamic data later */}
-                {[
-                  { name: lang === 'he' ? "מסמכי פרומפטים" : "Prompt Documents", color: "bg-purple-500", letter: "P" },
-                  { name: lang === 'he' ? "חוקר אינטרנט" : "Web Explorer", color: "bg-sky-500", letter: "W" },
-                ].map(agent => (
-                  <a key={agent.name} href="#" className="gemini-sidebar-link group">
-                     <span className={`w-5 h-5 rounded-sm ${agent.color} text-white flex items-center justify-center text-xs font-medium me-2.5 group-hover:opacity-90`}>{agent.letter}</span>
-                    {agent.name}
-                  </a>
-                ))}
+              <nav aria-label={lang === 'he' ? 'ניווט ראשי' : 'Main Navigation'}>
+                <h2 className="chatbot-ui-history-title">{lang === 'he' ? 'ניווט' : 'Navigation'}</h2>
+                <ul className="space-y-1">
+                    {navItems.map(item => (
+                        <li key={item.id}>
+                            <a 
+                                href="#" 
+                                onClick={(e) => { e.preventDefault(); handleNavigation(item.id);}}
+                                className={`chatbot-ui-sidebar-link ${currentNavPage === item.id ? 'active' : ''}`}
+                                aria-current={currentNavPage === item.id ? 'page' : undefined}
+                            >
+                                <item.icon />
+                                {item.labelKey[lang as 'he' | 'en']}
+                            </a>
+                        </li>
+                    ))}
+                </ul>
+              </nav>
+              
+              <div className="my-6">
+                <h3 className="chatbot-ui-history-title">Agents (Placeholder)</h3>
+                <a href="#" className="chatbot-ui-sidebar-link group">
+                    <Users/> Placeholder Agent 1
+                </a>
               </div>
-
-              {/* Placeholder for Recent Activity - visual only */}
-              <div className="mb-4">
-                <h3 className="gemini-sidebar-section-title">{lang === 'he' ? 'אחרונות' : 'Recent'}</h3>
-                {/* Example Recent items - replace with dynamic data later */}
-                {["איך להכין עוגת שוקולד?", "רעיונות לחופשה באיטליה"].map(item => (
-                   <a key={item} href="#" className="gemini-sidebar-link group text-sm truncate">
-                     <MessageSquare className="w-4 h-4 me-2.5 text-gray-500 group-hover:text-[var(--text-primary)]"/>
-                    {item}
-                  </a>
-                ))}
+              <div className="my-6">
+                <h3 className="chatbot-ui-history-title">{lang === 'he' ? 'פעילות אחרונה (Placeholder)' : 'Recent Activity (Placeholder)'}</h3>
+                <a href="#" className="chatbot-ui-sidebar-link group text-sm truncate">
+                    <MessageSquare/> Example Recent Chat
+                </a>
               </div>
             </>
           )}
         </div>
         
         {isOpen && (
-          <div className="p-3 border-t border-[var(--border-sidebar-light)]">
-            <div className="flex items-center justify-between mb-3">
-              <Button variant="ghost" size="icon" onClick={onClose} title={lang === 'he' ? 'כווץ סרגל צד' : 'Collapse sidebar'} className="gemini-header-icon p-1.5 rounded-md">
+          <div className="p-4 border-t border-[var(--border-sidebar-new)]">
+            <div className="flex items-center justify-between mb-4">
+              <Button variant="ghost" size="icon" onClick={onClose} title={lang === 'he' ? 'כווץ סרגל צד' : 'Collapse sidebar'} className="p-2 text-[var(--text-muted-new)] hover:bg-[var(--bg-input-new)]">
                 <ChevronLeft className={`w-5 h-5 ${lang === 'he' ? 'transform scale-x-[-1]' : ''}`} />
               </Button>
-              <div className="flex items-center gap-1 p-0.5 rounded-full bg-[var(--bg-tertiary-light)] gemini-sidebar-theme-toggle">
-                <Button variant="ghost" size="icon" onClick={toggleTheme} title={lang === 'he' ? 'מצב בהיר' : 'Light mode'} className={`rounded-full ${theme === 'light' ? 'active' : ''}`}>
+              <div className="flex items-center gap-1 p-1 rounded-full bg-[var(--bg-input-new)]">
+                <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={() => { if (!isLightThemeActive) toggleTheme(); }} 
+                    title={lang === 'he' ? 'מצב בהיר' : 'Light mode'} 
+                    className={`p-1.5 rounded-full ${isLightThemeActive ? 'bg-[#e8eaed] text-[var(--text-normal-new)]' : 'text-[var(--text-muted-new)] hover:text-[var(--text-normal-new)]'}`}
+                    aria-pressed={isLightThemeActive}
+                >
                   <Sun className="w-4 h-4" />
                 </Button>
-                <Button variant="ghost" size="icon" onClick={toggleTheme} title={lang === 'he' ? 'מצב כהה' : 'Dark mode'} className={`rounded-full ${theme === 'dark' ? 'active' : ''}`}>
+                <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={() => { if (isLightThemeActive) toggleTheme(); }} 
+                    title={lang === 'he' ? 'מצב כהה' : 'Dark mode'} 
+                    className={`p-1.5 rounded-full ${!isLightThemeActive ? 'bg-[#3c4043] text-white' : 'text-[var(--text-muted-new)] hover:text-[var(--text-normal-new)]'}`} /* Adjusted dark active */
+                    aria-pressed={!isLightThemeActive}
+                >
                   <Moon className="w-4 h-4" />
                 </Button>
               </div>
             </div>
             
-            <a href="#" onClick={(e) => { e.preventDefault(); /* TODO: Implement Help */ }} className="gemini-sidebar-link text-sm">
-                <HelpCircle className="w-4 h-4 text-gray-500"/>{lang === 'he' ? 'עזרה' : 'Help'}
-            </a>
-            <a href="#" onClick={(e) => { e.preventDefault(); /* TODO: Implement Feedback */ }} className="gemini-sidebar-link text-sm">
-                <MessageCircleQuestion className="w-4 h-4 text-gray-500"/>{lang === 'he' ? 'שליחת משוב' : 'Send feedback'}
-            </a>
-            <a href="#" onClick={(e) => { e.preventDefault(); handleSettingsNavigation(); }} className={`gemini-sidebar-link text-sm ${currentNavPage === 'settings' ? 'active' : ''}`}>
-                <SettingsIcon className={`w-4 h-4 ${currentNavPage === 'settings' ? 'text-white' : 'text-gray-500'}`}/>{lang === 'he' ? 'הגדרות' : 'Settings'}
-            </a>
+            <ul className="space-y-0.5">
+                <li><a href="#" onClick={(e) => { e.preventDefault(); /* TODO: Implement Help */ }} className="chatbot-ui-sidebar-footer-link">
+                    <HelpCircle />{lang === 'he' ? 'עזרה' : 'Help'}
+                </a></li>
+                <li><a href="#" onClick={(e) => { e.preventDefault(); /* TODO: Implement Feedback */ }} className="chatbot-ui-sidebar-footer-link">
+                    <MessageCircleQuestion />{lang === 'he' ? 'שליחת משוב' : 'Send feedback'}
+                </a></li>
+                <li><a href="#" onClick={(e) => { e.preventDefault(); handleNavigation('settings'); }} className={`chatbot-ui-sidebar-footer-link ${currentNavPage === 'settings' ? 'active' : ''}`}>
+                    <SettingsIcon />{lang === 'he' ? 'הגדרות' : 'Settings'}
+                </a></li>
+            </ul>
 
             {userProfile?.shareLocation && (
-              <div className="mt-3 pt-3 border-t border-[var(--border-sidebar-light)]">
-                <p className="gemini-location-text px-3">{lang === 'he' ? 'פתח תקווה, ישראל' : 'Petah Tikva, Israel'}</p>
-                <a href="#" onClick={(e) => {e.preventDefault(); handleSettingsNavigation();}} className="gemini-location-link px-3 block hover:underline">
-                  {lang === 'he' ? 'על סמך המקומות שלך (בית) - עדכן את המיקום' : 'From your places (Home) - Update location'}
+              <div className="mt-4 pt-4 border-t border-[var(--border-sidebar-new)]">
+                <p className="text-[11px] text-[var(--text-muted-new)] px-1">{lang === 'he' ? 'פתח תקווה, ישראל (Placeholder)' : 'Petah Tikva, Israel (Placeholder)'}</p>
+                <a href="#" onClick={(e) => {e.preventDefault(); handleNavigation('settings');}} className="text-[11px] text-[var(--color-primary-new)] px-1 block hover:underline">
+                  {lang === 'he' ? 'על סמך המקומות שלך (בית) - עדכן מיקום' : 'From your places (Home) - Update location'}
                 </a>
               </div>
             )}
           </div>
         )}
-      </div>
+      </aside>
     </>
   );
 };
+
+const navItemsConfig = [
+    { id: 'chat', labelKey: { he: 'צ\'אט', en: 'Chat' }, icon: MessageSquare },
+    { id: 'settings', labelKey: { he: 'הגדרות', en: 'Settings' }, icon: SettingsIcon },
+];
 
 
 const App: React.FC = () => {
@@ -152,22 +175,15 @@ const App: React.FC = () => {
     errorDialog,
     setErrorDialog,
     changeLanguage,
-    toggleTheme
   } = useAppContext(); 
-  const { userProfile } = useUserSettings(); // Removed markFeatureVisited as it's not used directly here anymore.
+  const { userProfile } = useUserSettings();
   
-  // Single state for SidePanel visibility
-  const [isSidePanelOpen, setIsSidePanelOpen] = useState(false); 
+  const [isSidePanelOpen, setIsSidePanelOpen] = useState(window.innerWidth >= 768);
   const [showProfileModal, setShowProfileModal] = useState(false);
 
-  // Simplified navigation for main pages (Chat & Settings)
-  const handlePageNavigation = (pageId: 'chat' | 'settings') => {
+  const handlePageNavigation = (pageId: string) => {
     setCurrentPageGlobal(pageId);
-    if(window.innerWidth < 768) { // Close mobile sidebar on navigation
-        setIsSidePanelOpen(false);
-    }
   };
-
 
   const handleCompleteOnboarding = async () => {
     setShowOnboarding(false);
@@ -181,7 +197,7 @@ const App: React.FC = () => {
       case 'settings': content = <SettingsPage />; break;
       default: content = <ChatPage />;
     }
-    // max-width is handled by PageWrapper or specific page components
+    // PageWrapper provides its own background. ChatPage specific background is white.
     return <PageWrapper disablePadding={currentPage === 'chat'}>{content}</PageWrapper>;
   };
   
@@ -204,46 +220,42 @@ const App: React.FC = () => {
     ENGAGED_USER: { he: "משתמש פעיל", en: "Engaged User" },
   };
 
-
   return (
-    <div className={`flex flex-col h-screen font-sans bg-[var(--bg-primary)] text-[var(--text-primary)]`} dir={lang === 'he' ? 'rtl' : 'ltr'}>
-      {/* New Gemini-like Header */}
+    <div className={`flex flex-col h-screen font-sans bg-[var(--bg-main-new)] text-[var(--text-normal-new)]`} dir={lang === 'he' ? 'rtl' : 'ltr'}>
       <header
-        className="flex items-center justify-between px-3 py-2 shadow-sm sticky top-0 z-20"
-        style={{ backgroundColor: '#FFFFFF', borderBottom: '1px solid var(--border-light)' }}
+        className="chatbot-ui-fixed-header flex items-center justify-between px-3 py-2.5 shadow-sm"
       >
-        {/* Right side (RTL) / Left side (LTR) */}
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="icon" onClick={() => setIsSidePanelOpen(!isSidePanelOpen)} className="gemini-header-icon p-1.5 rounded-md">
+        <div className="flex items-center gap-2"> {/* Increased gap for RTL visual balance */}
+          <Button variant="ghost" size="icon" onClick={() => setIsSidePanelOpen(!isSidePanelOpen)} className="p-2 text-[var(--text-muted-new)] hover:bg-[var(--bg-input-new)]" aria-label={lang === 'he' ? "פתח/סגור תפריט" : "Toggle menu"} aria-expanded={isSidePanelOpen}>
             <Menu className="w-5 h-5" />
           </Button>
-          <Button variant="ghost" size="icon" title={lang === 'he' ? 'חיפוש' : 'Search'} className="gemini-header-icon p-1.5 rounded-md">
+          {/* Visual Search Icon - Non-functional as per spec direction */}
+          <Button variant="ghost" size="icon" title={lang === 'he' ? 'חיפוש (ויזואלי)' : 'Search (Visual)'} className="p-2 text-[var(--text-muted-new)] hover:bg-[var(--bg-input-new)] hidden md:flex">
             <Search className="w-5 h-5" />
           </Button>
         </div>
 
-        {/* Center - Model Selector Placeholder */}
-        <div className="gemini-model-selector">
-          <span className="gemini-model-name">Gemini</span>
-          <span className="gemini-model-version-tag">Pro 2.5 (גרסת טרום-השקה) - Preview</span>
+        {/* Center - Model Selector Placeholder from Gemini Spec (Visual Only) */}
+        <div className="gemini-model-selector-placeholder hidden md:flex">
+          <span className="gemini-model-name-placeholder">Gemini</span>
+          <span className="gemini-model-version-tag-placeholder">Pro 2.5 (Preview)</span>
         </div>
 
-        {/* Left side (RTL) / Right side (LTR) */}
-        <div className="flex items-center gap-2">
-          <span className="gemini-pro-tag">PRO</span>
+
+        <div className="flex items-center gap-3"> {/* Increased gap */}
+          <span className="text-[10px] font-medium text-[var(--text-muted-new)] uppercase hidden sm:inline">PRO</span>
           <Button variant="ghost" size="icon" onClick={() => setShowProfileModal(true)} title={lang === 'he' ? 'פרופיל' : 'Profile'} className="p-0">
-             <div className="gemini-profile-icon">
+             <div className="gemini-profile-icon-container">
                 {getProfileInitial()}
                 <span className="gemini-profile-online-dot"></span>
             </div>
           </Button>
-          {/* Language toggle moved to SidePanel for cleaner header, or keep here if preferred */}
            <Button
             variant="ghost"
             size="icon"
             onClick={() => changeLanguage(lang === 'he' ? 'en' : 'he')}
             title={lang === 'he' ? 'שנה שפה לאנגלית' : 'Change Language to Hebrew'}
-            className="text-[var(--text-secondary-light)] hover:bg-[var(--border-light)] active:bg-[var(--border-light)] rounded-md p-1.5"
+            className="p-2 text-[var(--text-muted-new)] hover:bg-[var(--bg-input-new)]"
           >
             <Languages className="w-5 h-5"/>
           </Button>
@@ -255,15 +267,16 @@ const App: React.FC = () => {
           isOpen={isSidePanelOpen} 
           onClose={() => setIsSidePanelOpen(false)} 
           onNavigate={handlePageNavigation}
-          currentNavPage={currentPage as ('chat' | 'settings')}
+          currentNavPage={currentPage}
+          navItems={navItemsConfig}
         />
-        <main className="flex-1 flex flex-col overflow-y-auto bg-[var(--bg-primary)]">
+        <main className="flex-1 flex flex-col overflow-y-auto bg-[var(--bg-main-new)]"> {/* Main content area takes remaining space */}
              { (showOnboarding || apiSettings.length === 0 || !apiSettings.some(s=>s.isValid)) ? (
                 <div className="flex-1 flex items-center justify-center p-4">
                     <OnboardingWizard onComplete={handleCompleteOnboarding} />
                 </div>
             ) : (
-                renderPage() // PageWrapper is inside renderPage now
+                renderPage()
             )}
         </main>
       </div>
@@ -283,48 +296,48 @@ const App: React.FC = () => {
       </AlertDialog>
 
       <Dialog open={showProfileModal} onOpenChange={setShowProfileModal} size="md">
-        <DialogHeader>
+        <DialogHeader className="bg-[var(--bg-sidebar-new)]"> {/* Match sidebar bg for consistency */}
             <DialogTitle>{lang === 'he' ? 'פרופיל והישגים' : 'Profile & Achievements'}</DialogTitle>
         </DialogHeader>
-        <DialogContent className="p-6 space-y-4">
+        <DialogContent className="p-6 space-y-4 bg-[var(--bg-main-new)]">
             {userProfile && (
                 <>
                     <div>
-                        <h3 className="text-lg font-medium text-[var(--text-primary)]">{userProfile.userName || (lang === 'he' ? 'משתמש' : 'User')}</h3>
-                        <p className="text-sm text-[var(--text-secondary)]">{lang === 'he' ? 'בוט:' : 'Bot:'} {userProfile.botName || 'LUMINA'}</p>
+                        <h3 className="text-lg font-medium text-[var(--text-normal-new)]">{userProfile.userName || (lang === 'he' ? 'משתמש' : 'User')}</h3>
+                        <p className="text-sm text-[var(--text-muted-new)]">{lang === 'he' ? 'בוט:' : 'Bot:'} {userProfile.botName || 'LUMINA'}</p>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
-                        <div className="flex flex-col items-center p-3 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-md">
+                        <div className="flex flex-col items-center p-3 bg-[var(--bg-input-new)] border border-[var(--border-light-new)] rounded-md">
                             <Star className="w-7 h-7 text-yellow-500 mb-1.5"/>
-                            <span className="text-xl font-medium text-[var(--text-primary)]">{userProfile.userXP || 0}</span>
-                            <span className="text-xs text-[var(--text-secondary)]">XP</span>
+                            <span className="text-xl font-medium text-[var(--text-normal-new)]">{userProfile.userXP || 0}</span>
+                            <span className="text-xs text-[var(--text-muted-new)]">XP</span>
                         </div>
-                        <div className="flex flex-col items-center p-3 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-md">
+                        <div className="flex flex-col items-center p-3 bg-[var(--bg-input-new)] border border-[var(--border-light-new)] rounded-md">
                             <Activity className="w-7 h-7 text-red-500 mb-1.5"/>
-                            <span className="text-xl font-medium text-[var(--text-primary)]">{userProfile.dailyStreak || 0}</span>
-                            <span className="text-xs text-[var(--text-secondary)]">{lang === 'he' ? 'ימי רצף' : 'Day Streak'}</span>
+                            <span className="text-xl font-medium text-[var(--text-normal-new)]">{userProfile.dailyStreak || 0}</span>
+                            <span className="text-xs text-[var(--text-muted-new)]">{lang === 'he' ? 'ימי רצף' : 'Day Streak'}</span>
                         </div>
                     </div>
                     <div>
-                        <h4 className="font-medium mb-1.5 text-[var(--text-primary)] text-sm">{lang === 'he' ? 'תגים שהושגו:' : 'Badges Earned:'}</h4>
+                        <h4 className="font-medium mb-1.5 text-[var(--text-normal-new)] text-sm">{lang === 'he' ? 'תגים שהושגו:' : 'Badges Earned:'}</h4>
                         {(userProfile.badges && userProfile.badges.length > 0) ? (
                             <ul className="space-y-1.5">
                                 {userProfile.badges.map(badgeKey => (
-                                    <li key={badgeKey} className="flex items-center gap-2 p-2 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-md">
+                                    <li key={badgeKey} className="flex items-center gap-2 p-2 bg-[var(--bg-input-new)] border border-[var(--border-light-new)] rounded-md">
                                         {getBadgeIcon(badgeKey)}
-                                        <span className="text-sm font-normal text-[var(--text-secondary)]">{badgeDisplayNames[badgeKey]?.[lang as 'he' | 'en'] || badgeKey}</span>
+                                        <span className="text-sm font-normal text-[var(--text-muted-new)]">{badgeDisplayNames[badgeKey]?.[lang as 'he' | 'en'] || badgeKey}</span>
                                     </li>
                                 ))}
                             </ul>
                         ) : (
-                            <p className="text-sm text-[var(--text-secondary)]">{lang === 'he' ? 'עדיין אין תגים. המשך להשתמש באפליקציה כדי להרוויח!' : 'No badges yet. Keep using the app to earn them!'}</p>
+                            <p className="text-sm text-[var(--text-muted-new)]">{lang === 'he' ? 'עדיין אין תגים. המשך להשתמש באפליקציה כדי להרוויח!' : 'No badges yet. Keep using the app to earn them!'}</p>
                         )}
                     </div>
                 </>
             )}
         </DialogContent>
-        <DialogFooter>
-            <Button variant="ghost" onClick={() => setShowProfileModal(false)}>{lang === 'he' ? 'סגור' : 'Close'}</Button>
+        <DialogFooter className="bg-[var(--bg-sidebar-new)]"> {/* Match sidebar bg */}
+            <Button variant="outline" onClick={() => setShowProfileModal(false)}>{lang === 'he' ? 'סגור' : 'Close'}</Button>
         </DialogFooter>
       </Dialog>
     </div>

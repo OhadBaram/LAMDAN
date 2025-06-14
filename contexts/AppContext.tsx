@@ -115,12 +115,11 @@ interface InvokeLLMParams {
 }
 
 export const InvokeLLM = async ({ modelConfig, prompt, systemPrompt, conversationHistory = [], files = [], agentToolResults = null }: InvokeLLMParams) => {
-    if (!modelConfig || !modelConfig.modelId) { // API Key check for Google is handled by SDK init with process.env
+    if (!modelConfig || !modelConfig.modelId) {
         return { error: "Model ID not configured for the active model." };
     }
-    if (modelConfig.provider !== 'google' && !modelConfig.apiKey) {
-        return { error: "API Key not configured for the active model." };
-    }
+    // API Key is now required for all providers if they need one, checked before SDK/API call
+    // The specific check for Google API key will be inside its provider block.
 
 
     const { provider, modelId, apiKey, apiUrl, costs } = modelConfig;
@@ -171,6 +170,7 @@ export const InvokeLLM = async ({ modelConfig, prompt, systemPrompt, conversatio
 
 
     if (provider === 'openai' || provider === 'perplexity' || provider === 'meta' || provider === 'grok' || provider === 'qwen' || provider === 'deepseek' || provider === 'microsoft') {
+        if (!apiKey) return { error: `API Key not configured for ${PROVIDER_INFO[provider]?.name || provider} model.` };
         if (provider === 'microsoft' && !(apiUrl||'').includes('openai.azure.com')) {
              return { error: "Azure OpenAI requires a specific endpoint URL in model settings."};
         }
@@ -208,12 +208,12 @@ export const InvokeLLM = async ({ modelConfig, prompt, systemPrompt, conversatio
 
     } else if (provider === 'google') {
         try {
-            // Guideline: API key from process.env. Assume it's set.
-            // If process.env.API_KEY is not actually available in the browser, this will fail.
-            const ai = new GoogleGenAI({ apiKey: process.env.API_KEY! });
+            if (!apiKey) { // API key from user settings, not process.env
+                return { error: `API Key not configured for Google Gemini model "${modelConfig.name}".` };
+            }
+            const ai = new GoogleGenAI({ apiKey: apiKey }); // Use API key from modelConfig
             
-            // Guideline: Use 'gemini-2.5-flash-preview-04-17' for general text tasks.
-            const sdkModelName = 'gemini-2.5-flash-preview-04-17';
+            const sdkModelName = modelId || 'gemini-2.5-flash-preview-04-17'; // Use configured modelId or default
 
             const geminiApiContents: Content[] = [];
 
@@ -256,7 +256,6 @@ export const InvokeLLM = async ({ modelConfig, prompt, systemPrompt, conversatio
             if (effectiveSystemPrompt) {
                 sdkRequestConfig.systemInstruction = effectiveSystemPrompt;
             }
-            // As per guideline, omit thinkingConfig for default (enabled) behavior.
 
             const sdkResponse: GenerateContentResponse = await ai.models.generateContent({
                 model: sdkModelName,
@@ -273,7 +272,6 @@ export const InvokeLLM = async ({ modelConfig, prompt, systemPrompt, conversatio
                 usage.incomingTokens = messageContent.length / 4; // Estimate
                 usage.outgoingTokens = geminiApiContents.reduce((sum, content) => sum + content.parts.reduce((partSum, part) => partSum + ( (part as any).text?.length || (part as any).inlineData?.data?.length/1.37 || 0), 0),0) / 4; // Rougher estimate
             }
-            // Cost calculation will use this usage and be done after the try-catch block for providers.
 
         } catch (sdkError: any) {
             console.error("Google GenAI SDK Error:", sdkError);
@@ -282,23 +280,21 @@ export const InvokeLLM = async ({ modelConfig, prompt, systemPrompt, conversatio
         }
 
     } else if (provider === 'anthropic') {
+        if (!apiKey) return { error: `API Key not configured for ${PROVIDER_INFO[provider]?.name || provider} model.` };
         endpoint = endpoint || 'https://api.proxy-gemini.com/anthropic/v1/messages';
         (headers as Record<string, string>)['x-api-key'] = apiKey;
         (headers as Record<string, string>)['anthropic-version'] = '2023-06-01';
         
         const messagesForApi: any[] = [];
-        // Anthropic system prompt is a top-level field
-        // conversationHistory messages
         conversationHistory.forEach(msg => {
             messagesForApi.push({ role: msg.role === 'user' ? 'user' : 'assistant', content: msg.content });
         });
         
-        // Current user message parts for Anthropic
         const currentAnthropicUserParts: any[] = [];
-         currentUserPromptPartsForNonGoogle.forEach(part => { // Use pre-constructed parts for non-Google
+         currentUserPromptPartsForNonGoogle.forEach(part => { 
             if ('type' in part && part.type === "text") {
                 currentAnthropicUserParts.push({ type: "text", text: part.text });
-            } else if ('type'in part && part.type === "image" && part.source) { // LLMPromptPartImageSource
+            } else if ('type'in part && part.type === "image" && part.source) { 
                 currentAnthropicUserParts.push({ type: "image", source: (part as LLMPromptPartImageSource).source });
             }
         });
@@ -312,7 +308,6 @@ export const InvokeLLM = async ({ modelConfig, prompt, systemPrompt, conversatio
         return { error: `Provider "${provider}" is not supported or misconfigured.` };
     }
 
-    // --- Common response handling for non-Google fetch-based providers ---
     if (provider !== 'google') {
         try {
             const response = await fetchWithTimeout(endpoint, {
@@ -330,7 +325,7 @@ export const InvokeLLM = async ({ modelConfig, prompt, systemPrompt, conversatio
 
             const data = await response.json();
             
-            usage.outgoingTokens = JSON.stringify(requestBody).length / 4; // Default for outgoing unless overridden
+            usage.outgoingTokens = JSON.stringify(requestBody).length / 4; 
 
             if (provider === 'openai' || provider === 'perplexity' || provider === 'meta' || provider === 'grok' || provider === 'qwen' || provider === 'deepseek' || provider === 'microsoft') {
                 messageContent = data.choices?.[0]?.message?.content || '';
@@ -355,9 +350,6 @@ export const InvokeLLM = async ({ modelConfig, prompt, systemPrompt, conversatio
         }
     }
     
-    // --- Common Cost Calculation ---
-    // For Google, `usage` is already populated. For others, it's populated in the try block above.
-    // `messageContent` is also populated for all successful paths.
     const modelPricing = costs || KNOWN_MODELS_PRICING[modelConfig.modelId] || (provider === 'google' ? KNOWN_MODELS_PRICING['gemini-2.5-flash-preview-04-17'] : {}) || {};
     if (modelPricing.input && modelPricing.output) {
         cost = (usage.outgoingTokens / 1000000 * modelPricing.input) + (usage.incomingTokens / 1000000 * modelPricing.output);
@@ -369,17 +361,21 @@ export const InvokeLLM = async ({ modelConfig, prompt, systemPrompt, conversatio
 };
 
 export const validateApiKey = async (modelConfig: ApiSetting) => {
-    // For Google, validation with SDK will use process.env.API_KEY, not modelConfig.apiKey.
-    // For other providers, it uses modelConfig.apiKey.
+    // API key from modelConfig.apiKey will be used by InvokeLLM now for all providers.
     const validationPrompt = "Hello";
     const validationSystemPrompt = "You are a validation AI. Respond with a short confirmation like 'OK' or 'Confirmed'.";
     
-    // If it's Google, and process.env.API_KEY is not set, this validation might always fail client-side
-    // unless the environment variable is truly available, or we make an exception for validation.
-    // However, sticking to the guideline: process.env.API_KEY is assumed available.
+    // Check if API key is present in modelConfig before calling InvokeLLM, as InvokeLLM now expects it.
+    if (!modelConfig.apiKey && modelConfig.provider !== 'some_provider_that_truly_needs_no_key_which_is_not_google_here') { 
+        // This check is a bit redundant as InvokeLLM also checks, but good for clarity.
+        // The condition "modelConfig.provider !== 'some_provider_that_truly_needs_no_key_which_is_not_google_here'"
+        // is a placeholder for any future provider that might not need a key, which is not the case for current providers.
+        // For Google, it will now expect modelConfig.apiKey.
+        return { isValid: false, error: `API Key is required for ${PROVIDER_INFO[modelConfig.provider]?.name || modelConfig.provider}.` };
+    }
 
     const validationResult = await InvokeLLM({
-        modelConfig, // Pass the full modelConfig. InvokeLLM will handle API key based on provider.
+        modelConfig,
         prompt: validationPrompt,
         systemPrompt: validationSystemPrompt,
         conversationHistory: [],
@@ -388,15 +384,8 @@ export const validateApiKey = async (modelConfig: ApiSetting) => {
     if (validationResult.error) {
         return { isValid: false, error: validationResult.error };
     }
-    // Check if the response is somewhat affirmative, not just non-empty
     const affirmativeResponse = validationResult.message && validationResult.message.length < 50 && (validationResult.message.toLowerCase().includes('ok') || validationResult.message.toLowerCase().includes('confirm'));
-    if (!affirmativeResponse) {
-        // This could happen if the model responds but not with a simple confirmation.
-        // For stricter validation, one might analyze the content more. For now, any non-error response is 'valid'.
-        // Let's consider any non-error response as potentially valid for now, as the main check is API connectivity.
-        // However, if the model just says "I cannot fulfill this request", it's not truly validated.
-        // Given the prompt constraints, we'll keep it simple: no error = valid.
-    }
+    // If we want stricter validation, we can use affirmativeResponse. For now, no error = valid.
     return { isValid: true, error: null };
 };
 
@@ -454,7 +443,7 @@ export const useAppContext = () => {
 function AppProviderInternal({ children }: { children: React.ReactNode }) {
     const userSettings = useUserSettings(); // Hook into UserSettingsContext
     const [lang, setLang] = useState(() => localStorage.getItem('app_lang') || 'he');
-    const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light'); // Default to 'light' for Gemini-like UI
+    const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light'); 
     const [apiSettings, setApiSettingsState] = useState<ApiSetting[]>([]);
     const [tokenUsage, setTokenUsageState] = useState<TokenUsage[]>([]);
     const [currentPage, setCurrentPageGlobal] = useState('chat');

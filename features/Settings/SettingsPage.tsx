@@ -399,7 +399,7 @@ function ApiSettingsSection() {
             ...getInitialEditingModel(), 
             ...model, 
             name: model.name ?? '',
-            apiKey: model.provider === 'google' ? '' : (model.apiKey ?? ''), 
+            apiKey: model.apiKey ?? '', // No longer force empty for Google
             apiUrl: model.apiUrl ?? '',
             modelSystemPrompt: model.modelSystemPrompt ?? '',
             isFreeTier: model.isFreeTier ?? false,
@@ -426,9 +426,9 @@ function ApiSettingsSection() {
 
     const handleSaveModel = async () => {
         if (!editingModel || !editingModel.name?.trim() || !editingModel.provider?.trim() || !editingModel.modelId?.trim() || 
-            (editingModel.provider !== 'google' && !(editingModel.apiKey||'').trim()) 
+            (!(editingModel.apiKey||'').trim()) // API Key is now always required if provider needs one (implicitly includes google now)
         ) {
-             openErrorDialog(lang === 'he' ? 'שדות חסרים' : 'Missing Fields', lang === 'he' ? 'אנא מלא את כל שדות החובה (שם, ספק, מזהה מודל, ומפתח API אם נדרש).' : 'Please fill all required fields (Name, Provider, Model ID, and API Key if required).');
+             openErrorDialog(lang === 'he' ? 'שדות חסרים' : 'Missing Fields', lang === 'he' ? 'אנא מלא את כל שדות החובה (שם, ספק, מזהה מודל, ומפתח API).' : 'Please fill all required fields (Name, Provider, Model ID, and API Key).');
             return;
         }
         setSavingModel(true);
@@ -437,7 +437,7 @@ function ApiSettingsSection() {
             name: editingModel.name,
             provider: editingModel.provider,
             modelId: (editingModel.modelId === 'custom' ? (editingModel as any).modelIdIfCustom : editingModel.modelId)?.trim() || '',
-            apiKey: editingModel.provider === 'google' ? '' : (editingModel.apiKey || ''),
+            apiKey: editingModel.apiKey || '', // Save API key for all providers including Google
             apiUrl: editingModel.apiUrl?.trim() || undefined,
             costs: editingModel.costs || KNOWN_MODELS_PRICING[(editingModel.modelId === 'custom' ? (editingModel as any).modelIdIfCustom : editingModel.modelId)?.trim() || ''] || { input: 0, output: 0 },
             isFreeTier: editingModel.isFreeTier || false,
@@ -463,6 +463,12 @@ function ApiSettingsSection() {
     };
 
     const handleValidateModel = async (modelToValidate: ApiSetting) => {
+        // Ensure API key is present for validation, especially now that Google requires it from input
+        if (!modelToValidate.apiKey && modelToValidate.provider !== 'some_provider_that_truly_needs_no_key_which_is_not_google_here') {
+             openErrorDialog(lang === 'he' ? 'מפתח API חסר' : 'API Key Missing', lang === 'he' ? 'יש להזין מפתח API עבור מודל זה לפני הבדיקה.' : 'Please enter an API key for this model before validating.');
+            return;
+        }
+
         setValidatingModelId(modelToValidate.id);
         setValidationStatusMessages(prev => ({ ...prev, [modelToValidate.id]: { message: lang === 'he' ? 'בודק...' : 'Validating...', type: 'validating' } }));
         const result = await validateApiKey(modelToValidate);
@@ -600,7 +606,7 @@ function ApiSettingsSection() {
                                  modelId: defaultModelForProvider,
                                  costs: knownPricingForModel ? {input: knownPricingForModel.input, output: knownPricingForModel.output} : {input:0, output:0},
                                  isFreeTier: knownPricingForModel?.isFreeTier ?? false,
-                                 apiKey: selectedProvider === 'google' ? '' : (p?.apiKey ?? ''), 
+                                 apiKey: '', // Reset API key when provider changes
                                  apiUrl: PROVIDER_INFO[selectedProvider]?.requiresEndpoint ? '' : undefined 
                             }));
                         }}>
@@ -644,34 +650,37 @@ function ApiSettingsSection() {
                             )}
                         </div>
                     )}
-                    {editingModel?.provider !== 'google' && (
+                    {/* API Key input is now always visible if a provider is selected */}
+                    {editingModel?.provider && (
                         <div>
                             <Label htmlFor="apiKey">{lang === 'he' ? 'מפתח API' : 'API Key'} <span className="text-red-500">*</span></Label>
                             <Input id="apiKey" type="password" value={editingModel?.apiKey ?? ''} onChange={(e) => setEditingModel(p => ({...(p ?? getInitialEditingModel()), apiKey: e.target.value}))} placeholder="sk-xxxxxxxxxx או מפתח אחר"/>
-                            {editingModel?.provider && PROVIDER_INFO[editingModel.provider]?.apiKeyUrl && (
+                            {PROVIDER_INFO[editingModel.provider]?.apiKeyUrl && (
                                 <a href={PROVIDER_INFO[editingModel.provider]?.apiKeyUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-[var(--accent)] hover:underline flex items-center gap-1 mt-1">
-                                   <ExternalLink className="w-3 h-3"/> {lang === 'he' ? 'קבל מפתח API' : 'Get API Key'}
+                                   <ExternalLink className="w-3 h-3"/> {lang === 'he' ? `איך מקבלים מפתח ${PROVIDER_INFO[editingModel.provider]?.name}?` : `How to get a ${PROVIDER_INFO[editingModel.provider]?.name} key?`}
+                                </a>
+                            )}
+                             {PROVIDER_INFO[editingModel.provider]?.videoUrl && (
+                                <a href={PROVIDER_INFO[editingModel.provider]?.videoUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-[var(--accent)] hover:underline flex items-center gap-1 mt-1">
+                                   <Play className="w-3 h-3"/> {lang === 'he' ? 'מדריך וידאו' : 'Video Guide'}
                                 </a>
                             )}
                         </div>
                     )}
+
                      {PROVIDER_INFO[editingModel?.provider || '']?.requiresEndpoint && (
                          <div>
                             <Label htmlFor="apiUrl">{lang === 'he' ? 'כתובת API Endpoint (נדרש עבור Azure)' : 'API Endpoint URL (Required for Azure)'}</Label>
                             <Input id="apiUrl" value={editingModel?.apiUrl ?? ''} onChange={(e) => setEditingModel(p => ({...(p ?? getInitialEditingModel()), apiUrl: e.target.value}))} placeholder="https://YOUR_RESOURCE_NAME.openai.azure.com"/>
                         </div>
                      )}
-                     {!PROVIDER_INFO[editingModel?.provider || '']?.requiresEndpoint && editingModel?.provider !== 'google' && (
+                     {!PROVIDER_INFO[editingModel?.provider || '']?.requiresEndpoint && ( // Keep this for providers not needing endpoint by default
                         <div>
                             <Label htmlFor="apiUrl">{lang === 'he' ? 'כתובת API Endpoint (אופציונלי)' : 'API Endpoint URL (Optional)'}</Label>
                             <Input id="apiUrl" value={editingModel?.apiUrl ?? ''} onChange={(e) => setEditingModel(p => ({...(p ?? getInitialEditingModel()), apiUrl: e.target.value}))} placeholder={lang === 'he' ? 'השאר ריק עבור רוב הספקים' : 'Leave blank for most providers'}/>
                         </div>
                      )}
-                     {editingModel?.provider === 'google' && (
-                        <div className="p-2.5 bg-[var(--accent-primary-light)]/10 rounded-md text-sm text-[var(--accent-primary-light)] border border-[var(--accent-primary-light)]/20">
-                            {lang === 'he' ? 'עבור Google Gemini, מפתח ה-API נטען אוטומטית מקובץ הסביבה. אין צורך להזין אותו כאן.' : 'For Google Gemini, the API key is automatically loaded from the environment. No need to enter it here.'}
-                        </div>
-                     )}
+                    
                     <div>
                         <Label htmlFor="modelSystemPrompt">{lang === 'he' ? 'הנחיית מערכת ספציפית למודל (אופציונלי)' : 'Model-Specific System Prompt (Optional)'}</Label>
                         <Textarea id="modelSystemPrompt" value={editingModel?.modelSystemPrompt ?? ''} onChange={(e) => setEditingModel(p => ({...(p ?? getInitialEditingModel()), modelSystemPrompt: e.target.value}))} rows={3} placeholder={lang === 'he' ? 'הנחיה שתחול רק על מודל זה...' : 'Prompt that applies only to this model...'}/>
