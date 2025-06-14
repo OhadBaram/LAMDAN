@@ -15,18 +15,18 @@ export interface CostManagement { dailyBudget: number; weeklyBudget: number; mon
 
 
 // --- Storage Instances (specific to UserSettingsContext) ---
-export const initialAppCustomizationData: AppCustomization = { 
-    headerBgColor: '#2c3e50', 
+export const initialAppCustomizationData: AppCustomization = {
+    headerBgColor: '#2c3e50',
     headerTitleColor: '#ecf0f1',
-    chatBgColor: '#f4f6f8', 
+    chatBgColor: '#f4f6f8',
     chatFontColor: '#34495e',
-    chatFontSize: 14, 
-    botVoiceURI: null, // This is fine as Select component handles null
-    userName: 'User', 
-    userImage: null, 
-    botName: 'LUMINA', 
-    botImage: null, 
-    systemPrompt: 'You are a helpful AI assistant.' 
+    chatFontSize: 14,
+    botVoiceURI: null,
+    userName: 'User',
+    userImage: null,
+    botName: 'LUMINA',
+    botImage: null,
+    systemPrompt: 'You are a helpful AI assistant.'
 };
 
 const AppCustomizationStorage = mockStorage<AppCustomization>('app_customization_v2', initialAppCustomizationData);
@@ -101,7 +101,7 @@ export function UserSettingsProvider({ children }: { children: React.ReactNode }
 
     useEffect(() => {
         const loadAllUserSettings = async () => {
-            const [profileData, promptsData, personasData, spacesData, agentsData, costManagementData] = await Promise.all([
+            const [profileDataFromStorage, promptsData, personasData, spacesData, agentsData, costManagementDataFromStorage] = await Promise.all([
                 AppCustomizationStorage.getSingle(),
                 SavedPromptsStorage.list(),
                 PersonasStorage.list(),
@@ -110,7 +110,32 @@ export function UserSettingsProvider({ children }: { children: React.ReactNode }
                 CostManagementStorage.getSingle(),
             ]);
 
-            setUserProfileState(profileData || initialAppCustomizationData);
+            // Sanitize profileDataFromStorage before setting state
+            const sanitizedProfileData: AppCustomization = profileDataFromStorage ? {
+                headerBgColor: profileDataFromStorage.headerBgColor ?? initialAppCustomizationData.headerBgColor ?? '#2c3e50',
+                headerTitleColor: profileDataFromStorage.headerTitleColor ?? initialAppCustomizationData.headerTitleColor ?? '#ecf0f1',
+                chatBgColor: profileDataFromStorage.chatBgColor ?? initialAppCustomizationData.chatBgColor ?? '#f4f6f8',
+                chatFontColor: profileDataFromStorage.chatFontColor ?? initialAppCustomizationData.chatFontColor ?? '#34495e',
+                chatFontSize: profileDataFromStorage.chatFontSize ?? initialAppCustomizationData.chatFontSize ?? 14,
+                botVoiceURI: profileDataFromStorage.botVoiceURI ?? initialAppCustomizationData.botVoiceURI ?? null,
+                userName: profileDataFromStorage.userName ?? initialAppCustomizationData.userName ?? '',
+                userImage: profileDataFromStorage.userImage ?? initialAppCustomizationData.userImage ?? null,
+                botName: profileDataFromStorage.botName ?? initialAppCustomizationData.botName ?? '',
+                botImage: profileDataFromStorage.botImage ?? initialAppCustomizationData.botImage ?? null,
+                systemPrompt: profileDataFromStorage.systemPrompt ?? initialAppCustomizationData.systemPrompt ?? '',
+            } : initialAppCustomizationData;
+            setUserProfileState(sanitizedProfileData);
+
+            // Sanitize costManagementDataFromStorage before setting state
+            const sanitizedCostManagementData: CostManagement = costManagementDataFromStorage ? {
+                dailyBudget: costManagementDataFromStorage.dailyBudget ?? 0,
+                weeklyBudget: costManagementDataFromStorage.weeklyBudget ?? 0,
+                monthlyBudget: costManagementDataFromStorage.monthlyBudget ?? 0,
+                alertEmail: costManagementDataFromStorage.alertEmail ?? '',
+            } : initialCostManagementData;
+            setCostManagementState(sanitizedCostManagementData);
+
+
             setSavedPromptsState(promptsData.sort((a,b) => a.order - b.order));
             setPersonasState(personasData.sort((a,b) => a.order - b.order));
             const defaultPersona = personasData.find(p => p.isDefault) || (personasData.length > 0 ? personasData[0] : null);
@@ -125,14 +150,13 @@ export function UserSettingsProvider({ children }: { children: React.ReactNode }
             }
 
             setAgentsState(agentsData);
-            setCostManagementState(costManagementData || initialCostManagementData);
         };
         loadAllUserSettings();
     }, []);
 
     const setUserProfile = async (newProfile: AppCustomization) => {
         const updatedProfile = await AppCustomizationStorage.saveSingle(newProfile);
-        setUserProfileState(updatedProfile);
+        setUserProfileState(updatedProfile); // Assuming saveSingle returns the updated, sanitized object
     };
     const setSavedPrompts = async (newPrompts: SavedPrompt[]) => {
         await Promise.all(newPrompts.map(async (p, index) => await SavedPromptsStorage.upsert({...p, order: index})));
@@ -258,7 +282,14 @@ export function UserSettingsProvider({ children }: { children: React.ReactNode }
     };
 
     const setCostManagements = async (newSettings: CostManagement) => {
-        const updatedSettings = await CostManagementStorage.saveSingle(newSettings);
+        // Sanitize before saving and setting state
+        const sanitizedSettings: CostManagement = {
+            dailyBudget: newSettings.dailyBudget ?? 0,
+            weeklyBudget: newSettings.weeklyBudget ?? 0,
+            monthlyBudget: newSettings.monthlyBudget ?? 0,
+            alertEmail: newSettings.alertEmail ?? '',
+        };
+        const updatedSettings = await CostManagementStorage.saveSingle(sanitizedSettings);
         setCostManagementState(updatedSettings);
     };
 
