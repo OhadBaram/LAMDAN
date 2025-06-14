@@ -4,28 +4,34 @@ import React from 'react';
 export interface TextareaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
     className?: string;
     id?: string;
-    value?: string | number | readonly string[]; // Allow number for flexibility, will be stringified
+    // value and defaultValue are part of React.TextareaHTMLAttributes
+    // value?: string | number | readonly string[];
+    // defaultValue?: string;
     onChange?: React.ChangeEventHandler<HTMLTextAreaElement>;
     placeholder?: string;
     disabled?: boolean;
     rows?: number;
     name?: string;
-    defaultValue?: string;
     onKeyDown?: React.KeyboardEventHandler<HTMLTextAreaElement>;
 }
 
-export const Textarea: React.FC<TextareaProps> = ({ className, value: propValue, ...props }) => {
-    // Destructure defaultValue out of props to prevent it from being spread if 'value' is also present
-    const { defaultValue, ...otherProps } = props;
+export const Textarea: React.FC<TextareaProps> = (props) => {
+    const { 
+        className, 
+        value, 
+        defaultValue, // Explicitly capture defaultValue
+        ...rest 
+    } = props;
 
-    // Ensure the value passed to the DOM textarea is always a string.
-    const textareaValue = (propValue === null || propValue === undefined) ? '' : String(propValue);
+    const baseClassName = `px-3 py-2.5 rounded-lg border bg-transparent border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none w-full transition-colors duration-150 ease-in-out placeholder-slate-400 dark:placeholder-slate-500 ${className || ''}`;
+    
+    const domProps: Omit<React.TextareaHTMLAttributes<HTMLTextAreaElement>, 'value' | 'defaultValue'> = rest;
 
-    return (
-        <textarea 
-            className={`px-3 py-2.5 rounded-lg border bg-transparent border-slate-300 dark:border-slate-600 focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 outline-none w-full transition-colors duration-150 ease-in-out placeholder-slate-400 dark:placeholder-slate-500 ${className || ''}`} 
-            value={textareaValue}
-            {...otherProps} // Spread otherProps which does not include defaultValue
-        />
-    );
+    if (value !== undefined) {
+        // Controlled
+        return <textarea {...domProps} className={baseClassName} value={value === null ? '' : String(value)} />;
+    } else {
+        // Uncontrolled
+        return <textarea {...domProps} className={baseClassName} defaultValue={defaultValue} />;
+    }
 };
