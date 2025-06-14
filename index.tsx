@@ -174,6 +174,15 @@ const App: React.FC = () => {
           </Button>
           <Button
             variant="ghost"
+            size="icon"
+            onClick={() => changeLanguage(lang === 'he' ? 'en' : 'he')}
+            title={lang === 'he' ? 'שנה שפה לאנגלית' : 'Change Language to Hebrew'}
+            className="text-[var(--text-primary)] hover:bg-[var(--border)] active:bg-[var(--border)] rounded-md p-1.5"
+          >
+            <Languages className="w-4 h-4"/>
+          </Button>
+          <Button
+            variant="ghost"
             size="icon" 
             onClick={toggleTheme}
             title={lang === 'he' ? 'שנה ערכת נושא' : 'Toggle Theme'}
@@ -205,18 +214,7 @@ const App: React.FC = () => {
                         <NavLink key={item.id} item={item} isMobile={true} />
                     ))}
                 </div>
-                 <div className="mt-auto pt-4 border-t border-[var(--border)]">
-                     <Button
-                        variant="ghost"
-                        size="default" 
-                        onClick={() => changeLanguage(lang === 'he' ? 'en' : 'he')}
-                        title={lang === 'he' ? 'שנה שפה לאנגלית' : 'Change Language to Hebrew'}
-                        className="w-full justify-start text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--bg-primary)] rounded-md px-3 py-2.5 text-base"
-                    >
-                        <Languages className="w-4 h-4 me-2.5"/>
-                        <span>{lang === 'he' ? 'English' : 'עברית'}</span>
-                    </Button>
-                </div>
+                 {/* Language toggle removed from here */}
             </div>
         </div>
       )}
