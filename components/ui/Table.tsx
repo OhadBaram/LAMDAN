@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 export interface TableProps extends React.HTMLAttributes<HTMLTableElement> { children: React.ReactNode; }
@@ -7,9 +8,9 @@ export interface TableBodyProps extends React.HTMLAttributes<HTMLTableSectionEle
 export interface TableRowProps extends React.HTMLAttributes<HTMLTableRowElement> { children: React.ReactNode; className?: string; }
 export interface TableCellProps extends React.HTMLAttributes<HTMLTableCellElement> { children: React.ReactNode; className?: string;}
 
-export const Table: React.FC<TableProps> = ({ children, ...props }) => <div className="overflow-x-auto rounded-lg border border-slate-200 dark:border-slate-700"><table className="w-full min-w-[600px]" {...props}>{children}</table></div>;
-export const TableHeader: React.FC<TableHeaderProps> = ({ children, className, ...props }) => <thead className={`bg-slate-50 dark:bg-slate-800 ${className || ''}`} {...props}>{children}</thead>;
-export const TableHead: React.FC<TableHeadProps> = ({ children, className, ...props }) => <th className={`text-start p-3 sm:p-4 text-xs font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider ${className || ''}`} {...props}>{children}</th>;
-export const TableBody: React.FC<TableBodyProps> = ({ children, ...props }) => <tbody className="divide-y divide-slate-200 dark:divide-slate-700 bg-white dark:bg-slate-800/50" {...props}>{children}</tbody>;
-export const TableRow: React.FC<TableRowProps> = ({ children, className, ...props }) => <tr className={`hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors ${className || ''}`} {...props}>{children}</tr>;
-export const TableCell: React.FC<TableCellProps> = ({ children, className, ...props }) => <td className={`p-3 sm:p-4 text-sm text-slate-700 dark:text-slate-300 ${className || ''}`} {...props}>{children}</td>;
+export const Table: React.FC<TableProps> = ({ children, ...props }) => <div className="overflow-x-auto rounded-lg border border-[var(--border)]"><table className="w-full min-w-[600px] bg-[var(--bg-secondary)]" {...props}>{children}</table></div>;
+export const TableHeader: React.FC<TableHeaderProps> = ({ children, className, ...props }) => <thead className={`bg-[var(--bg-primary)] ${className || ''}`} {...props}>{children}</thead>;
+export const TableHead: React.FC<TableHeadProps> = ({ children, className, ...props }) => <th className={`text-left px-4 py-3 text-xs font-medium text-[var(--text-secondary)] uppercase tracking-wider ${className || ''}`} {...props}>{children}</th>; // p-4 (16px), p-3 (12px)
+export const TableBody: React.FC<TableBodyProps> = ({ children, ...props }) => <tbody className="divide-y divide-[var(--border)]" {...props}>{children}</tbody>;
+export const TableRow: React.FC<TableRowProps> = ({ children, className, ...props }) => <tr className={`hover:bg-[var(--bg-primary)] transition-colors ${className || ''}`} {...props}>{children}</tr>;
+export const TableCell: React.FC<TableCellProps> = ({ children, className, ...props }) => <td className={`px-4 py-3 text-sm text-[var(--text-primary)] ${className || ''}`} {...props}>{children}</td>; // p-4 (16px), p-3 (12px)

@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -14,33 +15,33 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 }
 
 export const Button: React.FC<ButtonProps> = ({ children, className, variant = 'default', size = 'default', ...props }) => {
-    const baseStyle = "font-semibold rounded-xl transition-all duration-150 ease-in-out focus:outline-none focus:ring-2 focus:ring-indigo-500/80 focus:ring-opacity-50 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed transform active:scale-[0.97]"; // rounded-lg to rounded-xl, added transform
+    const baseStyle = "font-medium rounded-md transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[var(--accent)]/50 focus:ring-opacity-50 flex items-center justify-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed active:scale-[0.98]";
     
     let variantStyle = "";
     switch(variant) {
-        case 'default':
-            variantStyle = "bg-indigo-600 hover:bg-indigo-700 text-white shadow-md hover:shadow-lg hover:-translate-y-px"; // Added hover:-translate-y-px
+        case 'default': // Primary button
+            variantStyle = "bg-[var(--accent)] hover:brightness-90 active:brightness-80 text-[var(--text-primary-light)]"; // text-primary-light for good contrast on accent
             break;
-        case 'outline':
-            variantStyle = "bg-transparent border-2 border-indigo-500 text-indigo-600 hover:bg-indigo-50 dark:hover:bg-indigo-500/15"; // Adjusted dark hover
+        case 'outline': // Secondary button
+            variantStyle = "bg-transparent border border-[var(--border)] text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]";
             break;
         case 'ghost':
-            variantStyle = "bg-transparent text-slate-700 dark:text-slate-300 hover:bg-slate-200/70 dark:hover:bg-slate-700/60"; // Adjusted hover opacity
+            variantStyle = "bg-transparent text-[var(--text-primary)] hover:bg-[var(--border)] active:bg-[var(--border)]";
             break;
         case 'destructive':
-            variantStyle = "bg-red-500 hover:bg-red-600 text-white shadow-md hover:shadow-lg hover:-translate-y-px"; // Added hover:-translate-y-px
+            variantStyle = "bg-[var(--error)] hover:brightness-90 active:brightness-80 text-white";
             break;
         case 'link':
-            variantStyle = "bg-transparent text-indigo-600 hover:text-indigo-700 hover:underline";
+            variantStyle = "bg-transparent text-[var(--accent)] hover:underline";
             break;
     }
 
-    let sizeStyle = "px-4 py-2 text-base"; // Default size
-    if (size === "sm") sizeStyle = "px-3 py-1.5 text-sm";
-    if (size === "lg") sizeStyle = "px-6 py-3 text-lg";
-    if (size === "icon") sizeStyle = "p-2.5"; 
+    let sizeStyle = "px-3 py-2 text-sm"; // Default size (16px from body, use text-sm for 14px button text or keep base)
+    if (size === "sm") sizeStyle = "px-2.5 py-1.5 text-xs"; // Smaller padding and text
+    if (size === "lg") sizeStyle = "px-5 py-2.5 text-base"; // Larger padding and text
+    if (size === "icon") sizeStyle = "p-2"; 
 
-    // Link variant usually doesn't have padding unless specified by className
+    // Link variant usually doesn't have padding unless specified by className or size icon
     if (variant === 'link' && size === 'default') sizeStyle = "p-0";
 
 

@@ -30,7 +30,13 @@ export const Input: React.FC<InputProps> = (props) => {
     } = props;
 
     const inputType = type || "text";
-    const baseClassName = `px-4 py-3 rounded-xl border bg-transparent border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 outline-none w-full transition-colors duration-150 ease-in-out placeholder-slate-400 dark:placeholder-slate-500 ${className || ''}`; // Adjusted padding, radius, border, focus
+    // Using theme variables. Tailwind JIT needs to see full class names, so we construct them carefully or use style prop for CSS vars.
+    // For direct Tailwind utility classes, we must ensure they are generated.
+    // Simpler to apply base and let specifics be overridden or rely on CSS vars.
+    const baseClassName = `px-3 py-3 rounded-md border bg-[var(--bg-primary)] border-[var(--border)] text-[var(--text-primary)]
+                           focus:ring-2 focus:ring-[var(--accent)]/50 focus:border-[var(--accent)] 
+                           outline-none w-full transition-colors duration-150 ease-in-out 
+                           placeholder-[var(--text-secondary)] disabled:opacity-50 disabled:cursor-not-allowed ${className || ''}`;
 
     // domProps should not contain 'value' or 'defaultValue' as they are handled explicitly.
     const domProps: Omit<React.InputHTMLAttributes<HTMLInputElement>, 'value' | 'defaultValue'> = rest;

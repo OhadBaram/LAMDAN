@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 export interface DialogProps {
@@ -23,21 +24,21 @@ export const Dialog: React.FC<DialogProps> = ({ children, open, onOpenChange, si
     return (
         <div
             onClick={() => onOpenChange(false)}
-            className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 backdrop-blur-md" // Increased backdrop opacity and blur
+            className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 backdrop-blur-sm" // backdrop-blur-sm for subtle blur
             aria-modal="true"
             role="dialog"
         >
             <div
                 onClick={(e) => e.stopPropagation()}
-                className={`bg-white dark:bg-slate-800 rounded-2xl shadow-2xl w-full ${sizeClass} flex flex-col max-h-[90vh] overflow-hidden`} // rounded-xl to rounded-2xl
+                className={`bg-[var(--bg-secondary)] rounded-lg shadow-xl w-full ${sizeClass} flex flex-col max-h-[90vh] overflow-hidden border border-[var(--border)]`}
             >
                 {children}
             </div>
         </div>
     );
 };
-export const DialogContent: React.FC<DialogContentProps> = ({ children, className, ...props }) => <div className={`flex-1 overflow-y-auto ${className || ''}`} {...props}>{children}</div>;
-export const DialogHeader: React.FC<DialogHeaderProps> = ({ children, className, ...props }) => <div className={`p-6 border-b border-slate-200 dark:border-slate-700 ${className || ''}`} {...props}>{children}</div>;
-export const DialogTitle: React.FC<DialogTitleProps> = ({ children, className, ...props }) => <h2 className={`text-xl font-semibold text-slate-800 dark:text-slate-100 ${className || ''}`} {...props}>{children}</h2>;
-export const DialogDescription: React.FC<DialogDescriptionProps> = ({ children, className, ...props }) => <p className={`text-sm text-slate-500 dark:text-slate-400 mt-1 ${className || ''}`} {...props}>{children}</p>;
-export const DialogFooter: React.FC<DialogFooterProps> = ({ children, className, ...props }) => <div className={`p-4 sm:p-6 bg-slate-50 dark:bg-slate-800/60 flex justify-end gap-3 rounded-b-2xl border-t border-slate-200 dark:border-slate-700 ${className || ''}`} {...props}>{children}</div>; // rounded-b-xl to rounded-b-2xl
+export const DialogContent: React.FC<DialogContentProps> = ({ children, className, ...props }) => <div className={`flex-1 overflow-y-auto ${className || ''}`} {...props}>{children}</div>; // Removed default padding, handle in specific dialog content
+export const DialogHeader: React.FC<DialogHeaderProps> = ({ children, className, ...props }) => <div className={`p-4 border-b border-[var(--border)] ${className || ''}`} {...props}>{children}</div>;
+export const DialogTitle: React.FC<DialogTitleProps> = ({ children, className, ...props }) => <h2 className={`text-lg font-medium text-[var(--text-primary)] ${className || ''}`} {...props}>{children}</h2>; // H3 equivalent text-lg font-medium
+export const DialogDescription: React.FC<DialogDescriptionProps> = ({ children, className, ...props }) => <p className={`text-sm text-[var(--text-secondary)] mt-1 ${className || ''}`} {...props}>{children}</p>;
+export const DialogFooter: React.FC<DialogFooterProps> = ({ children, className, ...props }) => <div className={`p-4 bg-[var(--bg-primary)] flex justify-end gap-2 rounded-b-lg border-t border-[var(--border)] ${className || ''}`} {...props}>{children}</div>;

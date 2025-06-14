@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Paperclip, X, Plus, Sparkles, SendHorizontal, Loader2, Mic, MicOff, Info } from "lucide-react"; // Changed Sparkles to Info
+import { Paperclip, X, Plus, Sparkles, SendHorizontal, Loader2, Mic, MicOff, Info, MessageCircle } from "lucide-react"; 
 import { useAppContext, ChatMessageItem, InvokeLLM } from '../../contexts/AppContext';
 import { useUserSettings } from '../../contexts/UserSettingsContext';
 
@@ -8,7 +8,7 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Textarea } from '../../components/ui/Textarea';
 import { Label } from '../../components/ui/Label';
-import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
+import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card'; // Card used in InfoPanel
 import { Dialog, DialogHeader, DialogTitle, DialogContent, DialogFooter } from '../../components/ui/Dialog';
 import { Select } from '../../components/ui/Select';
 import { Switch } from '../../components/ui/Switch';
@@ -16,10 +16,59 @@ import { Switch } from '../../components/ui/Switch';
 import { ChatMessage } from './ChatMessage';
 import { FilePreview } from './FilePreview';
 
+const thinkingMessages = {
+    en: [
+        "LUMINA is thinking...",
+        "Crafting a response...",
+        "Analyzing your query...",
+        "Just a moment...",
+        "Processing...",
+        "Gathering insights..."
+    ],
+    he: [
+        "LUMINA חושבת...",
+        "מנסחת תשובה...",
+        "מנתחת את השאלה שלך...",
+        "רק רגע...",
+        "מעבדת...",
+        "אוספת תובנות..."
+    ]
+};
+
+const welcomeMessages = {
+    en: [
+        "Hello! How can I assist you today?",
+        "Hi there! What can LUMINA do for you?",
+        "Welcome! Ask me anything.",
+        "Ready for your questions!"
+    ],
+    he: [
+        "שלום! איך אוכל לעזור היום?",
+        "היי! מה LUMINA יכולה לעשות בשבילך?",
+        "ברוכים הבאים! אפשר לשאול אותי כל דבר.",
+        "מוכנה לשאלות שלך!"
+    ]
+};
+
+const promptStarters = {
+    en: [
+        "Explain quantum computing in simple terms.",
+        "What are some healthy dinner recipes?",
+        "Tell me a fun fact.",
+        "Write a poem about nature."
+    ],
+    he: [
+        "הסבר לי על מחשוב קוונטי בפשטות.",
+        "אילו מתכונים בריאים יש לארוחת ערב?",
+        "ספר לי עובדה מעניינת.",
+        "כתוב שיר על הטבע."
+    ]
+};
+
 
 export function ChatPage() {
-  const { lang, apiSettings, recordTokenUsage, speak, continuousConversation, setContinuousConversation, isListening, startListening, stopListening, transcript, setTranscript, clearTranscript, openErrorDialog, ChatHistoryStorage, InvokeLLM: InvokeLLMFromContext, theme } = useAppContext(); // Removed isSidebarOpen, setIsSidebarOpen
-  const { userProfile, activePersonaId, personas, activeSpaceId, spaces, savedPrompts } = useUserSettings();
+  const { lang, apiSettings, recordTokenUsage, speak, continuousConversation, setContinuousConversation, isListening, startListening, stopListening, transcript, setTranscript, clearTranscript, openErrorDialog, ChatHistoryStorage, InvokeLLM: InvokeLLMFromContext } = useAppContext(); 
+  const { userProfile, activePersonaId, personas, activeSpaceId, spaces, savedPrompts, incrementXP } = useUserSettings();
 
   const [currentChatId, setCurrentChatId] = useState(`chat-${Date.now()}`);
   const [messages, setMessages] = useState<ChatMessageItem[]>([]);
@@ -29,48 +78,63 @@ export function ChatPage() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [attachedFiles, setAttachedFiles] = useState<Array<{ id: string; name: string; type: string; dataUrl: string; content: string }>>([]);
   const [showSavedPromptsDialog, setShowSavedPromptsDialog] = useState(false);
-  const [isChatInfoPanelOpen, setIsChatInfoPanelOpen] = useState(false); // Local state for chat info panel
+  const [isChatInfoPanelOpen, setIsChatInfoPanelOpen] = useState(false); 
 
   const [currentModelId, setCurrentModelId] = useState<string | null>(null);
   const [currentConversationCost, setCurrentConversationCost] = useState(0);
   const [currentConversationTokens, setCurrentConversationTokens] = useState({ incoming: 0, outgoing: 0 });
+  const [currentThinkingMessage, setCurrentThinkingMessage] = useState("");
 
-  const activeSpace = spaces.find(s => s.id === activeSpaceId);
+  const getRandomMessage = (messageArray: string[]) => messageArray[Math.floor(Math.random() * messageArray.length)];
 
-    useEffect(() => {
-        const loadHistory = async () => {
-            const history = await ChatHistoryStorage.get(currentChatId);
-            if (history && history.messages) {
-                setMessages(history.messages);
-                setCurrentConversationCost(history.cost || 0);
-                setCurrentConversationTokens(history.tokens || { incoming: 0, outgoing: 0 });
-            } else {
-                 setMessages([{ role: "assistant", content: lang === 'he' ? "שלום! איך אוכל לעזור?" : "Hello! How can I help?", timestamp: new Date().toISOString() }]);
-                 setCurrentConversationCost(0);
-                 setCurrentConversationTokens({ incoming: 0, outgoing: 0 });
-            }
-        };
-        loadHistory();
-    }, [currentChatId, lang, ChatHistoryStorage]);
-
-    useEffect(() => {
-        if (messages.length > 1 || currentConversationCost > 0) {
-            ChatHistoryStorage.upsert({ id: currentChatId, messages, cost: currentConversationCost, tokens: currentConversationTokens, lastUpdated: new Date().toISOString() });
+  useEffect(() => {
+    const loadHistory = async () => {
+        const history = await ChatHistoryStorage.get(currentChatId);
+        if (history && history.messages && history.messages.length > 0) {
+            setMessages(history.messages);
+            setCurrentConversationCost(history.cost || 0);
+            setCurrentConversationTokens(history.tokens || { incoming: 0, outgoing: 0 });
+        } else {
+             const initialWelcome = getRandomMessage(welcomeMessages[lang as 'he' | 'en']);
+             setMessages([{ role: "assistant", content: initialWelcome, timestamp: new Date().toISOString() }]);
+             setCurrentConversationCost(0);
+             setCurrentConversationTokens({ incoming: 0, outgoing: 0 });
         }
-    }, [messages, currentConversationCost, currentConversationTokens, currentChatId, ChatHistoryStorage]);
+    };
+    loadHistory();
+  }, [currentChatId, lang, ChatHistoryStorage]);
+
+  useEffect(() => {
+      if (messages.length > 1 || currentConversationCost > 0 || (messages.length === 1 && messages[0].role === 'assistant' && !welcomeMessages[lang as 'he' | 'en'].includes(messages[0].content))) { // Save if not default welcome or more than 1 msg
+          ChatHistoryStorage.upsert({ id: currentChatId, messages, cost: currentConversationCost, tokens: currentConversationTokens, lastUpdated: new Date().toISOString() });
+      }
+  }, [messages, currentConversationCost, currentConversationTokens, currentChatId, ChatHistoryStorage, lang]);
 
 
   useEffect(() => {
     const defaultApiModel = apiSettings.find(s => s.isDefault && s.isValid) || apiSettings.find(s => s.isValid) || null;
     if (defaultApiModel) setCurrentModelId(defaultApiModel.id);
     else if (apiSettings.length > 0 && !apiSettings.some(s => s.isValid)) {
-      openErrorDialog(lang === 'he' ? "אין מודלים מאומתים" : "No Valid Models", lang === 'he' ? "נראה שאין לך מודלים מאומתים. אנא עבור להגדרות ובדוק את תצורות ה-API שלך." : "It seems you don't have any validated models. Please go to settings and validate your API configurations.");
+      openErrorDialog(
+        lang === 'he' ? "מודל לא תקין" : "Invalid Model", 
+        lang === 'he' ? "אוי, נראה שאין מודל מאומת כרגע. אפשר לבדוק את ההגדרות או לבחור מודל אחר?" : "Oops, it seems there's no validated model selected. Could you check the settings or pick another one?"
+      );
     }
   }, [apiSettings, lang, openErrorDialog]);
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  useEffect(() => {
+    if (isLoading) {
+        const intervalId = setInterval(() => {
+            setCurrentThinkingMessage(getRandomMessage(thinkingMessages[lang as 'he' | 'en']));
+        }, 2500);
+        setCurrentThinkingMessage(getRandomMessage(thinkingMessages[lang as 'he' | 'en'])); // Initial message
+        return () => clearInterval(intervalId);
+    }
+  }, [isLoading, lang]);
 
   const handleSubmit = useCallback(async (e?: React.FormEvent | React.KeyboardEvent) => {
     if (e && typeof e.preventDefault === 'function') e.preventDefault();
@@ -82,6 +146,7 @@ export function ChatPage() {
     const userMessageContent = submissionInput;
     const userMessage: ChatMessageItem = { role: "user", content: userMessageContent, timestamp: new Date().toISOString(), files: attachedFiles };
     setMessages(prev => [...prev, userMessage]);
+    incrementXP(5); // Award XP for sending a message
 
     setInput("");
     setAttachedFiles([]);
@@ -90,9 +155,12 @@ export function ChatPage() {
 
     const activeModelConfig = apiSettings.find(m => m.id === currentModelId);
     if (!activeModelConfig || !activeModelConfig.isValid) {
-        openErrorDialog(lang === 'he' ? "שגיאת מודל" : "Model Error", lang === 'he' ? "המודל הנבחר אינו זמין או לא תקין. אנא בחר מודל אחר או בדוק את ההגדרות." : "The selected model is not available or invalid. Please select another model or check settings.");
+        openErrorDialog(
+            lang === 'he' ? "בעיה עם המודל" : "Model Issue", 
+            lang === 'he' ? "אממ, המודל שנבחר לא זמין או לא תקין. אולי כדאי לבחור מודל אחר או לבדוק את ההגדרות?" : "Hmm, the selected model isn't available or valid. Perhaps select another model or check the settings?"
+        );
         setIsLoading(false);
-        setMessages(prev => prev.slice(0, -1)); // Remove optimistic user message
+        setMessages(prev => prev.slice(0, -1)); 
         return;
     }
 
@@ -112,18 +180,30 @@ export function ChatPage() {
         modelConfig: activeModelConfig,
         prompt: fullPrompt,
         systemPrompt: systemPrompt,
-        conversationHistory: messages.slice(-10),
+        conversationHistory: messages.slice(-10), // Send last 10 messages for context
         files: attachedFiles,
     });
 
     setIsLoading(false);
 
     if (response.error) {
-        openErrorDialog(lang === 'he' ? "שגיאת API" : "API Error", response.error);
+        openErrorDialog(
+            lang === 'he' ? "שגיאת API" : "API Error", 
+            lang === 'he' ? `אוי לא, התקשורת עם ה-API נכשלה. הסיבה: ${response.error}. אולי לנסות שוב בעוד כמה רגעים?` : `Oh no, communication with the API failed. Reason: ${response.error}. Maybe try again in a few moments?`
+        );
         const errorMessage: ChatMessageItem = { role: "assistant", content: `${lang === 'he' ? 'שגיאה: ' : 'Error: '}${response.error}`, timestamp: new Date().toISOString(), isError: true };
         setMessages(prev => [...prev, errorMessage]);
     } else {
-        const assistantMessage: ChatMessageItem = { role: "assistant", content: response.message, timestamp: new Date().toISOString() };
+        const assistantMessage: ChatMessageItem = { 
+            role: "assistant", 
+            content: response.message, 
+            timestamp: new Date().toISOString(),
+            suggestions: [ // Static suggestions for now
+                lang === 'he' ? "ספר לי עוד" : "Tell me more",
+                lang === 'he' ? "הסבר את זה אחרת" : "Explain that differently",
+                lang === 'he' ? "מה המשמעות של זה?" : "What does this mean?"
+            ]
+        };
         setMessages(prev => [...prev, assistantMessage]);
         recordTokenUsage(response.provider, response.modelId, response.usage.incomingTokens, response.usage.outgoingTokens, response.cost);
         setCurrentConversationCost(prev => prev + response.cost);
@@ -140,7 +220,7 @@ export function ChatPage() {
             });
         }
     }
-  },[input, transcript, attachedFiles, isLoading, currentModelId, activePersonaId, activeSpaceId, apiSettings, personas, userProfile, spaces, messages, lang, openErrorDialog, recordTokenUsage, speak, startListening, clearTranscript, continuousConversation, isListening, setInput, setAttachedFiles, setIsLoading, setMessages, setCurrentConversationCost, setCurrentConversationTokens, InvokeLLMFromContext ]);
+  },[input, transcript, attachedFiles, isLoading, currentModelId, activePersonaId, activeSpaceId, apiSettings, personas, userProfile, spaces, messages, lang, openErrorDialog, recordTokenUsage, speak, startListening, clearTranscript, continuousConversation, isListening, setInput, setAttachedFiles, setIsLoading, setMessages, setCurrentConversationCost, setCurrentConversationTokens, InvokeLLMFromContext, incrementXP ]);
 
 
   useEffect(() => {
@@ -221,20 +301,37 @@ export function ChatPage() {
     setInput(prev => prev + promptContent);
     setShowSavedPromptsDialog(false);
   };
+  
+  const handlePromptStarterClick = (promptText: string) => {
+    setInput(promptText);
+    // Optionally, auto-submit:
+    // handleSubmit(); // or handleSubmit({ preventDefault: () => {} } as any);
+  };
 
   const currentPersonaName = personas.find(p => p.id === activePersonaId)?.name || (lang === 'he' ? "ברירת מחדל" : "Default");
-  const chatAreaBg = theme === 'dark' 
-    ? (userProfile?.chatBgColor && userProfile.chatBgColor !== '#f3f4f6' && userProfile.chatBgColor !== '#f4f6f8' ? userProfile.chatBgColor : '#27272a')
-    : (userProfile?.chatBgColor || '#ffffff'); 
+  const chatAreaBg = "var(--bg-primary)"; // Use CSS variable
+
+  const activeSpaceDetails = spaces.find(s => s.id === activeSpaceId);
+
+  // Chat page header using theme colors
+  const chatPageHeaderBg = "var(--bg-primary)"; 
+  const chatPageHeaderBorder = "var(--border)";
+  const chatPageInputAreaBg = "var(--bg-primary)";
 
 
   return (
-    <div className="flex flex-col h-full bg-white dark:bg-gray-900 relative"> {/* Added relative for panel positioning */}
-      {/* Top bar for chat controls, above message list */}
-      <div className={`px-4 py-2 border-b border-slate-200 dark:border-slate-700 flex items-center justify-between sticky top-0 bg-white dark:bg-slate-800 z-10`}>
-        <div className="flex items-center gap-2">
-            <Button onClick={() => { setCurrentChatId(`chat-${Date.now()}`); setMessages([{ role: "assistant", content: lang === 'he' ? "שלום! איך אוכל לעזור?" : "Hello! How can I help?", timestamp: new Date().toISOString() }]); setCurrentConversationCost(0); setCurrentConversationTokens({ incoming: 0, outgoing: 0 }); }} variant="outline" size="sm">
-                <Plus className="w-4 h-4 me-2"/> {lang === 'he' ? 'שיחה חדשה' : 'New Chat'}
+    <div className="flex flex-col h-full bg-[var(--bg-primary)] relative"> 
+      <div className={`px-3 py-2 border-b border-[${chatPageHeaderBorder}] flex items-center justify-between sticky top-0 bg-[${chatPageHeaderBg}] z-10`}>
+        <div className="flex items-center gap-1.5">
+            <Button onClick={() => { 
+                const newChatId = `chat-${Date.now()}`;
+                setCurrentChatId(newChatId); 
+                const initialWelcome = getRandomMessage(welcomeMessages[lang as 'he' | 'en']);
+                setMessages([{ role: "assistant", content: initialWelcome, timestamp: new Date().toISOString() }]); 
+                setCurrentConversationCost(0); 
+                setCurrentConversationTokens({ incoming: 0, outgoing: 0 }); 
+            }} variant="outline" size="sm" className="text-xs">
+                <Plus className="w-3.5 h-3.5 me-1.5"/> {lang === 'he' ? 'שיחה חדשה' : 'New Chat'}
             </Button>
             {validModels.length > 0 && currentModelId && (
                 <div className="flex items-center gap-1">
@@ -243,7 +340,7 @@ export function ChatPage() {
                         id="model-select-chat"
                         value={currentModelId}
                         onChange={(e) => setCurrentModelId(e.target.value)}
-                        className="text-xs p-1.5 min-w-[120px] sm:min-w-[150px] rounded-md" // Select uses rounded-xl by default, this is a specific smaller override
+                        className="text-xs p-1.5 min-w-[100px] sm:min-w-[130px] rounded-md h-8" 
                         disabled={isLoading}
                     >
                         {validModels.map(model => <option key={model.id} value={model.id}>{model.name}</option>)}
@@ -251,14 +348,15 @@ export function ChatPage() {
                 </div>
             )}
         </div>
-        <Button variant="ghost" size="icon" onClick={() => setIsChatInfoPanelOpen(!isChatInfoPanelOpen)} title={lang === 'he' ? 'הצג/הסתר מידע שיחה' : 'Toggle Conversation Info'} className="rounded-full">
-            <Info className="w-5 h-5"/> {/* Changed icon */}
+        <Button variant="ghost" size="icon" onClick={() => setIsChatInfoPanelOpen(!isChatInfoPanelOpen)} title={lang === 'he' ? 'הצג/הסתר מידע שיחה' : 'Toggle Conversation Info'} className="rounded-md p-1.5">
+            <Info className="w-4 h-4 text-[var(--text-secondary)] hover:text-[var(--text-primary)]"/> 
         </Button>
       </div>
 
-      <div className="flex-1 flex flex-col overflow-hidden"> {/* Main chat area */}
+      <div className="flex-1 flex flex-col overflow-hidden"> 
             <div 
-              className="flex-1 overflow-y-auto p-4 md:p-6" 
+              aria-live="polite"
+              className="flex-1 overflow-y-auto p-3 md:p-4" 
               style={{ backgroundColor: chatAreaBg }}
             >
                 {messages.map((message, index) =>
@@ -266,33 +364,56 @@ export function ChatPage() {
                         key={index}
                         message={message}
                         onSpeak={speak}
+                        onSuggestionClick={(suggestionText) => {
+                            setInput(suggestionText);
+                            // Optionally auto-submit: handleSubmit();
+                        }}
                     />
+                )}
+                 {isLoading && (
+                    <div className="flex items-center justify-start mb-4">
+                        <MessageCircle className="w-8 h-8 p-1.5 rounded-md self-start flex-shrink-0 bg-[var(--accent)]/20 text-[var(--accent)] me-2" />
+                        <div className="flex items-center space-x-2 bg-[var(--bg-secondary)] text-[var(--text-primary)] p-3 rounded-lg shadow-sm">
+                            <Loader2 className="h-4 w-4 animate-spin text-[var(--accent)]" />
+                            <span className="text-sm">{currentThinkingMessage}</span>
+                        </div>
+                    </div>
                 )}
                 <div ref={messagesEndRef} />
             </div>
 
-            <div className="p-3 md:p-4 border-t border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800">
+            <div className={`p-3 border-t border-[var(--border)] bg-[${chatPageInputAreaBg}]`}>
+                {(!isLoading && messages.length <= 2) && (
+                     <div className="mb-2 flex flex-wrap gap-1.5 items-center justify-center">
+                        <span className="text-xs text-[var(--text-secondary)] me-1.5">{lang === 'he' ? 'נסה לשאול:' : 'Try asking:'}</span>
+                        {promptStarters[lang as 'he' | 'en'].slice(0,3).map((starter, idx) => (
+                            <Button key={idx} variant="outline" size="sm" className="text-xs !px-2 !py-1 rounded-md" onClick={() => handlePromptStarterClick(starter)}>
+                                {starter}
+                            </Button>
+                        ))}
+                    </div>
+                )}
                 {attachedFiles.length > 0 && (
-                    <div className="mb-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
+                    <div className="mb-1.5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1.5">
                         {attachedFiles.map(file => <FilePreview key={file.id} file={file} onRemove={() => removeAttachedFile(file.id)} />)}
                     </div>
                 )}
-                <form id="chat-form" onSubmit={handleSubmit} className="flex items-end gap-2">
-                    <Button type="button" variant="ghost" size="icon" onClick={() => fileInputRef.current?.click()} title={lang === 'he' ? 'צרף קובץ' : 'Attach File'} className="rounded-full p-2 hover:bg-slate-200 dark:hover:bg-slate-700">
-                        <Paperclip className="w-5 h-5"/>
+                <form id="chat-form" onSubmit={handleSubmit} className="flex items-end gap-1.5">
+                    <Button type="button" variant="ghost" size="icon" onClick={() => fileInputRef.current?.click()} title={lang === 'he' ? 'צרף קובץ' : 'Attach File'} className="rounded-md p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+                        <Paperclip className="w-4 h-4"/>
                     </Button>
                     <input type="file" multiple ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*,application/pdf,.doc,.docx,.txt,.md,text/plain" />
 
-                    <Button type="button" variant="ghost" size="icon" onClick={() => setShowSavedPromptsDialog(true)} title={lang === 'he' ? 'הנחיות שמורות' : 'Saved Prompts'} className="rounded-full p-2 hover:bg-slate-200 dark:hover:bg-slate-700">
-                        <Sparkles className="w-5 h-5"/>
+                    <Button type="button" variant="ghost" size="icon" onClick={() => setShowSavedPromptsDialog(true)} title={lang === 'he' ? 'הנחיות שמורות' : 'Saved Prompts'} className="rounded-md p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
+                        <Sparkles className="w-4 h-4"/>
                     </Button>
 
                     <Textarea
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
-                        placeholder={isListening ? (lang === 'he' ? "מאזין..." : "Listening...") : (lang === 'he' ? "הקלד שאלה או השתמש במיקרופון..." : "Type a question or use the microphone...")}
+                        placeholder={isListening ? (lang === 'he' ? "מאזין..." : "Listening...") : (getRandomMessage(welcomeMessages[lang as 'he' | 'en'].map(s => s.replace("!", "?"))))}
                         disabled={isLoading}
-                        className="flex-1 min-h-[44px] max-h-[150px] resize-none rounded-xl px-4 py-2.5"
+                        className="flex-1 min-h-[40px] max-h-[120px] resize-none rounded-md px-3 py-2 text-base" // Standard text size for input
                         rows={1}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter' && !e.shiftKey) {
@@ -301,80 +422,79 @@ export function ChatPage() {
                             }
                         }}
                     />
-                    <Button type="button" variant="ghost" size="icon" onClick={handleSpeechToText} title={lang === 'he' ? (isListening ? 'הפסק הקלטה' : 'הקלט קול') : (isListening ? 'Stop Listening' : 'Record Voice')} className={`rounded-full p-2 hover:bg-slate-200 dark:hover:bg-slate-700 ${isListening ? "text-red-500 bg-red-100 dark:bg-red-900/50" : ""}`}>
-                        {isListening ? <MicOff className="w-5 h-5"/> : <Mic className="w-5 h-5"/>}
+                    <Button type="button" variant="ghost" size="icon" onClick={handleSpeechToText} title={lang === 'he' ? (isListening ? 'הפסק הקלטה' : 'הקלט קול') : (isListening ? 'Stop Listening' : 'Record Voice')} className={`rounded-md p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] ${isListening ? "text-[var(--error)] bg-[var(--error)]/10" : ""}`}>
+                        {isListening ? <MicOff className="w-4 h-4"/> : <Mic className="w-4 h-4"/>}
                     </Button>
-                    <Button id="chat-submit-button" type="submit" disabled={isLoading || (!input.trim() && !transcript.trim() && attachedFiles.length === 0)} size="icon" className="p-2.5 rounded-xl">
-                        {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <SendHorizontal className="w-5 h-5"/>}
+                    <Button id="chat-submit-button" type="submit" disabled={isLoading || (!input.trim() && !transcript.trim() && attachedFiles.length === 0)} size="icon" className="p-2 rounded-md bg-[var(--accent)] text-[var(--text-primary-light)] hover:brightness-90 active:brightness-80">
+                        {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <SendHorizontal className="w-4 h-4"/>}
                     </Button>
                 </form>
             </div>
       </div>
         
-      {/* Chat Info Panel (Off-canvas) */}
       <div 
         className={`fixed inset-y-0 ${lang === 'he' ? 'left-0 border-r' : 'right-0 border-l'} 
-                    w-72 sm:w-80 bg-slate-50 dark:bg-slate-800 shadow-2xl 
+                    w-64 sm:w-72 bg-[var(--bg-secondary)] shadow-xl 
                     transition-transform duration-300 ease-in-out z-30 transform 
                     ${isChatInfoPanelOpen ? 'translate-x-0' : (lang === 'he' ? '-translate-x-full' : 'translate-x-full')}
-                    border-slate-200 dark:border-slate-700 flex flex-col`}
+                    border-[var(--border)] flex flex-col`}
       >
-          <div className="flex justify-between items-center p-4 border-b border-slate-200 dark:border-slate-700">
-              <h3 className="text-lg font-semibold text-slate-800 dark:text-slate-100">{lang === 'he' ? 'מידע שיחה' : 'Conversation Info'}</h3>
-              <Button onClick={() => setIsChatInfoPanelOpen(false)} variant="ghost" size="icon" className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 rounded-full">
-                  <X className="w-5 h-5" />
+          <div className="flex justify-between items-center p-3 border-b border-[var(--border)]">
+              <h3 className="text-md font-medium text-[var(--text-primary)]">{lang === 'he' ? 'מידע שיחה' : 'Conversation Info'}</h3>
+              <Button onClick={() => setIsChatInfoPanelOpen(false)} variant="ghost" size="icon" className="text-[var(--text-secondary)] hover:text-[var(--text-primary)] rounded-md p-1.5">
+                  <X className="w-4 h-4" />
               </Button>
           </div>
-          <div className="p-4 space-y-4 text-sm overflow-y-auto flex-1">
-              <Card className="bg-white dark:bg-slate-700/50">
-                  <CardContent className="pt-4 space-y-3">
+          <div className="p-3 space-y-3 text-sm overflow-y-auto flex-1">
+              <Card className="bg-[var(--bg-primary)] border-[var(--border)]">
+                  <CardContent className="pt-3 space-y-2.5 text-xs">
                       <div>
-                          <Label htmlFor="active-model-display" className="text-slate-600 dark:text-slate-300">{lang === 'he' ? 'מודל פעיל:' : 'Active Model:'}</Label>
+                          <Label htmlFor="active-model-display" className="text-[var(--text-secondary)]">{lang === 'he' ? 'מודל פעיל:' : 'Active Model:'}</Label>
                           {currentModelId && apiSettings.find(m => m.id === currentModelId) ?
-                              <p id="active-model-display" className="text-indigo-600 dark:text-indigo-400 font-medium">{apiSettings.find(m => m.id === currentModelId)?.name || 'N/A'}</p> :
-                              <p id="active-model-display" className="text-red-500">{lang === 'he' ? 'לא נבחר מודל תקין' : 'No valid model selected'}</p>
+                              <p id="active-model-display" className="text-[var(--accent)] font-medium">{apiSettings.find(m => m.id === currentModelId)?.name || 'N/A'}</p> :
+                              <p id="active-model-display" className="text-[var(--error)]">{lang === 'he' ? 'לא נבחר מודל תקין' : 'No valid model selected'}</p>
                           }
                       </div>
                       <div>
-                          <Label htmlFor="active-persona-display" className="text-slate-600 dark:text-slate-300">{lang === 'he' ? 'פרסונה פעילה:' : 'Active Persona:'}</Label>
-                          <p id="active-persona-display" className="font-medium text-slate-700 dark:text-slate-200">{currentPersonaName}</p>
+                          <Label htmlFor="active-persona-display" className="text-[var(--text-secondary)]">{lang === 'he' ? 'פרסונה פעילה:' : 'Active Persona:'}</Label>
+                          <p id="active-persona-display" className="font-medium text-[var(--text-primary)]">{currentPersonaName}</p>
                       </div>
-                      {activeSpaceId && activeSpace && (
+                      {activeSpaceId && activeSpaceDetails && (
                           <div>
-                              <Label htmlFor="active-space-display" className="text-slate-600 dark:text-slate-300">{lang === 'he' ? 'מרחב פעיל:' : 'Active Space:'}</Label>
-                              <p id="active-space-display" className="font-medium text-slate-700 dark:text-slate-200">{activeSpace.name}</p>
-                              <p className="text-xs text-slate-400 dark:text-slate-500">{lang === 'he' ? `(${(activeSpace.files || []).length} קבצים)` : `(${(activeSpace.files || []).length} files)`}</p>
+                              <Label htmlFor="active-space-display" className="text-[var(--text-secondary)]">{lang === 'he' ? 'מרחב פעיל:' : 'Active Space:'}</Label>
+                              <p id="active-space-display" className="font-medium text-[var(--text-primary)]">{activeSpaceDetails.name}</p>
+                              <p className="text-xs text-[var(--text-secondary)]/80">{lang === 'he' ? `(${(activeSpaceDetails.files || []).length} קבצים)` : `(${(activeSpaceDetails.files || []).length} files)`}</p>
                           </div>
                       )}
-                      <div className="border-t border-slate-200 dark:border-slate-600 pt-3">
-                          <Label htmlFor="chat-cost-display" className="text-slate-600 dark:text-slate-300">{lang === 'he' ? 'עלות שיחה נוכחית:' : 'Current Chat Cost:'}</Label>
-                          <p id="chat-cost-display" className="font-medium text-slate-700 dark:text-slate-200">${currentConversationCost.toFixed(5)}</p>
+                      <div className="border-t border-[var(--border)] pt-2.5">
+                          <Label htmlFor="chat-cost-display" className="text-[var(--text-secondary)]">{lang === 'he' ? 'עלות שיחה נוכחית:' : 'Current Chat Cost:'}</Label>
+                          <p id="chat-cost-display" className="font-medium text-[var(--text-primary)]">${currentConversationCost.toFixed(5)}</p>
                       </div>
                       <div>
-                          <Label htmlFor="chat-tokens-display" className="text-slate-600 dark:text-slate-300">{lang === 'he' ? 'טוקנים בשיחה (נכנס/יוצא):' : 'Chat Tokens (In/Out):'}</Label>
-                          <p id="chat-tokens-display" className="font-medium text-slate-700 dark:text-slate-200">{currentConversationTokens.incoming.toLocaleString()} / {currentConversationTokens.outgoing.toLocaleString()}</p>
+                          <Label htmlFor="chat-tokens-display" className="text-[var(--text-secondary)]">{lang === 'he' ? 'טוקנים בשיחה (נכנס/יוצא):' : 'Chat Tokens (In/Out):'}</Label>
+                          <p id="chat-tokens-display" className="font-medium text-[var(--text-primary)]">{currentConversationTokens.incoming.toLocaleString()} / {currentConversationTokens.outgoing.toLocaleString()}</p>
                       </div>
                       <div className="pt-2">
-                           <Label htmlFor="continuous-conv-toggle" className="text-slate-600 dark:text-slate-300 flex items-center cursor-pointer w-full">
+                           <Label htmlFor="continuous-conv-toggle" className="text-[var(--text-secondary)] flex items-center cursor-pointer w-full">
                               <Switch id="continuous-conv-toggle" checked={continuousConversation} onCheckedChange={handleContinuousConversationToggle} />
-                              <span className="ms-2">{lang === 'he' ? 'שיחה רציפה' : 'Continuous Conversation'}</span>
+                              <span className="ms-2 text-xs">{lang === 'he' ? 'שיחה רציפה' : 'Continuous Conversation'}</span>
                           </Label>
                       </div>
                   </CardContent>
               </Card>
               
               {userProfile?.systemPrompt && (
-                  <Card className="bg-white dark:bg-slate-700/50">
-                      <CardHeader className="p-3"><CardTitle className="text-sm font-medium">{lang === 'he' ? 'הנחיית מערכת (משתמש):' : 'System Prompt (User):'}</CardTitle></CardHeader>
-                      <CardContent className="p-3 text-xs max-h-28 overflow-y-auto text-slate-600 dark:text-slate-300">
+                  <Card className="bg-[var(--bg-primary)] border-[var(--border)]">
+                      <CardHeader className="p-2.5"><CardTitle className="text-xs font-medium text-[var(--text-secondary)]">{lang === 'he' ? 'הנחיית מערכת (משתמש):' : 'System Prompt (User):'}</CardTitle></CardHeader>
+                      <CardContent className="p-2.5 text-xs max-h-24 overflow-y-auto text-[var(--text-primary)]">
                           {userProfile.systemPrompt}
                       </CardContent>
                   </Card>
               )}
               {personas.find(p => p.id === activePersonaId)?.prompt && (
-                   <Card className="bg-white dark:bg-slate-700/50">
-                      <CardHeader className="p-3"><CardTitle className="text-sm font-medium">{lang === 'he' ? 'הנחיית מערכת (פרסונה):' : 'System Prompt (Persona):'}</CardTitle></CardHeader>
-                      <CardContent className="p-3 text-xs max-h-28 overflow-y-auto text-slate-600 dark:text-slate-300">
+                   <Card className="bg-[var(--bg-primary)] border-[var(--border)]">
+                      <CardHeader className="p-2.5"><CardTitle className="text-xs font-medium text-[var(--text-secondary)]">{lang === 'he' ? 'הנחיית מערכת (פרסונה):' : 'System Prompt (Persona):'}</CardTitle></CardHeader>
+                      <CardContent className="p-2.5 text-xs max-h-24 overflow-y-auto text-[var(--text-primary)]">
                           {personas.find(p => p.id === activePersonaId)?.prompt}
                       </CardContent>
                   </Card>
@@ -384,7 +504,7 @@ export function ChatPage() {
        {/* Backdrop for off-canvas panel */}
       {isChatInfoPanelOpen && (
         <div 
-            className="fixed inset-0 bg-black/30 z-20 md:hidden" 
+            className="fixed inset-0 bg-black/50 z-20 md:hidden" 
             onClick={() => setIsChatInfoPanelOpen(false)}
         />
       )}
@@ -394,22 +514,22 @@ export function ChatPage() {
         <DialogHeader>
             <DialogTitle>{lang === 'he' ? 'הנחיות שמורות' : 'Saved Prompts'}</DialogTitle>
         </DialogHeader>
-        <DialogContent className="p-6 max-h-[60vh] overflow-y-auto">
+        <DialogContent className="p-4 max-h-[60vh] overflow-y-auto">
             {savedPrompts.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                     {savedPrompts.map(prompt => (
-                        <Card key={prompt.id} className="cursor-pointer hover:shadow-lg transition-shadow bg-slate-50 dark:bg-slate-700/50 hover:bg-slate-100 dark:hover:bg-slate-700" onClick={() => handleInsertPrompt(prompt.content)}>
-                            <CardHeader><CardTitle className="text-md">{prompt.title}</CardTitle></CardHeader>
-                            <CardContent className="text-sm text-slate-600 dark:text-slate-300 truncate h-12 overflow-hidden">{prompt.content}</CardContent>
+                        <Card key={prompt.id} className="cursor-pointer hover:border-[var(--accent)] transition-colors bg-[var(--bg-primary)]" onClick={() => handleInsertPrompt(prompt.content)}>
+                            <CardHeader className="p-3"><CardTitle className="text-sm">{prompt.title}</CardTitle></CardHeader>
+                            <CardContent className="p-3 text-xs text-[var(--text-secondary)] truncate h-10 overflow-hidden">{prompt.content}</CardContent>
                         </Card>
                     ))}
                 </div>
             ) : (
-                <p className="text-center text-slate-500 dark:text-slate-400">{lang === 'he' ? 'אין הנחיות שמורות. ניתן להוסיף בהגדרות.' : 'No saved prompts. Add some in settings.'}</p>
+                <p className="text-center text-[var(--text-secondary)] py-6">{lang === 'he' ? 'אין הנחיות שמורות. ניתן להוסיף בהגדרות.' : 'No saved prompts. Add some in settings.'}</p>
             )}
         </DialogContent>
         <DialogFooter>
-            <Button variant="outline" onClick={() => setShowSavedPromptsDialog(false)}>{lang === 'he' ? 'סגור' : 'Close'}</Button>
+            <Button variant="ghost" onClick={() => setShowSavedPromptsDialog(false)}>{lang === 'he' ? 'סגור' : 'Close'}</Button>
         </DialogFooter>
       </Dialog>
     </div>

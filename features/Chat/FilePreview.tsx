@@ -10,17 +10,17 @@ interface FilePreviewProps {
 
 export const FilePreview: React.FC<FilePreviewProps> = ({ file, onRemove }) => {
     return (
-        <div className="bg-gray-100 dark:bg-gray-700 p-2 rounded-md flex items-center gap-2 text-sm">
+        <div className="bg-[var(--bg-secondary)] p-2 rounded-md flex items-center gap-2 text-sm border border-[var(--border)]">
             {file.type.startsWith('image/') && file.dataUrl ? (
-                <img src={file.dataUrl} alt={file.name} className="w-10 h-10 object-cover rounded-md flex-shrink-0" />
+                <img src={file.dataUrl} alt={file.name} className="w-8 h-8 object-cover rounded-sm flex-shrink-0" />
             ) : (
                 file.type.startsWith('image/') ? 
-                <ImageIcon className="w-6 h-6 text-indigo-500 flex-shrink-0" /> : 
-                <FileIconPkg className="w-6 h-6 text-indigo-500 flex-shrink-0" />
+                <ImageIcon className="w-5 h-5 text-[var(--accent)] flex-shrink-0" /> : 
+                <FileIconPkg className="w-5 h-5 text-[var(--accent)] flex-shrink-0" />
             )}
-            <span className="truncate flex-1 min-w-0" title={file.name}>{file.name}</span>
-            <Button size="icon" variant="ghost" onClick={onRemove} className="p-1 text-red-500 hover:text-red-700 flex-shrink-0">
-                <X className="w-4 h-4" />
+            <span className="truncate flex-1 min-w-0 text-[var(--text-secondary)]" title={file.name}>{file.name}</span>
+            <Button size="icon" variant="ghost" onClick={onRemove} className="p-1 text-[var(--text-secondary)] hover:text-[var(--error)] flex-shrink-0">
+                <X className="w-3.5 h-3.5" />
             </Button>
         </div>
     );

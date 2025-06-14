@@ -42,38 +42,33 @@ function SettingsLayout(props: SettingsLayoutProps) {
     ];
 
     return (
-        <div className="container mx-auto max-w-7xl py-6 md:py-8 px-2 sm:px-4 lg:px-6"> 
-            <h1 className="text-2xl sm:text-3xl font-bold mb-6 md:mb-8 text-slate-900 dark:text-slate-100">{lang === 'he' ? 'הגדרות' : 'Settings'}</h1>
-            <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col gap-6 md:gap-8">
-                {/* Responsive TabsList: Horizontal scroll on mobile, vertical on desktop */}
-                <TabsList 
-                    className={`flex flex-row overflow-x-auto pb-2 md:pb-0 md:flex-col md:overflow-x-visible 
-                                md:border-b-0 md:space-y-1 w-full md:w-1/4 lg:w-1/5 
-                                ${lang === 'he' ? 'md:border-l md:pl-0 md:pr-4 lg:pr-6' : 'md:border-r md:pr-0 md:pl-4 lg:pl-6'} 
-                                border-slate-200 dark:border-slate-700 md:sticky md:top-20 md:max-h-[calc(100vh-10rem)] scrollbar-thin scrollbar-thumb-slate-300 dark:scrollbar-thumb-slate-600 scrollbar-track-transparent`}
-                >
+        <div className="container mx-auto max-w-5xl py-6 md:py-8 px-2 sm:px-4 lg:px-6"> 
+            <h1 className="text-2xl font-bold mb-6 text-[var(--text-primary)]">{lang === 'he' ? 'הגדרות' : 'Settings'}</h1>
+            <div className="flex flex-col md:flex-row gap-6 md:gap-8">
+                <nav className={`md:w-56 lg:w-60 flex-shrink-0 md:sticky md:top-24 md:max-h-[calc(100vh-8rem)] overflow-y-auto scrollbar-thin`}>
+                    <div className="flex flex-row md:flex-col gap-1.5 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0">
+                        {tabsConfig.map(tab => (
+                            <Button
+                                key={tab.id} 
+                                variant="ghost"
+                                onClick={() => setActiveTab(tab.id)} 
+                                className={`w-full md:w-full flex-shrink-0 justify-start text-left px-3 py-2.5 rounded-md text-sm
+                                            ${activeTab === tab.id 
+                                                ? 'bg-[var(--accent)]/15 text-[var(--accent)] font-medium' 
+                                                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--border)]'
+                                            }`}
+                            >
+                                <tab.icon className="w-4 h-4 me-2.5 flex-shrink-0"/>{tab.label}
+                            </Button>
+                        ))}
+                    </div>
+                </nav>
+                <div className="flex-1 min-w-0">
                     {tabsConfig.map(tab => (
-                        <TabsTrigger 
-                            key={tab.id} 
-                            value={tab.id} 
-                            className={`flex-shrink-0 md:w-full justify-start text-left md:mb-1 px-3 py-2.5 rounded-lg text-sm md:text-base
-                                        ${activeTab === tab.id 
-                                            ? 'bg-indigo-100 dark:bg-indigo-700/40 text-indigo-700 dark:text-indigo-200 font-semibold' 
-                                            : 'hover:bg-slate-100 dark:hover:bg-slate-700/50 text-slate-600 dark:text-slate-300'
-                                        }`}
-                        >
-                            <tab.icon className="w-4 h-4 md:w-5 md:h-5 me-2 md:me-3 flex-shrink-0"/>{tab.label}
-                        </TabsTrigger>
-                    ))}
-                </TabsList>
-                <div className="flex-1 min-w-0"> {/* Ensure content area can shrink on flex layouts */}
-                    {tabsConfig.map(tab => (
-                        <TabsContent key={tab.id} value={tab.id} className="h-full"> 
-                            {children({ activeSettingsTab: tab.id })}
-                        </TabsContent>
+                        activeTab === tab.id && <div key={tab.id} className="h-full">{children({ activeSettingsTab: tab.id })}</div>
                     ))}
                 </div>
-            </Tabs>
+            </div>
         </div>
     );
 }
@@ -109,46 +104,46 @@ function ProfileSettings() {
         setUserProfile({ 
             ...(userProfile || initialAppCustomizationData), 
             userName: name, 
-            userImage: image || null, // Ensure null if empty string
+            userImage: image || null, 
             systemPrompt: systemPrompt, 
             botName: botName, 
-            botImage: botImage || null // Ensure null if empty string
+            botImage: botImage || null 
         });
     };
 
     return (
          <Card>
-            <CardHeader><CardTitle>{lang === 'he' ? 'פרופיל משתמש והנחיית מערכת' : 'User Profile & System Prompt'}</CardTitle></CardHeader>
-            <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+            <CardHeader><CardTitle>{lang === 'he' ? 'פרופיל והנחיית מערכת' : 'User Profile & System Prompt'}</CardTitle></CardHeader>
+            <CardContent className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
                     <div>
                         <Label htmlFor="userName">{lang === 'he' ? 'שם משתמש' : 'User Name'}</Label>
                         <Input id="userName" value={name} onChange={(e) => setName(e.target.value)} />
                     </div>
                     <div>
                         <Label htmlFor="userImage">{lang === 'he' ? 'תמונת פרופיל (משתמש)' : 'User Profile Image'}</Label>
-                        <Input id="userImage" type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setImage)} className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"/>
-                        {image && <img src={image} alt="User Preview" className="w-20 h-20 rounded-full mt-2 object-cover"/>}
+                        <Input id="userImage" type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setImage)} className="file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-[var(--accent)]/20 file:text-[var(--accent)] hover:file:bg-[var(--accent)]/30"/>
+                        {image && <img src={image} alt="User Preview" className="w-16 h-16 rounded-md mt-2 object-cover"/>}
                     </div>
                 </div>
-                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 items-start">
+                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
                     <div>
                         <Label htmlFor="botName">{lang === 'he' ? 'שם הבוט' : 'Bot Name'}</Label>
                         <Input id="botName" value={botName} onChange={(e) => setBotName(e.target.value)} />
                     </div>
                     <div>
                         <Label htmlFor="botImage">{lang === 'he' ? 'תמונת פרופיל (בוט)' : 'Bot Profile Image'}</Label>
-                        <Input id="botImage" type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setBotImage)} className="file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100"/>
-                        {botImage && <img src={botImage} alt="Bot Preview" className="w-20 h-20 rounded-full mt-2 object-cover"/>}
+                        <Input id="botImage" type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setBotImage)} className="file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-[var(--accent)]/20 file:text-[var(--accent)] hover:file:bg-[var(--accent)]/30"/>
+                        {botImage && <img src={botImage} alt="Bot Preview" className="w-16 h-16 rounded-md mt-2 object-cover"/>}
                     </div>
                 </div>
                 <div>
                     <Label htmlFor="systemPrompt">{lang === 'he' ? 'הנחיית מערכת גלובלית' : 'Global System Prompt'}</Label>
-                    <Textarea id="systemPrompt" value={systemPrompt} onChange={(e) => setSystemPrompt(e.target.value)} rows={4} placeholder={lang === 'he' ? 'הכנס הנחיה שתצורף לכל שיחה...' : 'Enter a prompt that will be prepended to all conversations...'}/>
+                    <Textarea id="systemPrompt" value={systemPrompt} onChange={(e) => setSystemPrompt(e.target.value)} rows={3} placeholder={lang === 'he' ? 'הכנס הנחיה שתצורף לכל שיחה...' : 'Enter a prompt that will be prepended to all conversations...'}/>
                 </div>
             </CardContent>
             <CardFooter>
-                <Button onClick={handleSave}>{lang === 'he' ? 'שמור שינויים' : 'Save Changes'}</Button>
+                <Button onClick={handleSave} variant="default">{lang === 'he' ? 'שמור שינויים' : 'Save Changes'}</Button>
             </CardFooter>
         </Card>
     );
@@ -167,7 +162,7 @@ function SavedPromptsSettings() {
         setShowPromptDialog(true);
     };
     const handleEditPrompt = (prompt: SavedPrompt) => {
-        setEditingPrompt(prompt); // prompt object already has non-null title/content
+        setEditingPrompt(prompt);
         setShowPromptDialog(true);
     };
     const handleSavePrompt = async () => {
@@ -198,13 +193,13 @@ function SavedPromptsSettings() {
 
     return (
         <Card>
-            <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                 <CardTitle>{lang === 'he' ? 'ניהול הנחיות שמורות' : 'Manage Saved Prompts'}</CardTitle>
-                <Button onClick={handleAddNewPrompt} size="sm"><Plus className="w-4 h-4 me-2"/>{lang === 'he' ? 'הוסף הנחיה' : 'Add Prompt'}</Button>
+                <Button onClick={handleAddNewPrompt} size="sm" variant="default"><Plus className="w-3.5 h-3.5 me-1.5"/>{lang === 'he' ? 'הוסף הנחיה' : 'Add Prompt'}</Button>
             </CardHeader>
             <CardContent>
                 {savedPrompts.length > 0 ? (
-                    <ul className="space-y-3">
+                    <ul className="space-y-2.5">
                         {savedPrompts.map((prompt, index) => (
                             <li
                                 key={prompt.id}
@@ -213,16 +208,16 @@ function SavedPromptsSettings() {
                                 onDragEnter={() => dragOverItem.current = index}
                                 onDragEnd={handleDragSort}
                                 onDragOver={(e) => e.preventDefault()}
-                                className="p-4 border border-slate-200 dark:border-slate-700 rounded-lg flex items-center justify-between group cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow bg-slate-50 dark:bg-slate-700/30"
+                                className="p-3 border border-[var(--border)] rounded-md flex items-center justify-between group cursor-grab active:cursor-grabbing hover:shadow-sm transition-shadow bg-[var(--bg-primary)]"
                             >
                                 <div className="flex items-center flex-1 min-w-0">
-                                    <GripVertical className="w-5 h-5 text-slate-400 dark:text-slate-500 me-3 invisible group-hover:visible flex-shrink-0" />
+                                    <GripVertical className="w-4 h-4 text-[var(--text-secondary)] me-2 invisible group-hover:visible flex-shrink-0" />
                                     <div className="flex-1 min-w-0">
-                                        <h4 className="font-semibold text-slate-800 dark:text-slate-100 truncate">{prompt.title}</h4>
-                                        <p className="text-sm text-slate-500 dark:text-slate-400 truncate">{prompt.content}</p>
+                                        <h4 className="font-medium text-sm text-[var(--text-primary)] truncate">{prompt.title}</h4>
+                                        <p className="text-xs text-[var(--text-secondary)] truncate">{prompt.content}</p>
                                     </div>
                                 </div>
-                                <div className="space-x-2 flex-shrink-0 ms-2">
+                                <div className="space-x-1.5 flex-shrink-0 ms-2">
                                     <Button size="sm" variant="outline" onClick={() => handleEditPrompt(prompt)}><Edit3 className="w-3 h-3 me-1"/>{lang === 'he' ? 'ערוך' : 'Edit'}</Button>
                                     <Button size="sm" variant="destructive" onClick={() => handleDeletePrompt(prompt.id)}><Trash2 className="w-3 h-3 me-1"/>{lang === 'he' ? 'מחק' : 'Delete'}</Button>
                                 </div>
@@ -230,7 +225,7 @@ function SavedPromptsSettings() {
                         ))}
                     </ul>
                 ) : (
-                    <p className="text-center text-slate-500 dark:text-slate-400 py-8">{lang === 'he' ? 'אין הנחיות שמורות.' : 'No saved prompts yet.'}</p>
+                    <p className="text-center text-[var(--text-secondary)] py-6">{lang === 'he' ? 'אין הנחיות שמורות.' : 'No saved prompts yet.'}</p>
                 )}
             </CardContent>
 
@@ -238,19 +233,19 @@ function SavedPromptsSettings() {
                 <DialogHeader>
                     <DialogTitle>{editingPrompt?.id ? (lang === 'he' ? 'ערוך הנחיה' : 'Edit Prompt') : (lang === 'he' ? 'הוסף הנחיה חדשה' : 'Add New Prompt')}</DialogTitle>
                 </DialogHeader>
-                <DialogContent className="p-6 space-y-4">
+                <DialogContent className="p-4 space-y-3">
                     <div>
                         <Label htmlFor="promptTitle">{lang === 'he' ? 'כותרת' : 'Title'}</Label>
                         <Input id="promptTitle" value={editingPrompt?.title ?? ''} onChange={(e) => setEditingPrompt(p => ({...(p || { title: '', content: ''}), title: e.target.value}))} />
                     </div>
                     <div>
                         <Label htmlFor="promptContent">{lang === 'he' ? 'תוכן ההנחיה' : 'Prompt Content'}</Label>
-                        <Textarea id="promptContent" value={editingPrompt?.content ?? ''} onChange={(e) => setEditingPrompt(p => ({...(p || { title: '', content: ''}), content: e.target.value}))} rows={5}/>
+                        <Textarea id="promptContent" value={editingPrompt?.content ?? ''} onChange={(e) => setEditingPrompt(p => ({...(p || { title: '', content: ''}), content: e.target.value}))} rows={4}/>
                     </div>
                 </DialogContent>
                 <DialogFooter>
-                    <Button variant="outline" onClick={() => {setShowPromptDialog(false); setEditingPrompt(null);}}>{lang === 'he' ? 'ביטול' : 'Cancel'}</Button>
-                    <Button onClick={handleSavePrompt}>{lang === 'he' ? 'שמור' : 'Save'}</Button>
+                    <Button variant="ghost" onClick={() => {setShowPromptDialog(false); setEditingPrompt(null);}}>{lang === 'he' ? 'ביטול' : 'Cancel'}</Button>
+                    <Button onClick={handleSavePrompt} variant="default">{lang === 'he' ? 'שמור' : 'Save'}</Button>
                 </DialogFooter>
             </Dialog>
         </Card>
@@ -259,64 +254,35 @@ function SavedPromptsSettings() {
 
 function AppearanceSettings() {
     const { lang, theme, toggleTheme, activeVoice, setActiveVoice, availableVoices, speak, openErrorDialog, loadVoices } = useAppContext();
-    const { userProfile, setUserProfile } = useUserSettings();
+    const { userProfile, setUserProfile, updateUserProfilePartial } = useUserSettings();
     
-    const [customization, setCustomizationState] = useState<AppCustomization>(() => {
-        const profile = userProfile || initialAppCustomizationData;
-        return {
-            headerBgColor: profile.headerBgColor || initialAppCustomizationData.headerBgColor || '#2c3e50',
-            headerTitleColor: profile.headerTitleColor || initialAppCustomizationData.headerTitleColor || '#ecf0f1',
-            chatBgColor: profile.chatBgColor || initialAppCustomizationData.chatBgColor || '#f4f6f8',
-            chatFontColor: profile.chatFontColor || initialAppCustomizationData.chatFontColor || '#34495e',
-            chatFontSize: profile.chatFontSize || initialAppCustomizationData.chatFontSize || 14,
-            botVoiceURI: profile.botVoiceURI || null,
-            userName: profile.userName || initialAppCustomizationData.userName || '',
-            userImage: profile.userImage || null,
-            botName: profile.botName || initialAppCustomizationData.botName || '',
-            botImage: profile.botImage || null,
-            systemPrompt: profile.systemPrompt || initialAppCustomizationData.systemPrompt || '',
-        };
-    });
+    // chatFontSize and botVoiceURI are the only customizable appearance settings left.
+    const [chatFontSize, setChatFontSize] = useState(userProfile?.chatFontSize || 16);
+    const [botVoiceURI, setBotVoiceURIState] = useState(userProfile?.botVoiceURI || null);
+
 
     useEffect(() => {
-        const profile = userProfile || initialAppCustomizationData;
-        setCustomizationState(prev => ({
-            ...prev,
-            headerBgColor: profile.headerBgColor || initialAppCustomizationData.headerBgColor || '#2c3e50',
-            headerTitleColor: profile.headerTitleColor || initialAppCustomizationData.headerTitleColor || '#ecf0f1',
-            chatBgColor: profile.chatBgColor || initialAppCustomizationData.chatBgColor || '#f4f6f8',
-            chatFontColor: profile.chatFontColor || initialAppCustomizationData.chatFontColor || '#34495e',
-            chatFontSize: profile.chatFontSize || initialAppCustomizationData.chatFontSize || 14,
-            botVoiceURI: (activeVoice && !profile.botVoiceURI) ? activeVoice.voiceURI : (profile.botVoiceURI ?? null),
-            userName: profile.userName ?? initialAppCustomizationData.userName ?? '',
-            userImage: profile.userImage ?? null,
-            botName: profile.botName ?? initialAppCustomizationData.botName ?? '',
-            botImage: profile.botImage ?? null,
-            systemPrompt: profile.systemPrompt ?? initialAppCustomizationData.systemPrompt ?? '',
-        }));
+        setChatFontSize(userProfile?.chatFontSize || 16);
+        setBotVoiceURIState(userProfile?.botVoiceURI || (activeVoice?.voiceURI ?? null));
     }, [userProfile, activeVoice]);
 
-
-    const handleCustomizationChange = (field: keyof AppCustomization, value: any) => {
-        setCustomizationState(prev => ({...prev, [field]: value}));
-    };
-
     const handleSaveAppearance = () => {
-        setUserProfile(customization);
+        updateUserProfilePartial({ chatFontSize, botVoiceURI });
     };
 
     const handleResetAppearance = async () => {
-        const resetData = {
-            ...initialAppCustomizationData,
+        const defaultFontSize = 16;
+        setChatFontSize(defaultFontSize);
+        setBotVoiceURIState(null);
+        await updateUserProfilePartial({ 
+            chatFontSize: defaultFontSize, 
             botVoiceURI: null 
-        };
-        setCustomizationState(resetData);
-        await setUserProfile(resetData); 
-        loadVoices(); 
+        });
+        loadVoices(); // To reset activeVoice if needed
     };
 
     const handlePlaySampleVoice = () => {
-         const voiceToPlay = availableVoices.find(v => v.voiceURI === customization.botVoiceURI && v.lang.startsWith(lang)) ||
+         const voiceToPlay = availableVoices.find(v => v.voiceURI === botVoiceURI && v.lang.startsWith(lang)) ||
                             availableVoices.find(v => v.lang.startsWith(lang));
 
         if (voiceToPlay) {
@@ -339,15 +305,10 @@ function AppearanceSettings() {
     };
 
     const handleVoiceChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        const voiceURI = e.target.value;
-        const selected = availableVoices.find(v => v.voiceURI === voiceURI);
-        if (selected) {
-            setActiveVoice(selected); 
-            setCustomizationState(prev => ({...prev, botVoiceURI: voiceURI }));
-        } else {
-            setActiveVoice(null);
-            setCustomizationState(prev => ({...prev, botVoiceURI: null }));
-        }
+        const newVoiceURI = e.target.value;
+        const selected = availableVoices.find(v => v.voiceURI === newVoiceURI);
+        setActiveVoice(selected || null); 
+        setBotVoiceURIState(newVoiceURI || null);
     };
 
     const currentLangVoices = availableVoices.filter(v => v.lang.startsWith(lang));
@@ -355,41 +316,22 @@ function AppearanceSettings() {
     return (
         <Card>
             <CardHeader><CardTitle>{lang === 'he' ? 'התאמה אישית של מראה וקול' : 'Appearance & Voice Customization'}</CardTitle></CardHeader>
-            <CardContent className="space-y-6">
-                 <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 dark:bg-slate-700/30">
-                    <Label htmlFor="theme-switch" className="mb-0">{lang === 'he' ? 'ערכת נושא כהה' : 'Dark Theme'}</Label>
+            <CardContent className="space-y-4">
+                 <div className="flex items-center justify-between p-3 rounded-md bg-[var(--bg-primary)] border border-[var(--border)]">
+                    <Label htmlFor="theme-switch" className="mb-0 text-sm">{lang === 'he' ? 'ערכת נושא כהה' : 'Dark Theme'}</Label>
                     <Switch id="theme-switch" checked={theme === 'dark'} onCheckedChange={toggleTheme} />
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <Label htmlFor="headerBgColor">{lang === 'he' ? 'צבע רקע כותרת' : 'Header Background Color'}</Label>
-                        <Input id="headerBgColor" type="color" value={customization.headerBgColor ?? '#2c3e50'} onChange={(e) => handleCustomizationChange('headerBgColor', e.target.value)} className="h-10"/>
-                    </div>
-                    <div>
-                        <Label htmlFor="headerTitleColor">{lang === 'he' ? 'צבע טקסט כותרת' : 'Header Title Color'}</Label>
-                        <Input id="headerTitleColor" type="color" value={customization.headerTitleColor ?? '#ecf0f1'} onChange={(e) => handleCustomizationChange('headerTitleColor', e.target.value)} className="h-10"/>
-                    </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div>
-                        <Label htmlFor="chatBgColor">{lang === 'he' ? 'צבע רקע צ\'אט' : 'Chat Background Color'}</Label>
-                        <Input id="chatBgColor" type="color" value={customization.chatBgColor ?? '#f4f6f8'} onChange={(e) => handleCustomizationChange('chatBgColor', e.target.value)} className="h-10"/>
-                    </div>
-                    <div>
-                        <Label htmlFor="chatFontColor">{lang === 'he' ? 'צבע גופן צ\'אט (תשובות בוט)' : 'Chat Font Color (Bot Replies)'}</Label>
-                        <Input id="chatFontColor" type="color" value={customization.chatFontColor ?? '#34495e'} onChange={(e) => handleCustomizationChange('chatFontColor', e.target.value)} className="h-10"/>
-                    </div>
-                </div>
+                
                 <div>
                     <Label htmlFor="chatFontSize">{lang === 'he' ? 'גודל גופן צ\'אט (פיקסלים)' : 'Chat Font Size (pixels)'}</Label>
-                    <Input id="chatFontSize" type="number" min={10} max={24} value={customization.chatFontSize ?? 14} onChange={(e) => handleCustomizationChange('chatFontSize', parseInt(e.target.value))} />
+                    <Input id="chatFontSize" type="number" min={12} max={20} value={chatFontSize} onChange={(e) => setChatFontSize(parseInt(e.target.value))} />
                 </div>
                 <div>
                     <Label htmlFor="botVoice">{lang === 'he' ? 'קול הבוט' : 'Bot Voice'}</Label>
                     <div className="flex items-center gap-2">
                         <Select
                             id="botVoice"
-                            value={customization.botVoiceURI ?? ''} 
+                            value={botVoiceURI ?? ''} 
                             onChange={handleVoiceChange}
                             disabled={currentLangVoices.length === 0}
                             className="flex-grow"
@@ -401,12 +343,12 @@ function AppearanceSettings() {
                                 </option>
                             ))}
                         </Select>
-                        <Button onClick={handlePlaySampleVoice} variant="outline" size="sm" disabled={!customization.botVoiceURI || currentLangVoices.length === 0}>
-                            <Play className="w-4 h-4 me-1" /> {lang === 'he' ? 'השמע דוגמה' : 'Play Sample'}
+                        <Button onClick={handlePlaySampleVoice} variant="outline" size="sm" disabled={!botVoiceURI || currentLangVoices.length === 0}>
+                            <Play className="w-3.5 h-3.5 me-1" /> {lang === 'he' ? 'השמע' : 'Play'}
                         </Button>
                     </div>
                     {currentLangVoices.length === 0 && (
-                        <p className="text-xs text-red-500 mt-1">
+                        <p className="text-xs text-[var(--error)] mt-1">
                             {lang === 'he' ? `לא נמצאו קולות מותקנים עבור ${lang === 'he' ? 'עברית' : 'אנגלית'} במערכת שלך.` : `No installed voices found for ${lang === 'he' ? 'Hebrew' : 'English'} on your system.`}
                         </p>
                     )}
@@ -416,7 +358,7 @@ function AppearanceSettings() {
                 </Button>
             </CardContent>
             <CardFooter>
-                <Button onClick={handleSaveAppearance}>{lang === 'he' ? 'שמור שינויים' : 'Save Changes'}</Button>
+                <Button onClick={handleSaveAppearance} variant="default">{lang === 'he' ? 'שמור שינויים' : 'Save Changes'}</Button>
             </CardFooter>
         </Card>
     );
@@ -438,10 +380,10 @@ function ApiSettingsSection() {
         apiKey: '',
         apiUrl: '',
         costs: KNOWN_MODELS_PRICING[PROVIDER_INFO.openai.defaultModel] || { input: 0, output: 0 },
-        isFreeTier: KNOWN_MODELS_PRICING[PROVIDER_INFO.openai.defaultModel]?.isFreeTier ?? false, // Ensure boolean
+        isFreeTier: KNOWN_MODELS_PRICING[PROVIDER_INFO.openai.defaultModel]?.isFreeTier ?? false, 
         modelSystemPrompt: '',
-        isDefault: false, // Ensure boolean
-        isValid: false, // Ensure boolean
+        isDefault: false, 
+        isValid: false, 
     });
 
 
@@ -455,13 +397,13 @@ function ApiSettingsSection() {
             ...getInitialEditingModel(), 
             ...model, 
             name: model.name ?? '',
-            apiKey: model.provider === 'google' ? '' : (model.apiKey ?? ''), // Clear API key for Google if editing
+            apiKey: model.provider === 'google' ? '' : (model.apiKey ?? ''), 
             apiUrl: model.apiUrl ?? '',
             modelSystemPrompt: model.modelSystemPrompt ?? '',
             isFreeTier: model.isFreeTier ?? false,
             isDefault: model.isDefault ?? false,
             isValid: model.isValid ?? false,
-            costs: model.costs || {input:0, output:0} // Ensure costs is not undefined
+            costs: model.costs || {input:0, output:0}
         });
         setShowAddModelDialog(true);
     };
@@ -493,13 +435,13 @@ function ApiSettingsSection() {
             name: editingModel.name,
             provider: editingModel.provider,
             modelId: editingModel.modelId.trim(),
-            apiKey: editingModel.provider === 'google' ? '' : (editingModel.apiKey || ''), // API key is not stored for Google
+            apiKey: editingModel.provider === 'google' ? '' : (editingModel.apiKey || ''),
             apiUrl: editingModel.apiUrl?.trim() || undefined,
             costs: editingModel.costs || KNOWN_MODELS_PRICING[editingModel.modelId.trim()] || { input: 0, output: 0 },
             isFreeTier: editingModel.isFreeTier || false,
             modelSystemPrompt: editingModel.modelSystemPrompt || '',
             isDefault: editingModel.isDefault || false,
-            isValid: editingModel.isValid || false, // Validation will update this
+            isValid: editingModel.isValid || false, 
             lastValidated: editingModel.lastValidated
         };
 
@@ -520,7 +462,6 @@ function ApiSettingsSection() {
 
     const handleValidateModel = async (modelToValidate: ApiSetting) => {
         setValidatingModelId(modelToValidate.id);
-        // For Google, apiKey in modelToValidate will be empty, validateApiKey relies on process.env.API_KEY
         const result = await validateApiKey(modelToValidate);
         let updatedModel = { ...modelToValidate, isValid: result.isValid, lastValidated: new Date().toISOString() };
         if(result.error) {
@@ -546,14 +487,14 @@ function ApiSettingsSection() {
 
         return (
             <div className="mt-2 text-sm">
-                <Button variant="ghost" onClick={() => setIsOpen(!isOpen)} className="text-xs px-2 py-1.5 mb-1 w-full justify-start text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-md">
+                <Button variant="ghost" onClick={() => setIsOpen(!isOpen)} className="text-xs px-2 py-1.5 mb-1 w-full justify-start text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--border)] rounded-md">
                     {isOpen ? <ChevronUp className="w-3 h-3 me-1"/> : <ChevronDown className="w-3 h-3 me-1"/>}
                     {lang === 'he' ? 'ערוך עלויות (למיליון טוקנים)' : 'Edit Costs (per 1M tokens)'}
-                    {knownPricing && <span className="ms-1 text-slate-400 dark:text-slate-500 text-xs">({lang === 'he' ? 'מוכר:' : 'Known:'} I:{knownPricing.input.toFixed(2)} O:{knownPricing.output.toFixed(2)})</span>}
+                    {knownPricing && <span className="ms-1 text-[var(--text-secondary)]/80 text-xs">({lang === 'he' ? 'מוכר:' : 'Known:'} I:{knownPricing.input.toFixed(2)} O:{knownPricing.output.toFixed(2)})</span>}
                 </Button>
                 {isOpen && (
-                    <div className="p-3 border border-slate-200 dark:border-slate-600 rounded-lg bg-slate-50 dark:bg-slate-700/50 space-y-2">
-                        {isGoogleTiered && <p className="text-xs text-yellow-600 dark:text-yellow-400">{lang === 'he' ? 'לתמחור מדורג של Gemini 1.5 Pro, עיין בתיעוד הרשמי והזן את המחיר הרלוונטי ביותר עבורך או השאר ריק לשימוש בתמחור ברירת מחדל.' : 'For Gemini 1.5 Pro tiered pricing, consult official docs and enter the most relevant rate, or leave blank for default.'}</p>}
+                    <div className="p-3 border border-[var(--border)] rounded-lg bg-[var(--bg-primary)] space-y-2">
+                        {isGoogleTiered && <p className="text-xs text-yellow-500">{lang === 'he' ? 'לתמחור מדורג של Gemini 1.5 Pro, עיין בתיעוד הרשמי והזן את המחיר הרלוונטי ביותר עבורך או השאר ריק לשימוש בתמחור ברירת מחדל.' : 'For Gemini 1.5 Pro tiered pricing, consult official docs and enter the most relevant rate, or leave blank for default.'}</p>}
                         <div>
                             <Label htmlFor="inputCost" className="text-xs">{lang === 'he' ? 'עלות קלט (Input)' : 'Input Cost'}</Label>
                             <Input id="inputCost" type="number" step="0.01" value={costs?.input ?? ''} onChange={e => handleCostChange('input', e.target.value)} placeholder={knownPricing?.input?.toFixed(2) || "e.g., 0.50"} className="text-xs p-1.5 h-auto" />
@@ -571,9 +512,9 @@ function ApiSettingsSection() {
 
     return (
         <Card>
-            <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                 <CardTitle>{lang === 'he' ? 'ניהול מודלי API' : 'API Model Management'}</CardTitle>
-                <Button onClick={handleAddNewModel} size="sm"><Plus className="w-4 h-4 me-2"/>{lang === 'he' ? 'הוסף מודל חדש' : 'Add New Model'}</Button>
+                <Button onClick={handleAddNewModel} size="sm" variant="default"><Plus className="w-3.5 h-3.5 me-1.5"/>{lang === 'he' ? 'הוסף מודל חדש' : 'Add New Model'}</Button>
             </CardHeader>
             <CardContent>
                 {apiSettings.length > 0 ? (
@@ -590,19 +531,19 @@ function ApiSettingsSection() {
                             {apiSettings.map(model => (
                                 <TableRow key={model.id}>
                                     <TableCell>
-                                        <div className="flex items-center gap-2">
+                                        <div className="flex items-center gap-1.5">
                                         {model.name}
-                                        {model.isDefault && <span title={lang === 'he' ? 'ברירת מחדל' : 'Default'}><Star className="w-4 h-4 text-yellow-400" /></span>}
-                                        {model.isFreeTier && <span title={lang === 'he' ? 'שכבה חינמית זמינה' : 'Free tier available'}><Cpu className="w-4 h-4 text-green-500" /></span>}
+                                        {model.isDefault && <span title={lang === 'he' ? 'ברירת מחדל' : 'Default'}><Star className="w-3.5 h-3.5 text-yellow-400" /></span>}
+                                        {model.isFreeTier && <span title={lang === 'he' ? 'שכבה חינמית זמינה' : 'Free tier available'}><Cpu className="w-3.5 h-3.5 text-green-400" /></span>}
                                         </div>
                                     </TableCell>
                                     <TableCell>{PROVIDER_INFO[model.provider]?.name || model.provider}</TableCell>
                                     <TableCell className="font-mono text-xs">{model.modelId}</TableCell>
                                     <TableCell>
                                         {model.isValid ?
-                                            <span className="flex items-center text-green-600 dark:text-green-400"><CheckCircle className="w-4 h-4 me-1"/> {lang === 'he' ? 'תקין' : 'Valid'}</span> :
-                                            <span className="flex items-center text-red-600 dark:text-red-400"><XCircle className="w-4 h-4 me-1"/> {lang === 'he' ? 'לא תקין' : 'Invalid'}</span>}
-                                        {model.lastValidated && <p className="text-xs text-slate-400 dark:text-slate-500">{lang === 'he' ? 'נבדק: ' : 'Validated: '}{new Date(model.lastValidated).toLocaleDateString()}</p>}
+                                            <span className="flex items-center text-green-500"><CheckCircle className="w-3.5 h-3.5 me-1"/> {lang === 'he' ? 'תקין' : 'Valid'}</span> :
+                                            <span className="flex items-center text-red-500"><XCircle className="w-3.5 h-3.5 me-1"/> {lang === 'he' ? 'לא תקין' : 'Invalid'}</span>}
+                                        {model.lastValidated && <p className="text-xs text-[var(--text-secondary)]">{lang === 'he' ? 'נבדק: ' : 'Validated: '}{new Date(model.lastValidated).toLocaleDateString()}</p>}
                                     </TableCell>
                                     <TableCell className="text-xs">
                                         I: ${model.costs?.input?.toFixed(2) ?? KNOWN_MODELS_PRICING[model.modelId]?.input?.toFixed(2) ?? 'N/A'}<br/>
@@ -611,7 +552,7 @@ function ApiSettingsSection() {
                                     <TableCell className="text-right">
                                         <div className="flex justify-end gap-1.5 flex-wrap">
                                         <Button size="sm" variant="outline" onClick={() => handleValidateModel(model)} disabled={validatingModelId === model.id}>
-                                            {validatingModelId === model.id ? <Loader2 className="w-4 h-4 animate-spin"/> : <Check className="w-3 h-3 me-1"/>} {lang === 'he' ? 'בדוק' : 'Validate'}
+                                            {validatingModelId === model.id ? <Loader2 className="w-3.5 h-3.5 animate-spin"/> : <Check className="w-3 h-3 me-1"/>} {lang === 'he' ? 'בדוק' : 'Validate'}
                                         </Button>
                                         <Button size="sm" variant="outline" onClick={() => handleSetDefault(model.id)} disabled={model.isDefault ?? false}>{lang === 'he' ? 'ברירת מחדל' : 'Set Default'}</Button>
                                         <Button size="sm" variant="outline" onClick={() => handleEditModel(model)}><Edit3 className="w-3 h-3 me-1"/>{lang === 'he' ? 'ערוך' : 'Edit'}</Button>
@@ -623,14 +564,14 @@ function ApiSettingsSection() {
                         </TableBody>
                     </Table>
                 ) : (
-                    <p className="text-center text-slate-500 dark:text-slate-400 py-8">{lang === 'he' ? 'לא הוגדרו מודלים. לחץ על "הוסף מודל חדש" כדי להתחיל.' : 'No models configured. Click "Add New Model" to start.'}</p>
+                    <p className="text-center text-[var(--text-secondary)] py-6">{lang === 'he' ? 'לא הוגדרו מודלים. לחץ על "הוסף מודל חדש" כדי להתחיל.' : 'No models configured. Click "Add New Model" to start.'}</p>
                 )}
             </CardContent>
             <Dialog open={showAddModelDialog} onOpenChange={setShowAddModelDialog} size="lg">
                 <DialogHeader>
                     <DialogTitle>{editingModel?.id ? (lang === 'he' ? 'ערוך מודל API' : 'Edit API Model') : (lang === 'he' ? 'הוסף מודל API חדש' : 'Add New API Model')}</DialogTitle>
                 </DialogHeader>
-                <DialogContent className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
+                <DialogContent className="p-4 space-y-3 max-h-[70vh] overflow-y-auto">
                     <div>
                         <Label htmlFor="modelName">{lang === 'he' ? 'שם תצוגה למודל' : 'Model Display Name'} <span className="text-red-500">*</span></Label>
                         <Input id="modelName" value={editingModel?.name ?? ''} onChange={(e) => setEditingModel(p => ({...(p ?? getInitialEditingModel()), name: e.target.value}))} placeholder={lang === 'he' ? 'למשל, OpenAI GPT-4 שלי' : 'e.g., My OpenAI GPT-4'}/>
@@ -657,7 +598,7 @@ function ApiSettingsSection() {
                             ))}
                         </Select>
                         {editingModel?.provider && PROVIDER_INFO[editingModel.provider]?.note && (
-                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">{PROVIDER_INFO[editingModel.provider]?.note}</p>
+                            <p className="text-xs text-[var(--text-secondary)] mt-1">{PROVIDER_INFO[editingModel.provider]?.note}</p>
                         )}
                     </div>
                      {editingModel?.provider && (
@@ -691,7 +632,7 @@ function ApiSettingsSection() {
                             <Label htmlFor="apiKey">{lang === 'he' ? 'מפתח API' : 'API Key'} <span className="text-red-500">*</span></Label>
                             <Input id="apiKey" type="password" value={editingModel?.apiKey ?? ''} onChange={(e) => setEditingModel(p => ({...(p ?? getInitialEditingModel()), apiKey: e.target.value}))} placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxx"/>
                             {editingModel?.provider && PROVIDER_INFO[editingModel.provider]?.apiKeyUrl && (
-                                <a href={PROVIDER_INFO[editingModel.provider]?.apiKeyUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-indigo-500 hover:underline flex items-center gap-1 mt-1">
+                                <a href={PROVIDER_INFO[editingModel.provider]?.apiKeyUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-[var(--accent)] hover:underline flex items-center gap-1 mt-1">
                                    <ExternalLink className="w-3 h-3"/> {lang === 'he' ? 'קבל מפתח API' : 'Get API Key'}
                                 </a>
                             )}
@@ -705,13 +646,13 @@ function ApiSettingsSection() {
                      )}
                      {!PROVIDER_INFO[editingModel?.provider || '']?.requiresEndpoint && editingModel?.provider !== 'google' && (
                         <div>
-                            <Label htmlFor="apiUrl">{lang === 'he' ? 'כתובת API Endpoint (אופציונלי, רק למקרים מיוחדים)' : 'API Endpoint URL (Optional, for special cases only)'}</Label>
+                            <Label htmlFor="apiUrl">{lang === 'he' ? 'כתובת API Endpoint (אופציונלי)' : 'API Endpoint URL (Optional)'}</Label>
                             <Input id="apiUrl" value={editingModel?.apiUrl ?? ''} onChange={(e) => setEditingModel(p => ({...(p ?? getInitialEditingModel()), apiUrl: e.target.value}))} placeholder={lang === 'he' ? 'השאר ריק עבור רוב הספקים' : 'Leave blank for most providers'}/>
                         </div>
                      )}
                      {editingModel?.provider === 'google' && (
-                        <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-md text-sm text-blue-700 dark:text-blue-300">
-                            {lang === 'he' ? 'עבור Google Gemini, מפתח ה-API נטען אוטומטית מ משתנה הסביבה `API_KEY` בשרת שלך. אין צורך להזין אותו כאן.' : 'For Google Gemini, the API key is automatically loaded from the `API_KEY` environment variable on your server. No need to enter it here.'}
+                        <div className="p-2.5 bg-[var(--accent)]/10 rounded-md text-sm text-[var(--accent)]">
+                            {lang === 'he' ? 'עבור Google Gemini, מפתח ה-API נטען אוטומטית. אין צורך להזין אותו כאן.' : 'For Google Gemini, the API key is automatically loaded. No need to enter it here.'}
                         </div>
                      )}
                     <div>
@@ -731,8 +672,8 @@ function ApiSettingsSection() {
 
                 </DialogContent>
                 <DialogFooter>
-                    <Button variant="outline" onClick={() => {setShowAddModelDialog(false); setEditingModel(null);}}>{lang === 'he' ? 'ביטול' : 'Cancel'}</Button>
-                    <Button onClick={handleSaveModel} disabled={savingModel}>{savingModel ? <Loader2 className="w-4 h-4 animate-spin"/> : (lang === 'he' ? 'שמור' : 'Save')}</Button>
+                    <Button variant="ghost" onClick={() => {setShowAddModelDialog(false); setEditingModel(null);}}>{lang === 'he' ? 'ביטול' : 'Cancel'}</Button>
+                    <Button onClick={handleSaveModel} disabled={savingModel} variant="default">{savingModel ? <Loader2 className="w-4 h-4 animate-spin"/> : (lang === 'he' ? 'שמור' : 'Save')}</Button>
                 </DialogFooter>
             </Dialog>
             <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
@@ -814,13 +755,13 @@ function PersonasSettings() {
 
     return (
         <Card>
-            <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
+            <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                 <CardTitle>{lang === 'he' ? 'ניהול פרסונות' : 'Manage Personas'}</CardTitle>
-                <Button onClick={handleAddNewPersona} size="sm"><Plus className="w-4 h-4 me-2"/>{lang === 'he' ? 'הוסף פרסונה' : 'Add Persona'}</Button>
+                <Button onClick={handleAddNewPersona} size="sm" variant="default"><Plus className="w-3.5 h-3.5 me-1.5"/>{lang === 'he' ? 'הוסף פרסונה' : 'Add Persona'}</Button>
             </CardHeader>
             <CardContent>
                 {personas.length > 0 ? (
-                    <ul className="space-y-3">
+                    <ul className="space-y-2.5">
                         {personas.map((persona, index) => (
                             <li
                                 key={persona.id}
@@ -829,20 +770,20 @@ function PersonasSettings() {
                                 onDragEnter={() => dragOverItem.current = index}
                                 onDragEnd={handleDragSort}
                                 onDragOver={(e) => e.preventDefault()}
-                                className={`p-4 border border-slate-200 dark:border-slate-700 rounded-lg flex items-center justify-between group cursor-grab active:cursor-grabbing hover:shadow-md transition-shadow
-                                            ${activePersonaId === persona.id ? 'ring-2 ring-indigo-500 bg-indigo-50 dark:bg-indigo-900/40' : 'bg-slate-50 dark:bg-slate-700/30'}`}
+                                className={`p-3 border border-[var(--border)] rounded-md flex items-center justify-between group cursor-grab active:cursor-grabbing hover:shadow-sm transition-shadow
+                                            ${activePersonaId === persona.id ? 'ring-1 ring-[var(--accent)] bg-[var(--accent)]/10' : 'bg-[var(--bg-primary)]'}`}
                             >
                                 <div className="flex items-center flex-1 min-w-0">
-                                    <GripVertical className="w-5 h-5 text-slate-400 dark:text-slate-500 me-3 invisible group-hover:visible flex-shrink-0" />
+                                    <GripVertical className="w-4 h-4 text-[var(--text-secondary)] me-2 invisible group-hover:visible flex-shrink-0" />
                                     <div className="flex-1 min-w-0">
-                                        <h4 className="font-semibold text-slate-800 dark:text-slate-100 flex items-center truncate">
+                                        <h4 className="font-medium text-sm text-[var(--text-primary)] flex items-center truncate">
                                             {persona.name}
-                                            {persona.isDefault && <span title={lang === 'he' ? 'פרסונת ברירת מחדל' : 'Default Persona'}><Star className="w-4 h-4 text-yellow-400 ms-2" /></span>}
+                                            {persona.isDefault && <span title={lang === 'he' ? 'פרסונת ברירת מחדל' : 'Default Persona'}><Star className="w-3.5 h-3.5 text-yellow-400 ms-1.5" /></span>}
                                         </h4>
-                                        <p className="text-sm text-slate-500 dark:text-slate-400 truncate">{persona.prompt}</p>
+                                        <p className="text-xs text-[var(--text-secondary)] truncate">{persona.prompt}</p>
                                     </div>
                                 </div>
-                                <div className="space-x-2 flex-shrink-0 ms-2">
+                                <div className="space-x-1.5 flex-shrink-0 ms-2">
                                     {!(persona.isDefault ?? false) && <Button size="sm" variant="outline" onClick={() => handleSetDefaultPersona(persona.id)}>{lang === 'he' ? 'ברירת מחדל' : 'Set Default'}</Button>}
                                     <Button size="sm" variant="outline" onClick={() => handleEditPersona(persona)}><Edit3 className="w-3 h-3 me-1"/>{lang === 'he' ? 'ערוך' : 'Edit'}</Button>
                                     <Button size="sm" variant="destructive" onClick={() => handleDeletePersona(persona.id)} disabled={personas.length === 1 && (persona.isDefault ?? false)}><Trash2 className="w-3 h-3 me-1"/>{lang === 'he' ? 'מחק' : 'Delete'}</Button>
@@ -851,21 +792,21 @@ function PersonasSettings() {
                         ))}
                     </ul>
                 ) : (
-                    <p className="text-center text-slate-500 dark:text-slate-400 py-8">{lang === 'he' ? 'אין פרסונות שמורות.' : 'No saved personas yet.'}</p>
+                    <p className="text-center text-[var(--text-secondary)] py-6">{lang === 'he' ? 'אין פרסונות שמורות.' : 'No saved personas yet.'}</p>
                 )}
             </CardContent>
             <Dialog open={showPersonaDialog} onOpenChange={setShowPersonaDialog} size="md">
                 <DialogHeader>
                     <DialogTitle>{editingPersona?.id ? (lang === 'he' ? 'ערוך פרסונה' : 'Edit Persona') : (lang === 'he' ? 'הוסף פרסונה חדשה' : 'Add New Persona')}</DialogTitle>
                 </DialogHeader>
-                <DialogContent className="p-6 space-y-4">
+                <DialogContent className="p-4 space-y-3">
                     <div>
                         <Label htmlFor="personaName">{lang === 'he' ? 'שם הפרסונה' : 'Persona Name'}</Label>
                         <Input id="personaName" value={editingPersona?.name ?? ''} onChange={(e) => setEditingPersona(p => ({...(p ?? getInitialEditingPersona()), name: e.target.value}))} />
                     </div>
                     <div>
                         <Label htmlFor="personaPrompt">{lang === 'he' ? 'הנחיית מערכת לפרסונה' : 'System Prompt for Persona'}</Label>
-                        <Textarea id="personaPrompt" value={editingPersona?.prompt ?? ''} onChange={(e) => setEditingPersona(p => ({...(p ?? getInitialEditingPersona()), prompt: e.target.value}))} rows={5}/>
+                        <Textarea id="personaPrompt" value={editingPersona?.prompt ?? ''} onChange={(e) => setEditingPersona(p => ({...(p ?? getInitialEditingPersona()), prompt: e.target.value}))} rows={4}/>
                     </div>
                     <div className="flex items-center gap-2">
                         <Switch id="personaIsDefault" checked={editingPersona?.isDefault ?? false} onCheckedChange={(checked) => setEditingPersona(p => ({...(p ?? getInitialEditingPersona()), isDefault: checked}))} />
@@ -873,8 +814,8 @@ function PersonasSettings() {
                     </div>
                 </DialogContent>
                 <DialogFooter>
-                    <Button variant="outline" onClick={() => {setShowPersonaDialog(false); setEditingPersona(null);}}>{lang === 'he' ? 'ביטול' : 'Cancel'}</Button>
-                    <Button onClick={handleSavePersona}>{lang === 'he' ? 'שמור' : 'Save'}</Button>
+                    <Button variant="ghost" onClick={() => {setShowPersonaDialog(false); setEditingPersona(null);}}>{lang === 'he' ? 'ביטול' : 'Cancel'}</Button>
+                    <Button onClick={handleSavePersona} variant="default">{lang === 'he' ? 'שמור' : 'Save'}</Button>
                 </DialogFooter>
             </Dialog>
         </Card>
@@ -898,27 +839,27 @@ function CalendarView({ date, data, lang }: CalendarViewProps) {
     if (startingDayIndex < 0) startingDayIndex += 7;
 
     return (
-        <div className="grid grid-cols-7 gap-1.5 sm:gap-2">
-            {daysOfWeek.map(day => <div key={day} className="text-center font-medium text-xs text-slate-500 dark:text-slate-400 py-2">{day}</div>)}
-            {Array.from({ length: startingDayIndex }).map((_, i) => <div key={`empty-${i}`} className="border border-slate-100 dark:border-slate-700/50 rounded-lg min-h-[100px] sm:min-h-[120px]"></div>)}
+        <div className="grid grid-cols-7 gap-1">
+            {daysOfWeek.map(day => <div key={day} className="text-center font-medium text-xs text-[var(--text-secondary)] py-1.5">{day}</div>)}
+            {Array.from({ length: startingDayIndex }).map((_, i) => <div key={`empty-${i}`} className="border border-[var(--border)]/50 rounded-md min-h-[80px] sm:min-h-[100px]"></div>)}
             {daysInMonth.map((dayInstance) => {
                 const dayNumber = dayInstance.getDate();
                 const dayData = data[dayNumber];
                 return (
-                    <div key={dayInstance.toString()} className="border border-slate-200 dark:border-slate-700 rounded-lg min-h-[100px] sm:min-h-[120px] p-2 sm:p-2.5 flex flex-col bg-white dark:bg-slate-800 hover:shadow-lg transition-shadow">
-                        <span className="font-semibold text-sm text-slate-800 dark:text-slate-200">{dayNumber}</span>
+                    <div key={dayInstance.toString()} className="border border-[var(--border)] rounded-md min-h-[80px] sm:min-h-[100px] p-1.5 sm:p-2 flex flex-col bg-[var(--bg-primary)] hover:shadow-md transition-shadow">
+                        <span className="font-medium text-xs text-[var(--text-primary)]">{dayNumber}</span>
                         {dayData && (
-                            <div className="text-xs mt-1 space-y-1 flex-grow flex flex-col justify-end">
-                                <div className="flex items-center gap-1 text-blue-600 dark:text-blue-400" title={lang === 'he' ? 'טוקנים נכנסים' : 'Incoming Tokens'}>
-                                    <TrendingDown className="w-3.5 h-3.5 flex-shrink-0"/>
-                                    <span className="truncate">{dayData.incomingTokens.toLocaleString()}</span>
+                            <div className="text-xs mt-1 space-y-0.5 flex-grow flex flex-col justify-end">
+                                <div className="flex items-center gap-1 text-blue-400" title={lang === 'he' ? 'טוקנים נכנסים' : 'Incoming Tokens'}>
+                                    <TrendingDown className="w-3 h-3 flex-shrink-0"/>
+                                    <span className="truncate text-[10px]">{dayData.incomingTokens.toLocaleString()}</span>
                                 </div>
-                                <div className="flex items-center gap-1 text-green-600 dark:text-green-400" title={lang === 'he' ? 'טוקנים יוצאים' : 'Outgoing Tokens'}>
-                                    <TrendingUp className="w-3.5 h-3.5 flex-shrink-0"/> 
-                                    <span className="truncate">{dayData.outgoingTokens.toLocaleString()}</span>
+                                <div className="flex items-center gap-1 text-green-400" title={lang === 'he' ? 'טוקנים יוצאים' : 'Outgoing Tokens'}>
+                                    <TrendingUp className="w-3 h-3 flex-shrink-0"/> 
+                                    <span className="truncate text-[10px]">{dayData.outgoingTokens.toLocaleString()}</span>
                                 </div>
-                                <div className="flex items-center gap-1 text-purple-600 dark:text-purple-400" title={lang === 'he' ? 'עלות' : 'Cost'}>
-                                    <DollarSign className="w-3.5 h-3.5 flex-shrink-0"/> <span className="truncate">${dayData.cost.toFixed(3)}</span>
+                                <div className="flex items-center gap-1 text-purple-400" title={lang === 'he' ? 'עלות' : 'Cost'}>
+                                    <DollarSign className="w-3 h-3 flex-shrink-0"/> <span className="truncate text-[10px]">${dayData.cost.toFixed(3)}</span>
                                 </div>
                             </div>
                         )}
@@ -971,25 +912,25 @@ function UsageDashboard() {
                 <CardDescription>{lang === 'he' ? 'צפה בשימוש ועלויות לפי יום, ספק ומודל.' : 'View usage and costs by day, provider, and model.'}</CardDescription>
             </CardHeader>
             <CardContent>
-                <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-                    <div className="flex items-center gap-2">
-                        <Button variant="outline" size="icon" onClick={() => setCurrentDate(subMonths(currentDate, 1))} className="rounded-full"><ChevronLeft/></Button>
-                        <h3 className="text-xl font-semibold w-48 text-center text-slate-700 dark:text-slate-200">{format(currentDate, 'MMMM yyyy', { locale: currentLocale })}</h3>
-                        <Button variant="outline" size="icon" onClick={() => setCurrentDate(addMonths(currentDate, 1))} className="rounded-full"><ChevronRight/></Button>
+                <div className="flex flex-col sm:flex-row justify-between items-center mb-4 gap-3">
+                    <div className="flex items-center gap-1.5">
+                        <Button variant="outline" size="icon" onClick={() => setCurrentDate(subMonths(currentDate, 1))} className="rounded-md p-1.5"><ChevronLeft className="w-4 h-4"/></Button>
+                        <h3 className="text-lg font-medium w-40 text-center text-[var(--text-primary)]">{format(currentDate, 'MMMM yyyy', { locale: currentLocale })}</h3>
+                        <Button variant="outline" size="icon" onClick={() => setCurrentDate(addMonths(currentDate, 1))} className="rounded-md p-1.5"><ChevronRight className="w-4 h-4"/></Button>
                     </div>
                 </div>
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8 text-center">
-                    <Card className="bg-blue-50 dark:bg-blue-900/40 border-blue-200 dark:border-blue-700">
-                        <CardHeader className="pb-2 pt-4"><CardTitle className="text-sm font-medium text-blue-700 dark:text-blue-300">{lang === 'he' ? 'סה"כ טוקנים נכנסים (חודשי)' : 'Total Incoming Tokens (Monthly)'}</CardTitle></CardHeader>
-                        <CardContent className="pb-4"><p className="text-3xl font-bold text-blue-600 dark:text-blue-400">{monthlyTotal.incomingTokens.toLocaleString()}</p></CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-3 mb-6 text-center">
+                    <Card className="bg-[var(--bg-primary)] border-[var(--border)]">
+                        <CardHeader className="pb-1.5 pt-3"><CardTitle className="text-xs font-medium text-[var(--text-secondary)]">{lang === 'he' ? 'סה"כ טוקנים נכנסים (חודשי)' : 'Total Incoming Tokens (Monthly)'}</CardTitle></CardHeader>
+                        <CardContent className="pb-3"><p className="text-2xl font-medium text-blue-400">{monthlyTotal.incomingTokens.toLocaleString()}</p></CardContent>
                     </Card>
-                     <Card className="bg-green-50 dark:bg-green-900/40 border-green-200 dark:border-green-700">
-                        <CardHeader className="pb-2 pt-4"><CardTitle className="text-sm font-medium text-green-700 dark:text-green-300">{lang === 'he' ? 'סה"כ טוקנים יוצאים (חודשי)' : 'Total Outgoing Tokens (Monthly)'}</CardTitle></CardHeader>
-                        <CardContent className="pb-4"><p className="text-3xl font-bold text-green-600 dark:text-green-400">{monthlyTotal.outgoingTokens.toLocaleString()}</p></CardContent>
+                     <Card className="bg-[var(--bg-primary)] border-[var(--border)]">
+                        <CardHeader className="pb-1.5 pt-3"><CardTitle className="text-xs font-medium text-[var(--text-secondary)]">{lang === 'he' ? 'סה"כ טוקנים יוצאים (חודשי)' : 'Total Outgoing Tokens (Monthly)'}</CardTitle></CardHeader>
+                        <CardContent className="pb-3"><p className="text-2xl font-medium text-green-400">{monthlyTotal.outgoingTokens.toLocaleString()}</p></CardContent>
                     </Card>
-                     <Card className="bg-purple-50 dark:bg-purple-900/40 border-purple-200 dark:border-purple-700">
-                        <CardHeader className="pb-2 pt-4"><CardTitle className="text-sm font-medium text-purple-700 dark:text-purple-300">{lang === 'he' ? 'סה"כ עלות (חודשי)' : 'Total Cost (Monthly)'}</CardTitle></CardHeader>
-                        <CardContent className="pb-4"><p className="text-3xl font-bold text-purple-600 dark:text-purple-400">${monthlyTotal.cost.toFixed(2)}</p></CardContent>
+                     <Card className="bg-[var(--bg-primary)] border-[var(--border)]">
+                        <CardHeader className="pb-1.5 pt-3"><CardTitle className="text-xs font-medium text-[var(--text-secondary)]">{lang === 'he' ? 'סה"כ עלות (חודשי)' : 'Total Cost (Monthly)'}</CardTitle></CardHeader>
+                        <CardContent className="pb-3"><p className="text-2xl font-medium text-purple-400">${monthlyTotal.cost.toFixed(2)}</p></CardContent>
                     </Card>
                 </div>
                 <CalendarView date={currentDate} data={dataByDay} lang={lang} />
@@ -1002,17 +943,15 @@ function UsageDashboard() {
 export function SettingsPage() {
     const { lang } = useAppContext();
     return (
-        // PageWrapper for settings might not need disablePadding, so remove it or set to false
-        // The overall padding for settings is handled by the container in SettingsLayout
         <SettingsLayout> 
             {({ activeSettingsTab }) => {
                 switch (activeSettingsTab) {
-                    case 'profile': return <><ProfileSettings /><div className="my-8 border-t border-slate-200 dark:border-slate-700"></div><SavedPromptsSettings /></>;
+                    case 'profile': return <><ProfileSettings /><div className="my-6 border-t border-[var(--border)]"></div><SavedPromptsSettings /></>;
                     case 'appearance': return <AppearanceSettings />;
                     case 'api': return <ApiSettingsSection />;
                     case 'personas': return <PersonasSettings />;
                     case 'usage': return <UsageDashboard />;
-                    default: return <div className="p-6 text-center text-slate-500">{lang === 'he' ? 'בחר קטגוריה מהתפריט' : 'Select a category from the menu'}</div>;
+                    default: return <div className="p-4 text-center text-[var(--text-secondary)]">{lang === 'he' ? 'בחר קטגוריה מהתפריט' : 'Select a category from the menu'}</div>;
                 }
             }}
         </SettingsLayout>

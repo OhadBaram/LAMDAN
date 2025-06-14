@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react"; // Added useEffect
 import { Plus, Edit3, Trash2, UploadCloud, X, ImageIcon, File as FileIconPkg } from "lucide-react";
 import { useAppContext } from '../../contexts/AppContext';
 import { useUserSettings, Space, SpaceFile } from '../../contexts/UserSettingsContext';
@@ -15,7 +15,7 @@ import { Select } from '../../components/ui/Select';
 
 export function SpacesPage() {
     const { lang, openErrorDialog } = useAppContext();
-    const { spaces, addSpace, updateSpace, deleteSpace, activeSpaceId, setActiveSpaceId, addFileToSpace, removeFileFromSpace } = useUserSettings();
+    const { spaces, addSpace, updateSpace, deleteSpace, activeSpaceId, setActiveSpaceId, addFileToSpace, removeFileFromSpace, markFeatureVisited } = useUserSettings();
     const [showSpaceDialog, setShowSpaceDialog] = useState(false);
     const [editingSpace, setEditingSpace] = useState<Partial<Space> | null>(null);
     const [_fileForUpload, setFileForUpload] = useState<File | null>(null);
@@ -31,7 +31,10 @@ export function SpacesPage() {
     };
     const handleSaveSpace = async () => {
         if (!editingSpace || !editingSpace.name?.trim()) {
-            openErrorDialog(lang === 'he' ? 'שם חסר' : 'Name Missing', lang === 'he' ? 'אנא הזן שם למרחב.' : 'Please enter a name for the space.');
+            openErrorDialog(
+                lang === 'he' ? 'שם חסר' : 'Name Missing', 
+                lang === 'he' ? 'אופס, שכחת לתת שם למרחב. כל מרחב צריך שם ייחודי.' : 'Oops, you forgot to name the space. Every space needs a unique name.'
+            );
             return;
         }
         if (editingSpace.id) {
@@ -44,7 +47,7 @@ export function SpacesPage() {
         setEditingSpace(null);
     };
     const handleDeleteSpace = async (spaceId: string) => {
-        if (window.confirm(lang === 'he' ? 'האם למחוק מרחב זה וכל קבציו?' : 'Delete this space and all its files?')) {
+        if (window.confirm(lang === 'he' ? 'האם למחוק מרחב זה וכל קבציו? זו פעולה שלא ניתן לשחזר.' : 'Delete this space and all its files? This action cannot be undone.')) {
             await deleteSpace(spaceId);
         }
     };
@@ -91,15 +94,15 @@ export function SpacesPage() {
     const currentActiveSpace = spaces.find(s => s.id === activeSpaceId);
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             <Card>
-                <CardHeader className="flex justify-between items-center">
+                <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                     <CardTitle>{lang === 'he' ? 'ניהול מרחבי עבודה' : 'Manage Workspaces (Spaces)'}</CardTitle>
-                    <Button onClick={handleAddNewSpace}><Plus className="w-4 h-4 me-2"/>{lang === 'he' ? 'צור מרחב חדש' : 'Create New Space'}</Button>
+                    <Button onClick={handleAddNewSpace} variant="default"><Plus className="w-3.5 h-3.5 me-1.5"/>{lang === 'he' ? 'צור מרחב חדש' : 'Create New Space'}</Button>
                 </CardHeader>
                 <CardContent>
                     {spaces.length > 0 ? (
-                        <div className="space-y-3">
+                        <div className="space-y-2.5">
                             <Label htmlFor="active-space-select">{lang === 'he' ? 'בחר מרחב פעיל:' : 'Select Active Space:'}</Label>
                             <Select id="active-space-select" value={activeSpaceId || ''} onChange={e => setActiveSpaceId(e.target.value || null)}>
                                 <option value="">{lang === 'he' ? 'ללא מרחב פעיל' : 'No Active Space'}</option>
@@ -107,47 +110,47 @@ export function SpacesPage() {
                             </Select>
                         </div>
                     ) : (
-                         <p className="text-center text-gray-500 py-8">{lang === 'he' ? 'עדיין אין מרחבים. צור אחד כדי להתחיל לארגן את הקבצים שלך.' : 'No spaces yet. Create one to start organizing your files.'}</p>
+                         <p className="text-center text-[var(--text-secondary)] py-6">{lang === 'he' ? 'עדיין אין מרחבים. צור אחד כדי להתחיל לארגן את הקבצים שלך.' : 'No spaces yet. Create one to start organizing your files.'}</p>
                     )}
                 </CardContent>
             </Card>
 
             {currentActiveSpace && (
                 <Card>
-                    <CardHeader className="flex justify-between items-center">
+                    <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                         <div>
                             <CardTitle>{currentActiveSpace.name}</CardTitle>
                             {currentActiveSpace.description && <CardDescription>{currentActiveSpace.description}</CardDescription>}
                         </div>
-                        <div className="space-x-2">
+                        <div className="space-x-1.5">
                              <Button variant="outline" size="sm" onClick={() => handleEditSpace(currentActiveSpace)}><Edit3 className="w-3 h-3 me-1"/>{lang === 'he' ? 'ערוך פרטי מרחב' : 'Edit Space Details'}</Button>
                              <Button variant="destructive" size="sm" onClick={() => handleDeleteSpace(currentActiveSpace.id)}><Trash2 className="w-3 h-3 me-1"/>{lang === 'he' ? 'מחק מרחב' : 'Delete Space'}</Button>
                         </div>
                     </CardHeader>
                     <CardContent>
-                        <div className="mb-4">
-                            <Label htmlFor="file-upload-space" className="cursor-pointer inline-flex items-center px-4 py-2 border border-dashed border-gray-300 dark:border-gray-600 rounded-md text-sm font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700">
-                                <UploadCloud className="w-4 h-4 me-2"/>{lang === 'he' ? 'העלה קבצים למרחב זה' : 'Upload Files to this Space'}
+                        <div className="mb-3">
+                            <Label htmlFor="file-upload-space" className="cursor-pointer inline-flex items-center px-3 py-2 border border-dashed border-[var(--border)] rounded-md text-sm font-medium text-[var(--text-secondary)] hover:bg-[var(--bg-primary)]">
+                                <UploadCloud className="w-3.5 h-3.5 me-1.5"/>{lang === 'he' ? 'העלה קבצים למרחב זה' : 'Upload Files to this Space'}
                             </Label>
                             <input id="file-upload-space" type="file" ref={fileInputRef} onChange={handleFileForSpaceUpload} className="hidden" multiple accept="image/*,application/pdf,.doc,.docx,.ppt,.pptx,.txt,.md,text/plain"/>
                         </div>
                         {(currentActiveSpace.files || []).length > 0 ? (
-                            <ul className="space-y-2">
+                            <ul className="space-y-1.5">
                                 {(currentActiveSpace.files || []).map(file => (
-                                    <li key={file.id} className="p-3 border dark:border-gray-700 rounded-md flex items-center justify-between">
-                                        <div className="flex items-center gap-2">
-                                            {file.type.startsWith('image/') ? <ImageIcon className="w-5 h-5 text-indigo-500"/> : <FileIconPkg className="w-5 h-5 text-indigo-500"/>}
-                                            <span className="text-sm">{file.name}</span>
-                                            <span className="text-xs text-gray-400">({(file.size / 1024).toFixed(1)} KB)</span>
+                                    <li key={file.id} className="p-2.5 border border-[var(--border)] rounded-md flex items-center justify-between bg-[var(--bg-primary)] hover:border-[var(--accent)]/50">
+                                        <div className="flex items-center gap-1.5">
+                                            {file.type.startsWith('image/') ? <ImageIcon className="w-4 h-4 text-[var(--accent)]"/> : <FileIconPkg className="w-4 h-4 text-[var(--accent)]"/>}
+                                            <span className="text-sm text-[var(--text-primary)]">{file.name}</span>
+                                            <span className="text-xs text-[var(--text-secondary)]">({(file.size / 1024).toFixed(1)} KB)</span>
                                         </div>
-                                        <Button size="icon" variant="ghost" onClick={() => activeSpaceId && removeFileFromSpace(activeSpaceId, file.id)} className="p-1 text-red-500 hover:text-red-700">
-                                            <X className="w-4 h-4" />
+                                        <Button size="icon" variant="ghost" onClick={() => activeSpaceId && removeFileFromSpace(activeSpaceId, file.id)} className="p-1 text-[var(--text-secondary)] hover:text-[var(--error)]">
+                                            <X className="w-3.5 h-3.5" />
                                         </Button>
                                     </li>
                                 ))}
                             </ul>
                         ) : (
-                            <p className="text-sm text-gray-500">{lang === 'he' ? 'אין קבצים במרחב זה עדיין.' : 'No files in this space yet.'}</p>
+                            <p className="text-sm text-[var(--text-secondary)]">{lang === 'he' ? 'אין קבצים במרחב זה עדיין.' : 'No files in this space yet.'}</p>
                         )}
                     </CardContent>
                 </Card>
@@ -157,7 +160,7 @@ export function SpacesPage() {
                 <DialogHeader>
                     <DialogTitle>{editingSpace?.id ? (lang === 'he' ? 'ערוך מרחב' : 'Edit Space') : (lang === 'he' ? 'צור מרחב חדש' : 'Create New Space')}</DialogTitle>
                 </DialogHeader>
-                <DialogContent className="p-6 space-y-4">
+                <DialogContent className="p-4 space-y-3">
                     <div>
                         <Label htmlFor="spaceName">{lang === 'he' ? 'שם המרחב' : 'Space Name'}</Label>
                         <Input id="spaceName" value={editingSpace?.name || ''} onChange={e => setEditingSpace(s => ({...s, name: e.target.value}))}/>
@@ -168,8 +171,8 @@ export function SpacesPage() {
                     </div>
                 </DialogContent>
                 <DialogFooter>
-                     <Button variant="outline" onClick={() => {setShowSpaceDialog(false); setEditingSpace(null);}}>{lang === 'he' ? 'ביטול' : 'Cancel'}</Button>
-                    <Button onClick={handleSaveSpace}>{lang === 'he' ? 'שמור' : 'Save'}</Button>
+                     <Button variant="ghost" onClick={() => {setShowSpaceDialog(false); setEditingSpace(null);}}>{lang === 'he' ? 'ביטול' : 'Cancel'}</Button>
+                    <Button onClick={handleSaveSpace} variant="default">{lang === 'he' ? 'שמור' : 'Save'}</Button>
                 </DialogFooter>
             </Dialog>
         </div>

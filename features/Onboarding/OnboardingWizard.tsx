@@ -89,9 +89,9 @@ export function OnboardingWizard({ onComplete }: { onComplete: () => void }) {
         validationSuccess: { he: "האימות הצליח! מעביר אותך לאפליקציה...", en: "Validation successful! Taking you to the app..." },
         validationErrorMsg: { he: "שגיאת אימות:", en: "Validation Error:" },
         videoGuide: { he: "מדריך וידאו לקבלת מפתח", en: "Video Guide for API Key"},
-        googleProviderNote: { he: "עבור Google Gemini, מפתח ה-API נטען אוטומטית מ משתנה סביבה בשרת שלך. אין צורך להזין אותו כאן.", en: "For Google Gemini, the API key is automatically loaded from an environment variable on your server. No need to enter it here."},
+        googleProviderNote: { he: "עבור Google Gemini, מפתח ה-API נטען אוטומטית. אין צורך להזין אותו כאן.", en: "For Google Gemini, the API key is automatically loaded. No need to enter it here."},
         back: { he: "חזור", en: "Back"},
-        skipOnboarding: {he: "דלג על ההגדרה הראשונית (הגדרות מתקדמות)", en: "Skip Initial Setup (Advanced Settings)"},
+        skipOnboarding: {he: "דלג על ההגדרה הראשונית", en: "Skip Initial Setup"},
     };
 
     const currentLang = lang as 'he' | 'en';
@@ -100,25 +100,25 @@ export function OnboardingWizard({ onComplete }: { onComplete: () => void }) {
         switch (step) {
             case 0: 
                 return (
-                    <DialogContent className="text-center p-8">
-                        <Cpu className="w-16 h-16 mx-auto text-indigo-500 mb-4" />
+                    <DialogContent className="text-center p-6 sm:p-8">
+                        <Cpu className="w-12 h-12 mx-auto text-[var(--accent)] mb-3" />
                         <DialogTitle>{translations.welcomeTitle[currentLang]}</DialogTitle>
                         <DialogDescription>{translations.welcomeDesc[currentLang]}</DialogDescription>
                     </DialogContent>
                 );
             case 1: 
                 return (
-                    <DialogContent className="p-6">
+                    <DialogContent className="p-4 sm:p-6">
                         <DialogTitle>{translations.selectProviderTitle[currentLang]}</DialogTitle>
                         <DialogDescription>{translations.selectProviderDesc[currentLang]}</DialogDescription>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-4">
                             {providerList.map(([key, info]) => (
-                                <Card key={key} onClick={() => handleProviderSelect(key)} className="cursor-pointer hover:shadow-lg transition-shadow">
-                                    <CardHeader className="flex items-center gap-3">
-                                        <CardTitle className="text-lg">{info.name}</CardTitle>
+                                <Card key={key} onClick={() => handleProviderSelect(key)} className="cursor-pointer hover:border-[var(--accent)] transition-colors bg-[var(--bg-primary)]">
+                                    <CardHeader className="p-3 flex items-center gap-2">
+                                        <CardTitle className="text-base">{info.name}</CardTitle>
                                     </CardHeader>
-                                    <CardContent>
-                                        <p className="text-xs text-gray-500 dark:text-gray-400">{lang === 'he' ? `מודל ברירת מחדל: ${info.defaultModel}` : `Default model: ${info.defaultModel}`}</p>
+                                    <CardContent className="p-3 pt-0">
+                                        <p className="text-xs text-[var(--text-secondary)]">{lang === 'he' ? `מודל ברירת מחדל: ${info.defaultModel}` : `Default model: ${info.defaultModel}`}</p>
                                     </CardContent>
                                 </Card>
                             ))}
@@ -128,7 +128,7 @@ export function OnboardingWizard({ onComplete }: { onComplete: () => void }) {
             case 2: 
                 const currentProviderInfo = selectedProviderKey ? PROVIDER_INFO[selectedProviderKey] : null;
                 return (
-                    <DialogContent className="p-6 space-y-4">
+                    <DialogContent className="p-4 sm:p-6 space-y-3">
                         <DialogTitle>{translations.apiKeyTitle[currentLang]}</DialogTitle>
                         <DialogDescription>{translations.apiKeyDesc[currentLang](selectedProviderKey)}</DialogDescription>
                         
@@ -147,22 +147,22 @@ export function OnboardingWizard({ onComplete }: { onComplete: () => void }) {
                         )}
                         
                         {selectedProviderKey === 'google' && (
-                             <div className="p-3 bg-blue-50 dark:bg-blue-900/30 rounded-md text-sm text-blue-700 dark:text-blue-300">
+                             <div className="p-2.5 bg-[var(--accent)]/10 rounded-md text-sm text-[var(--accent)]">
                                 {translations.googleProviderNote[currentLang]}
                             </div>
                         )}
 
                         {currentProviderInfo?.apiKeyUrl && selectedProviderKey !== 'google' && (
-                             <a href={currentProviderInfo.apiKeyUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-indigo-600 hover:underline flex items-center gap-1">
-                                <ExternalLink className="w-3 h-3"/> {lang === 'he' ? `איך מקבלים מפתח ${currentProviderInfo.name}?` : `How to get a ${currentProviderInfo.name} key?`}
+                             <a href={currentProviderInfo.apiKeyUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-[var(--accent)] hover:underline flex items-center gap-1">
+                                <ExternalLink className="w-3.5 h-3.5"/> {lang === 'he' ? `איך מקבלים מפתח ${currentProviderInfo.name}?` : `How to get a ${currentProviderInfo.name} key?`}
                             </a>
                         )}
-                        {currentProviderInfo?.videoUrl && selectedProviderKey !== 'google' && ( // Also hide video guide if API key is not asked
-                            <a href={currentProviderInfo.videoUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-indigo-600 hover:underline flex items-center gap-1">
-                                <Play className="w-3 h-3"/> {translations.videoGuide[currentLang]}
+                        {currentProviderInfo?.videoUrl && selectedProviderKey !== 'google' && ( 
+                            <a href={currentProviderInfo.videoUrl} target="_blank" rel="noopener noreferrer" className="text-sm text-[var(--accent)] hover:underline flex items-center gap-1">
+                                <Play className="w-3.5 h-3.5"/> {translations.videoGuide[currentLang]}
                             </a>
                         )}
-                        {validationStatus === 'error' && <p className="text-red-500 text-sm">{translations.validationErrorMsg[currentLang]} {validationError}</p>}
+                        {validationStatus === 'error' && <p className="text-[var(--error)] text-sm">{translations.validationErrorMsg[currentLang]} {validationError}</p>}
                     </DialogContent>
                 );
             default: return null;
@@ -172,20 +172,25 @@ export function OnboardingWizard({ onComplete }: { onComplete: () => void }) {
     const footerActions = () => {
          switch (step) {
             case 0:
-                return <Button onClick={() => setStep(1)}>{translations.next[currentLang]}</Button>;
+                return (
+                    <>
+                         <Button variant="ghost" size="sm" onClick={onComplete} className="me-auto text-xs">{translations.skipOnboarding[currentLang]}</Button>
+                         <Button onClick={() => setStep(1)} variant="default">{translations.next[currentLang]}</Button>
+                    </>
+                );
             case 1:
                  return (
                     <>
-                        <Button variant="outline" onClick={() => setStep(0)}>{translations.back[currentLang]}</Button>
-                        <Button variant="ghost" size="sm" onClick={onComplete} className="text-xs absolute bottom-4 left-4">{translations.skipOnboarding[currentLang]}</Button>
+                        <Button variant="ghost" onClick={() => setStep(0)}>{translations.back[currentLang]}</Button>
+                        <Button variant="ghost" size="sm" onClick={onComplete} className="text-xs">{translations.skipOnboarding[currentLang]}</Button>
                     </>
                  );
             case 2:
                 return (
                     <>
-                        <Button variant="outline" onClick={() => setStep(1)} disabled={isValidating}>{translations.back[currentLang]}</Button>
-                        <Button onClick={handleValidateAndSave} disabled={isValidating || validationStatus === 'success'}>
-                            {isValidating ? <Loader2 className="w-4 h-4 animate-spin me-2"/> : null}
+                        <Button variant="ghost" onClick={() => setStep(1)} disabled={isValidating}>{translations.back[currentLang]}</Button>
+                        <Button onClick={handleValidateAndSave} disabled={isValidating || validationStatus === 'success'} variant="default">
+                            {isValidating ? <Loader2 className="w-4 h-4 animate-spin me-1.5"/> : null}
                             {validationStatus === 'success' ? translations.validationSuccess[currentLang] :
                              isValidating ? translations.validating[currentLang] : translations.validateAndSave[currentLang]}
                         </Button>
@@ -196,10 +201,10 @@ export function OnboardingWizard({ onComplete }: { onComplete: () => void }) {
     }
 
     return (
-        <Dialog open={true} onOpenChange={() => {}} size="lg">
+        <Dialog open={true} onOpenChange={() => {}} size="md"> {/* Adjusted size */}
             <DialogHeader className="p-0">{null}</DialogHeader>
             {renderStepContent()}
-            <DialogFooter className="border-t border-gray-200 dark:border-gray-700">
+            <DialogFooter className="border-t border-[var(--border)]">
                 {footerActions()}
             </DialogFooter>
         </Dialog>

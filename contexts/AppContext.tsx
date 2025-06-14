@@ -2,7 +2,7 @@
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from "react";
 import { GoogleGenAI, GenerateContentResponse, Part, Content } from "@google/genai"; // SDK Import
 import { mockStorage } from '../utils/storage';
-import { AppCustomization, initialAppCustomizationData as userInitialCustomization } from './UserSettingsContext'; // Renamed import
+import { AppCustomization, initialAppCustomizationData as userInitialCustomization, useUserSettings } from './UserSettingsContext'; // Renamed import
 
 
 // --- Type Definitions (moved from index.tsx or new) ---
@@ -20,7 +20,7 @@ export interface ApiSetting {
   isValid?: boolean;
   lastValidated?: string;
 }
-export interface ChatMessageItem { role: string; content: string; timestamp: string; files?: any[], isError?: boolean }
+export interface ChatMessageItem { role: string; content: string; timestamp: string; files?: any[], isError?: boolean; suggestions?: string[] }
 export interface ChatHistory { id: string; messages: ChatMessageItem[]; cost?: number; tokens?: { incoming: number; outgoing: number }; lastUpdated: string; }
 export interface TokenUsage { id: string; date: string; provider: string; modelId: string; incomingTokens: number; outgoingTokens: number; cost: number; }
 
@@ -416,8 +416,6 @@ interface AppContextType {
     setCurrentPageGlobal: (page: string) => void;
     showOnboarding: boolean;
     setShowOnboarding: (show: boolean) => void;
-    // isSidebarOpen: boolean; // Removed
-    // setIsSidebarOpen: (open: boolean) => void; // Removed
     activeVoice: SpeechSynthesisVoice | null;
     setActiveVoice: (voice: SpeechSynthesisVoice | null) => void;
     availableVoices: SpeechSynthesisVoice[];
@@ -452,14 +450,15 @@ export const useAppContext = () => {
     return context;
 };
 
-export function AppProvider({ children }: { children: React.ReactNode }) {
+
+function AppProviderInternal({ children }: { children: React.ReactNode }) {
+    const userSettings = useUserSettings(); // Hook into UserSettingsContext
     const [lang, setLang] = useState(() => localStorage.getItem('app_lang') || 'he');
     const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
     const [apiSettings, setApiSettingsState] = useState<ApiSetting[]>([]);
     const [tokenUsage, setTokenUsageState] = useState<TokenUsage[]>([]);
     const [currentPage, setCurrentPageGlobal] = useState('chat');
     const [showOnboarding, setShowOnboarding] = useState(false);
-    // const [isSidebarOpen, setIsSidebarOpen] = useState(false); // Removed
 
     const [activeVoice, setActiveVoice] = useState<SpeechSynthesisVoice | null>(null);
     const [availableVoices, setAvailableVoices] = useState<SpeechSynthesisVoice[]>([]);
@@ -479,7 +478,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const filteredVoices = voices.filter(voice => voice.lang.startsWith(lang));
         setAvailableVoices(filteredVoices);
         
-        const storedCustomization = localStorage.getItem('app_customization_v2'); 
+        const storedCustomization = localStorage.getItem('app_customization_v3'); // Updated storage key
         const savedVoiceURI = storedCustomization ? (JSON.parse(storedCustomization) as AppCustomization).botVoiceURI : null;
 
         if (savedVoiceURI) {
@@ -524,11 +523,21 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     };
 
     const loadTokenUsage = async () => setTokenUsageState(await TokenUsageStorage.list());
-
+    
+    // Initial data load and gamification updates
     useEffect(() => {
-        loadApiSettings();
-        loadTokenUsage();
-    }, []);
+        const initializeApp = async () => {
+            await loadApiSettings();
+            await loadTokenUsage();
+            // Gamification updates (streak and session reset) after user settings might be loaded
+            if (userSettings.userProfile) { // Check if userProfile is loaded
+                 await userSettings.updateStreak();
+                 await userSettings.resetSessionActivity(); // Reset on app load (new session)
+            }
+        };
+        initializeApp();
+    }, [userSettings.userProfile]); // Depend on userProfile from UserSettingsContext to ensure it's loaded
+
 
     const recordTokenUsage = async (provider: string, modelId: string, incoming: number, outgoing: number, cost: number) => {
         const today = new Date().toISOString();
@@ -555,11 +564,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         if (currentVoices.length === 0) {
             console.warn("Voices not loaded yet, trying to fetch them...");
             if (typeof window.speechSynthesis.onvoiceschanged !== 'undefined') {
-                window.speechSynthesis.onvoiceschanged = () => { // This is an anonymous arrow function
+                window.speechSynthesis.onvoiceschanged = () => { 
                     currentVoices = window.speechSynthesis.getVoices();
                     if (currentVoices.length > 0) {
-                        loadVoices(); // This call is correct as loadVoices expects no arguments
-                        // Re-attempt speak, ensuring activeVoice is set by loadVoices
+                        loadVoices(); 
                         const updatedUtterance = new SpeechSynthesisUtterance(text);
                         let updatedTargetVoice: SpeechSynthesisVoice | undefined | null = 
                             availableVoices.find(v => v.voiceURI === (activeVoice?.voiceURI) && v.lang.startsWith(lang)) ||
@@ -583,21 +591,19 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                         if (onEndCallback) onEndCallback();
                     }
                 };
-                 setTimeout(() => { // Trigger onvoiceschanged if it doesn't fire automatically
+                 setTimeout(() => { 
                     currentVoices = window.speechSynthesis.getVoices();
                     if(currentVoices.length === 0) {
                          console.warn("Still no voices after delay. Forcing reload attempt.");
-                         loadVoices(); // This call is also correct
+                         loadVoices(); 
                     } else if (window.speechSynthesis.onvoiceschanged) {
-                        // Manually trigger if voices loaded but event didn't fire for some reason
-                         // Ensure to call it as an event handler would, with an Event object
                          const eventHandler = window.speechSynthesis.onvoiceschanged;
                          if (typeof eventHandler === 'function') {
                             eventHandler.call(window.speechSynthesis, new Event('voiceschanged'));
                          }
                     }
-                 }, 250); // Increased timeout slightly
-                 return; // wait for voices
+                 }, 250); 
+                 return; 
             } else {
                  openErrorDialog(lang === 'he' ? "שגיאת קול" : "Voice Error", lang === 'he' ? "לא נטענו קולות." : "Voices not loaded.");
                  if (onEndCallback) onEndCallback();
@@ -608,7 +614,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         const utterance = new SpeechSynthesisUtterance(text);
         let targetVoice: SpeechSynthesisVoice | undefined | null = activeVoice;
 
-        if (!targetVoice || !targetVoice.lang.startsWith(lang)) { // Ensure activeVoice is for current lang
+        if (!targetVoice || !targetVoice.lang.startsWith(lang)) { 
             targetVoice = availableVoices.find(v => v.lang.startsWith(lang) && v.default) ||
                           availableVoices.find(v => v.lang.startsWith(lang));
         }
@@ -677,7 +683,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 setIsListening(false);
                  if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
                      openErrorDialog(lang === 'he' ? "הרשאת מיקרופון נדחתה" : "Microphone Permission Denied", lang === 'he' ? "הגישה למיקרופון נדחתה. אנא אפשר גישה בהגדרות הדפדפן." : "Microphone access was denied. Please allow access in browser settings.");
-                } else if (event.error !== 'no-speech' && event.error !== 'aborted') { // aborted can happen on manual stop
+                } else if (event.error !== 'no-speech' && event.error !== 'aborted') { 
                      openErrorDialog(lang === 'he' ? "שגיאת זיהוי דיבור" : "Speech Recognition Error", `${lang === 'he' ? 'אירעה שגיאה: ' : 'Error occurred: '}${event.error}`);
                 }
             };
@@ -691,18 +697,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                         interimTranscriptPart += event.results[i][0].transcript;
                     }
                 }
-                if (finalTranscriptPart) { // Append final part and a space (unless continuous then no space yet)
+                if (finalTranscriptPart) { 
                      setTranscript(prev => prev + finalTranscriptPart + (continuousConversation ? "" : " "));
                 } else if (interimTranscriptPart) {
-                    // For interim, could update a temporary state or directly update transcript if UX handles it well.
-                    // Current setTranscript might be too frequent. For now, only final updates transcript.
+                    // Interim updates can be handled here if needed
                 }
             };
         }
         
         if (recognitionRef.current) {
-             recognitionRef.current.lang = lang; // Ensure lang is up-to-date
-             recognitionRef.current.continuous = continuousConversation; // Ensure continuous mode is up-to-date
+             recognitionRef.current.lang = lang; 
+             recognitionRef.current.continuous = continuousConversation;
         }
 
         if (recognitionRef.current && !isListening) {
@@ -711,7 +716,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
                 recognitionRef.current.start();
             } catch (e: any) {
                 console.warn("Could not start recognition:", e.message);
-                if (e.name !== 'InvalidStateError') { // InvalidStateError means it's already started or stopping
+                if (e.name !== 'InvalidStateError') { 
                     openErrorDialog(lang === 'he' ? "שגיאת הפעלה" : "Start Error", lang === 'he' ? "לא ניתן היה להתחיל זיהוי דיבור." : "Could not start speech recognition.");
                 }
             }
@@ -723,12 +728,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
             recognitionRef.current.manualStop = true;
             recognitionRef.current.stop();
         }
-        setIsListening(false); // Ensure state updates immediately
+        setIsListening(false); 
     };
 
     const clearTranscript = () => setTranscript("");
     
-    // Use the renamed import for initialAppCustomizationData
     const initialCustomization = userInitialCustomization;
 
 
@@ -738,7 +742,6 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         tokenUsage, loadTokenUsage: loadTokenUsage,
         currentPage, setCurrentPageGlobal,
         showOnboarding, setShowOnboarding,
-        // isSidebarOpen, setIsSidebarOpen, // Removed
         activeVoice, setActiveVoice, availableVoices, loadVoices, speak, stopSpeak, isSpeaking,
         continuousConversation, setContinuousConversation,
         isListening, startListening, stopListening, transcript, setTranscript, clearTranscript,
@@ -747,4 +750,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         validateApiKey, InvokeLLM
     };
     return <AppContext.Provider value={value}>{children}</AppContext.Provider>;
+}
+
+export function AppProvider({ children }: { children: React.ReactNode }) {
+    return <AppProviderInternal>{children}</AppProviderInternal>;
 }

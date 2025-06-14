@@ -23,7 +23,10 @@ export const Select: React.FC<SelectProps> = (props) => {
         ...rest 
     } = props;
 
-    const baseClassName = `px-4 py-3 rounded-xl border bg-slate-50 dark:bg-slate-700 border-slate-300 dark:border-slate-700 focus:ring-2 focus:ring-indigo-500/50 focus:border-indigo-500 outline-none w-full transition-colors duration-150 ease-in-out ${className || ''}`; // Adjusted padding, radius, border, focus
+    const baseClassName = `px-3 py-3 rounded-md border bg-[var(--bg-primary)] border-[var(--border)] text-[var(--text-primary)]
+                           focus:ring-2 focus:ring-[var(--accent)]/50 focus:border-[var(--accent)] 
+                           outline-none w-full transition-colors duration-150 ease-in-out 
+                           disabled:opacity-50 disabled:cursor-not-allowed ${className || ''}`;
 
     const domProps: Omit<React.SelectHTMLAttributes<HTMLSelectElement>, 'value' | 'defaultValue'> = rest;
 

@@ -1,21 +1,60 @@
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+@layer base {
+  :root {
+    /* Base for Dark Theme (Default) */
+    --bg-primary: #202123;
+    --bg-secondary: #343541;
+    --text-primary: #FFFFFF;
+    --text-secondary: #A9A9A9;
+    --accent: #10A37F;
+    --border: #4D4D4F;
+    --success: #28A745;
+    --error: #DC3545;
+    --warning: #FFC107;
+
+    /* Base for Light Theme */
+    --bg-primary-light: #FFFFFF;
+    --bg-secondary-light: #F7F7F8;
+    --text-primary-light: #202123;
+    --text-secondary-light: #6E6E80;
+    /* --accent-light is same as --accent */
+    --border-light: #E5E5E5;
+    /* System colors are the same */
+  }
+
+  .dark {
+    --bg-primary: #202123;
+    --bg-secondary: #343541;
+    --text-primary: #FFFFFF;
+    --text-secondary: #A9A9A9;
+    --border: #4D4D4F;
+  }
+
+  /* When .light class is applied or no .dark (defaulting to light if preferred) */
+  /* This setup assumes .dark is added to html for dark mode */
+  /* For light mode, we can rely on these vars to be set if html has .light or by default */
+  html:not(.dark) {
+    --bg-primary: var(--bg-primary-light);
+    --bg-secondary: var(--bg-secondary-light);
+    --text-primary: var(--text-primary-light);
+    --text-secondary: var(--text-secondary-light);
+    --border: var(--border-light);
+  }
+}
+
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
+  font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
     'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
     sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  color: #333; /* Default text color for light mode */
-}
-
-/* Basic dark mode text color */
-.dark body {
-  color: #ccc;
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  line-height: 1.6; /* Default line height for better readability */
 }
 
 /* Ensure html and body take full height for flex layouts to work correctly */
@@ -23,29 +62,53 @@ html, body, #root {
   height: 100%;
 }
 
-/* Custom scrollbar utilities (optional, if you want thin scrollbars) */
+/* Headings and Text elements based on new typography scale */
+h1, .h1 { font-size: 24px; font-weight: 700; }
+h2, .h2 { font-size: 20px; font-weight: 700; }
+h3, .h3 { font-size: 18px; font-weight: 500; }
+p, .p { font-size: 16px; font-weight: 400; }
+small, .small { font-size: 14px; font-weight: 400; }
+
+
+/* Custom scrollbar utilities */
 @layer utilities {
   .scrollbar-thin {
     scrollbar-width: thin;
-    scrollbar-color: theme('colors.slate.300') theme('colors.transparent');
-  }
-  .dark .scrollbar-thin {
-    scrollbar-color: theme('colors.slate.600') theme('colors.transparent');
-  }
-  .scrollbar-thumb-slate-300::-webkit-scrollbar-thumb {
-    background-color: theme('colors.slate.300');
-    border-radius: 4px;
-  }
-  .dark .scrollbar-thumb-slate-600::-webkit-scrollbar-thumb {
-    background-color: theme('colors.slate.600');
-     border-radius: 4px;
-  }
-  .scrollbar-track-transparent::-webkit-scrollbar-track {
-    background-color: theme('colors.transparent');
+    scrollbar-color: var(--text-secondary) transparent; /* Use theme variable */
   }
    /* For Webkit browsers (Chrome, Safari) */
   .scrollbar-thin::-webkit-scrollbar {
     width: 8px;
     height: 8px;
   }
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: var(--text-secondary); /* Use theme variable */
+    border-radius: 4px;
+  }
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+}
+
+/* Chat message appearance animation */
+.message-appear {
+  animation: fadeInSlideUp 0.2s ease-out forwards;
+}
+
+@keyframes fadeInSlideUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* General transition utility for interactive elements */
+.transition-std {
+  transition-property: color, background-color, border-color, text-decoration-color, fill, stroke, opacity, box-shadow, transform, filter, backdrop-filter;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
 }

@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react"; // Added useEffect
 import { Play, Loader2 } from "lucide-react";
 import { useAppContext, InvokeLLM } from '../../contexts/AppContext';
 import { useUserSettings } from '../../contexts/UserSettingsContext';
@@ -13,23 +13,29 @@ import { Select } from '../../components/ui/Select';
 
 export function AgentArenaPage() {
     const { lang, apiSettings, openErrorDialog, InvokeLLM: InvokeLLMFromContext } = useAppContext(); 
-    const { agents, userProfile, activePersonaId, personas } = useUserSettings();
+    const { agents, userProfile, activePersonaId, personas, markFeatureVisited } = useUserSettings();
 
     const [selectedAgentId, setSelectedAgentId] = useState<string | null>(null);
     const [task, setTask] = useState('');
     const [isLoading, setIsLoading] = useState(false);
     const [agentRunLog, setAgentRunLog] = useState<Array<{type: 'thought' | 'action' | 'observation' | 'final_answer' | 'error', content: string, tool?: string, toolInput?: string}>>([]);
-
+    
     const handleRunAgent = async () => {
         if (!selectedAgentId || !task.trim()) {
-            openErrorDialog(lang === 'he' ? 'קלט חסר' : 'Missing Input', lang === 'he' ? 'אנא בחר סוכן והזן משימה.' : 'Please select an agent and enter a task.');
+            openErrorDialog(
+                lang === 'he' ? 'קלט חסר' : 'Missing Input', 
+                lang === 'he' ? 'אוי, נראה שצריך לבחור סוכן ולהזין משימה כדי להתחיל.' : 'Oops, it looks like you need to select an agent and enter a task to begin.'
+            );
             return;
         }
         const agentConfig = agents.find(a => a.id === selectedAgentId);
         const modelConfig = apiSettings.find(m => m.id === agentConfig?.modelId);
 
         if (!agentConfig || !modelConfig || !modelConfig.isValid) {
-            openErrorDialog(lang === 'he' ? 'תצורת סוכן שגויה' : 'Agent Configuration Error', lang === 'he' ? 'הסוכן או המודל המשויך אליו אינם מוגדרים כראוי או לא תקינים.' : 'The agent or its associated model is not properly configured or invalid.');
+            openErrorDialog(
+                lang === 'he' ? 'תצורת סוכן שגויה' : 'Agent Configuration Error', 
+                lang === 'he' ? 'הממ, הסוכן או המודל שלו לא מוגדרים כמו שצריך או לא תקינים. כדאי לבדוק.' : 'Hmm, the agent or its model isn\'t configured correctly or isn\'t valid. Worth checking!'
+            );
             return;
         }
 
@@ -105,13 +111,13 @@ export function AgentArenaPage() {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-4">
             <Card>
                 <CardHeader>
                     <CardTitle>{lang === 'he' ? 'זירת הפעלת סוכנים' : 'Agent Operation Arena'}</CardTitle>
                     <CardDescription>{lang === 'he' ? 'הפעל סוכנים אוטונומיים לביצוע משימות מורכבות.' : 'Run autonomous agents to perform complex tasks.'}</CardDescription>
                 </CardHeader>
-                <CardContent className="space-y-4">
+                <CardContent className="space-y-3">
                     <div>
                         <Label htmlFor="agent-select">{lang === 'he' ? 'בחר סוכן' : 'Select Agent'}</Label>
                         <Select id="agent-select" value={selectedAgentId || ''} onChange={e => setSelectedAgentId(e.target.value || null)}>
@@ -120,7 +126,7 @@ export function AgentArenaPage() {
                         </Select>
                     </div>
                     {selectedAgentId && agents.find(a=>a.id === selectedAgentId) && (
-                        <div className="text-sm p-3 bg-gray-50 dark:bg-gray-700/50 rounded-md">
+                        <div className="text-sm p-3 bg-[var(--bg-primary)] border border-[var(--border)] rounded-md">
                             <p><strong>{lang === 'he' ? 'מטרת הסוכן:' : 'Agent Goal:'}</strong> {agents.find(a=>a.id === selectedAgentId)?.goal}</p>
                             <p><strong>{lang === 'he' ? 'כלים זמינים:' : 'Tools:'}</strong> {agents.find(a=>a.id === selectedAgentId)?.tools.join(', ')}</p>
                         </div>
@@ -131,8 +137,8 @@ export function AgentArenaPage() {
                     </div>
                 </CardContent>
                 <CardFooter>
-                     <Button onClick={handleRunAgent} disabled={isLoading || !selectedAgentId || !task.trim()}>
-                        {isLoading ? <Loader2 className="w-4 h-4 animate-spin me-2"/> : <Play className="w-4 h-4 me-2"/>}
+                     <Button onClick={handleRunAgent} disabled={isLoading || !selectedAgentId || !task.trim()} variant="default">
+                        {isLoading ? <Loader2 className="w-4 h-4 animate-spin me-1.5"/> : <Play className="w-4 h-4 me-1.5"/>}
                         {lang === 'he' ? 'הפעל סוכן' : 'Run Agent'}
                     </Button>
                 </CardFooter>
@@ -140,18 +146,18 @@ export function AgentArenaPage() {
 
             {agentRunLog.length > 0 && (
                 <Card>
-                    <CardHeader><CardTitle>{lang === 'he' ? 'יומן ריצת סוכן' : 'Agent Run Log'}</CardTitle></CardHeader>
-                    <CardContent className="space-y-2 text-sm max-h-[500px] overflow-y-auto">
+                    <CardHeader><CardTitle className="text-base">{lang === 'he' ? 'יומן ריצת סוכן' : 'Agent Run Log'}</CardTitle></CardHeader>
+                    <CardContent className="space-y-2 text-sm max-h-[400px] overflow-y-auto p-3">
                         {agentRunLog.map((entry, index) => (
-                            <div key={index} className={`p-2 rounded-md ${
-                                entry.type === 'thought' ? 'bg-blue-50 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' :
-                                entry.type === 'action' ? 'bg-yellow-50 dark:bg-yellow-900/30 text-yellow-700 dark:text-yellow-400' :
-                                entry.type === 'observation' ? 'bg-gray-100 dark:bg-gray-700' :
-                                entry.type === 'final_answer' ? 'bg-green-50 dark:bg-green-900/30 text-green-700 dark:text-green-300 font-semibold' :
-                                entry.type === 'error' ? 'bg-red-50 dark:bg-red-900/30 text-red-700 dark:text-red-300' : ''
+                            <div key={index} className={`p-2 rounded-md text-xs border ${
+                                entry.type === 'thought' ? 'bg-[var(--accent)]/10 border-[var(--accent)]/20 text-[var(--text-primary)]' :
+                                entry.type === 'action' ? 'bg-yellow-500/10 border-yellow-500/20 text-[var(--text-primary)]' :
+                                entry.type === 'observation' ? 'bg-[var(--border)]/30 border-[var(--border)]/50 text-[var(--text-secondary)]' :
+                                entry.type === 'final_answer' ? 'bg-green-500/10 border-green-500/20 text-green-400 font-medium' :
+                                entry.type === 'error' ? 'bg-[var(--error)]/10 border-[var(--error)]/20 text-[var(--error)]' : 'border-[var(--border)]'
                             }`}>
                                 <strong className="capitalize">{entry.type.replace('_', ' ')}:</strong>
-                                {entry.tool && <span className="font-mono text-xs ms-1"> ({entry.tool}{entry.toolInput ? `: ${String(entry.toolInput).substring(0,50)}...` : ''})</span>}
+                                {entry.tool && <span className="font-mono text-[10px] ms-1"> ({entry.tool}{entry.toolInput ? `: ${String(entry.toolInput).substring(0,50)}...` : ''})</span>}
                                 <p className="whitespace-pre-wrap mt-0.5">{entry.content}</p>
                             </div>
                         ))}
@@ -161,4 +167,3 @@ export function AgentArenaPage() {
         </div>
     );
 }
-

@@ -1,3 +1,4 @@
+
 import React from 'react';
 
 export interface TabsProps {
@@ -28,15 +29,15 @@ export interface TabsContentProps {
 
 export const Tabs: React.FC<TabsProps> = ({ children, value, onValueChange, className }) => <div className={className}>{React.Children.map(children, child => React.isValidElement(child) ? React.cloneElement(child as React.ReactElement<any>, { activeTab: value, setActiveTab: onValueChange }) : child)}</div>;
 
-export const TabsList: React.FC<TabsListProps> = ({ children, className, activeTab, setActiveTab }) => <div className={`flex border-b border-slate-200 dark:border-slate-700 ${className || ''}`}>{React.Children.map(children, child => React.isValidElement(child) ? React.cloneElement(child as React.ReactElement<any>, { activeTab, setActiveTab }) : child)}</div>;
+export const TabsList: React.FC<TabsListProps> = ({ children, className, activeTab, setActiveTab }) => <div className={`flex border-b border-[var(--border)] ${className || ''}`}>{React.Children.map(children, child => React.isValidElement(child) ? React.cloneElement(child as React.ReactElement<any>, { activeTab, setActiveTab }) : child)}</div>;
 
 export const TabsTrigger: React.FC<TabsTriggerProps> = ({ children, value, activeTab, setActiveTab, className, ...props }) => (
     <button 
         onClick={() => setActiveTab && setActiveTab(value)} 
-        className={`px-4 py-3 text-sm font-medium transition-colors focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-1 dark:focus:ring-offset-slate-900 rounded-t-md
+        className={`px-4 py-2.5 text-sm font-medium transition-colors focus:outline-none focus:ring-1 focus:ring-[var(--accent)] focus:z-10 
                     ${activeTab === value 
-                        ? 'border-b-2 border-indigo-500 text-indigo-600 dark:text-indigo-400' 
-                        : 'text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 border-b-2 border-transparent hover:border-slate-300 dark:hover:border-slate-600'} 
+                        ? 'border-b-2 border-[var(--accent)] text-[var(--accent)]' 
+                        : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] border-b-2 border-transparent hover:border-[var(--border)]'} 
                     ${className || ''}`} 
         {...props}
     >
@@ -44,4 +45,4 @@ export const TabsTrigger: React.FC<TabsTriggerProps> = ({ children, value, activ
     </button>
 );
 
-export const TabsContent: React.FC<TabsContentProps> = ({ children, value, activeTab, className }) => activeTab === value ? <div className={`pt-6 ${className || ''}`}>{children}</div> : null;
+export const TabsContent: React.FC<TabsContentProps> = ({ children, value, activeTab, className }) => activeTab === value ? <div className={`pt-4 ${className || ''}`}>{children}</div> : null; // pt-4 (16px)

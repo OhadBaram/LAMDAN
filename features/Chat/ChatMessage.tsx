@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Bot, User as UserIcon, Volume2 } from "lucide-react";
 import { useAppContext, ChatMessageItem } from '../../contexts/AppContext';
@@ -7,62 +8,85 @@ import { Button } from '../../components/ui/Button';
 interface ChatMessageProps {
     message: ChatMessageItem;
     onSpeak: (text: string) => void;
+    onSuggestionClick?: (suggestionText: string) => void; // For action suggestions
 }
 
-export const ChatMessage: React.FC<ChatMessageProps> = ({ message, onSpeak }) => {
-    const { lang } = useAppContext();
+export const ChatMessage: React.FC<ChatMessageProps> = ({ message, onSpeak, onSuggestionClick }) => {
+    const { lang, theme } = useAppContext(); // Use theme from AppContext for correct color var resolution
     const { userProfile } = useUserSettings();
     const isUser = message.role === 'user';
     const alignClass = isUser ? 'justify-end' : 'justify-start';
     
-    const bubbleBaseStyle = "max-w-xl md:max-w-2xl p-3.5 rounded-2xl shadow-md"; // rounded-xl to rounded-2xl
-    const userBubbleStyle = "bg-indigo-500 text-white"; // bg-indigo-600, removed rounded-br-lg for global rounding
-    const botBubbleStyle = "bg-slate-100 dark:bg-slate-700 text-slate-800 dark:text-slate-100 border border-slate-200 dark:border-slate-600"; // Updated bot bubble style
-    const errorBubbleStyle = "bg-red-100 dark:bg-red-800/60 border border-red-500 dark:border-red-600";
+    // Consistent padding and slightly less rounded corners to match ChatGPT
+    const bubbleBaseStyle = "max-w-xl md:max-w-2xl p-3 rounded-lg shadow-sm"; 
     
-    const bubbleClass = isUser ? userBubbleStyle : botBubbleStyle;
+    // User bubble: accent background, text-primary-light (white) for contrast
+    // Bot bubble: secondary background, text-primary (theme dependent)
+    const userBubbleStyle = "bg-[var(--accent)] text-[var(--text-primary-light)]"; 
+    const botBubbleStyle = "bg-[var(--bg-secondary)] text-[var(--text-primary)]"; 
+    
+    // Error bubble: distinct error color, ensure text readable on it
+    const errorBubbleStyle = "bg-[var(--error)]/20 border border-[var(--error)] text-[var(--error)]"; // Lighter bg, border, direct error text
+    
+    const bubbleClass = isUser ? userBubbleStyle : (message.isError ? errorBubbleStyle : botBubbleStyle);
 
     const profileImage = isUser ? userProfile?.userImage : userProfile?.botImage;
     const ProfileIcon = isUser ? UserIcon : Bot;
-    const profileIconBg = isUser ? 'bg-slate-200 dark:bg-slate-600 text-slate-500' : 'bg-indigo-100 dark:bg-indigo-900 text-indigo-500';
+    
+    // Profile icon background: subtle, using --border or a shade of --bg-primary
+    const profileIconBg = isUser ? 'bg-[var(--border)] text-[var(--text-secondary)]' : 'bg-[var(--border)] text-[var(--accent)]';
+
 
     const showSpeaker = !isUser && message.content && onSpeak && !message.isError;
 
+    // Chat font size from userProfile, default to 16px as per typography guide
+    const chatFontSize = userProfile?.chatFontSize || 16;
+
     return (
-        <div className={`flex items-end gap-2.5 mb-5 ${alignClass}`}>
+        <div className={`flex items-end gap-2 mb-4 ${alignClass} message-appear`}>
             {!isUser && (
                 profileImage ? 
-                    <img src={profileImage} alt="Bot" className="w-9 h-9 rounded-full object-cover self-start flex-shrink-0"/> : 
-                    <ProfileIcon className={`w-9 h-9 p-1.5 rounded-full self-start flex-shrink-0 ${profileIconBg}`} />
+                    <img src={profileImage} alt="Bot" className="w-8 h-8 rounded-md object-cover self-start flex-shrink-0"/> : 
+                    <ProfileIcon className={`w-8 h-8 p-1.5 rounded-md self-start flex-shrink-0 ${profileIconBg}`} />
             )}
-            <div className={`${bubbleBaseStyle} ${message.isError ? errorBubbleStyle : bubbleClass}`}>
+            <div className={`${bubbleBaseStyle} ${bubbleClass}`}>
                 <p
-                    className={`whitespace-pre-wrap leading-relaxed ${message.isError ? (isUser ? 'text-red-50' : 'text-red-700 dark:text-red-200') : ''}`}
-                    style={{
-                        fontSize: `${userProfile?.chatFontSize || 15}px`, 
-                        color: isUser ? undefined : (message.isError ? undefined : (theme === 'dark' ? userProfile?.chatFontColor || '#e2e8f0' : userProfile?.chatFontColor || '#1e293b'))
-                    }}
+                    className={`whitespace-pre-wrap leading-relaxed`}
+                    style={{ fontSize: `${chatFontSize}px`}} // Font color handled by bubbleClass
                 >
                     {message.content}
                 </p>
                 <div className="text-xs mt-1.5 flex justify-between items-center">
-                    <span className={isUser ? 'text-indigo-200' : (message.isError ? 'text-red-400 dark:text-red-500' : 'text-slate-400 dark:text-slate-500') }>
+                    <span className={isUser ? 'text-[var(--text-primary-light)]/70' : (message.isError ? 'text-[var(--error)]/80' : 'text-[var(--text-secondary)]') }>
                         {new Date(message.timestamp).toLocaleTimeString(lang === 'he' ? 'he-IL' : 'en-US', { hour: '2-digit', minute: '2-digit' })}
                     </span>
                     {showSpeaker && (
-                        <Button size="icon" variant="ghost" onClick={() => onSpeak(message.content)} className="p-1 h-auto w-auto text-slate-500 hover:text-indigo-500 rounded-full">
-                            <Volume2 className="w-4 h-4" />
+                        <Button size="icon" variant="ghost" onClick={() => onSpeak(message.content)} className="p-1 h-auto w-auto text-[var(--text-secondary)] hover:text-[var(--accent)] rounded-md">
+                            <Volume2 className="w-3.5 h-3.5" />
                         </Button>
                     )}
                 </div>
+                 {!isUser && !message.isError && message.suggestions && message.suggestions.length > 0 && onSuggestionClick && (
+                    <div className="mt-2 pt-1.5 border-t border-[var(--border)] flex flex-wrap gap-1.5">
+                        {message.suggestions.slice(0, 3).map((suggestion, idx) => (
+                            <Button
+                                key={idx}
+                                variant="outline" // Will use bg-transparent border-[var(--border)] text-[var(--text-primary)] hover:bg-[var(--bg-secondary)]
+                                size="sm"
+                                className="text-xs !px-2 !py-1"
+                                onClick={() => onSuggestionClick(suggestion)}
+                            >
+                                {suggestion}
+                            </Button>
+                        ))}
+                    </div>
+                )}
             </div>
              {isUser && (
                 profileImage ? 
-                    <img src={profileImage || ''} alt={userProfile?.userName || 'User'} className="w-9 h-9 rounded-full object-cover self-start flex-shrink-0"/> : 
-                    <ProfileIcon className={`w-9 h-9 p-1.5 rounded-full self-start flex-shrink-0 ${profileIconBg}`} />
+                    <img src={profileImage || ''} alt={userProfile?.userName || 'User'} className="w-8 h-8 rounded-md object-cover self-start flex-shrink-0"/> : 
+                    <ProfileIcon className={`w-8 h-8 p-1.5 rounded-md self-start flex-shrink-0 ${profileIconBg}`} />
             )}
         </div>
     );
 }
-// Helper to get theme, assuming userProfile might not always be up-to-date with global theme immediately
-const theme = document.documentElement.classList.contains('dark') ? 'dark' : 'light';
