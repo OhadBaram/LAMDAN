@@ -4,8 +4,8 @@ import { format, endOfMonth, eachDayOfInterval, getDay, addMonths, isSameMonth }
 import startOfMonth from 'date-fns/startOfMonth';
 import subMonths from 'date-fns/subMonths';
 import parseISO from 'date-fns/parseISO';
-import { he } from 'date-fns/locale/he';
-import { enUS } from 'date-fns/locale/enUS';
+import he from 'date-fns/locale/he'; // Standard default import
+import enUS from 'date-fns/locale/en-US'; // Standard default import with canonical name
 
 import { useAppContext, ApiSetting, KNOWN_MODELS_PRICING, PROVIDER_INFO } from '../../contexts/AppContext';
 import { useUserSettings, initialAppCustomizationData, SavedPrompt, Persona, AppCustomization, CostManagement } from '../../contexts/UserSettingsContext';
@@ -794,14 +794,14 @@ interface CalendarViewProps {
     lang: string;
 }
 function CalendarView({ date, data, lang }: CalendarViewProps) {
-    const locale = lang === 'he' ? he : enUS;
-    const daysOfWeek = Array.from({ length: 7 }, (_, i) => format(new Date(2023, 0, i + (locale.options?.weekStartsOn || 0)), 'eee', { locale }));
+    const currentLocale = lang === 'he' ? he : enUS; // Use the imported locale objects
+    const daysOfWeek = Array.from({ length: 7 }, (_, i) => format(new Date(2023, 0, i + (currentLocale.options?.weekStartsOn || 0)), 'eee', { locale: currentLocale }));
 
     const startDate = startOfMonth(date);
     const endDate = endOfMonth(date);
     const daysInMonth = eachDayOfInterval({ start: startDate, end: endDate });
 
-    let startingDayIndex = getDay(startDate) - (locale.options?.weekStartsOn || 0);
+    let startingDayIndex = getDay(startDate) - (currentLocale.options?.weekStartsOn || 0);
     if (startingDayIndex < 0) startingDayIndex += 7;
 
     return (
@@ -839,6 +839,7 @@ function CalendarView({ date, data, lang }: CalendarViewProps) {
 function UsageDashboard() {
     const { lang, tokenUsage } = useAppContext(); // apiSettings removed as not directly used here
     const [currentDate, setCurrentDate] = useState(new Date());
+    const currentLocale = lang === 'he' ? he : enUS; // Use the imported locale objects
 
     const filteredData = tokenUsage.filter(d => {
         const recordDate = parseISO(d.date);
@@ -871,7 +872,7 @@ function UsageDashboard() {
                 <div className="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
                     <div className="flex items-center gap-2">
                         <Button variant="outline" size="icon" onClick={() => setCurrentDate(subMonths(currentDate, 1))} className="rounded-full"><ChevronLeft/></Button>
-                        <h3 className="text-xl font-semibold w-48 text-center text-slate-700 dark:text-slate-200">{format(currentDate, 'MMMM yyyy', { locale: lang === 'he' ? he : enUS })}</h3>
+                        <h3 className="text-xl font-semibold w-48 text-center text-slate-700 dark:text-slate-200">{format(currentDate, 'MMMM yyyy', { locale: currentLocale })}</h3>
                         <Button variant="outline" size="icon" onClick={() => setCurrentDate(addMonths(currentDate, 1))} className="rounded-full"><ChevronRight/></Button>
                     </div>
                 </div>
