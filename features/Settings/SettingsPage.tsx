@@ -5,8 +5,8 @@ import { format, endOfMonth, eachDayOfInterval, getDay, addMonths, isSameMonth }
 import startOfMonth from 'date-fns/startOfMonth';
 import subMonths from 'date-fns/subMonths';
 import parseISO from 'date-fns/parseISO';
-import { he } from 'date-fns/locale/he';
-import { enUS } from 'date-fns/locale/enUS';
+import he from 'date-fns/locale/he';
+import enUS from 'date-fns/locale/enUS';
 
 import { useAppContext, ApiSetting, KNOWN_MODELS_PRICING, PROVIDER_INFO } from '../../contexts/AppContext';
 import { useUserSettings, initialAppCustomizationData, SavedPrompt, Persona, AppCustomization, CostManagement } from '../../contexts/UserSettingsContext';
