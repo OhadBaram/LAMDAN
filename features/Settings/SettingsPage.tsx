@@ -4,8 +4,8 @@ import { format, endOfMonth, eachDayOfInterval, getDay, addMonths, isSameMonth }
 import startOfMonth from 'date-fns/startOfMonth';
 import subMonths from 'date-fns/subMonths';
 import parseISO from 'date-fns/parseISO';
-import he from 'date-fns/locale/he'; // Standard default import
-import enUS from 'date-fns/locale/en-US'; // Standard default import with canonical name
+import { he } from 'date-fns/locale/he'; // Updated locale imports
+import { enUS } from 'date-fns/locale/en-US'; // Updated locale imports
 
 import { useAppContext, ApiSetting, KNOWN_MODELS_PRICING, PROVIDER_INFO } from '../../contexts/AppContext';
 import { useUserSettings, initialAppCustomizationData, SavedPrompt, Persona, AppCustomization, CostManagement } from '../../contexts/UserSettingsContext';
@@ -794,7 +794,7 @@ interface CalendarViewProps {
     lang: string;
 }
 function CalendarView({ date, data, lang }: CalendarViewProps) {
-    const currentLocale = lang === 'he' ? he : enUS; // Use the imported locale objects
+    const currentLocale = lang === 'he' ? he : enUS;
     const daysOfWeek = Array.from({ length: 7 }, (_, i) => format(new Date(2023, 0, i + (currentLocale.options?.weekStartsOn || 0)), 'eee', { locale: currentLocale }));
 
     const startDate = startOfMonth(date);
@@ -837,9 +837,9 @@ function CalendarView({ date, data, lang }: CalendarViewProps) {
 }
 
 function UsageDashboard() {
-    const { lang, tokenUsage } = useAppContext(); // apiSettings removed as not directly used here
+    const { lang, tokenUsage } = useAppContext();
     const [currentDate, setCurrentDate] = useState(new Date());
-    const currentLocale = lang === 'he' ? he : enUS; // Use the imported locale objects
+    const currentLocale = lang === 'he' ? he : enUS;
 
     const filteredData = tokenUsage.filter(d => {
         const recordDate = parseISO(d.date);
