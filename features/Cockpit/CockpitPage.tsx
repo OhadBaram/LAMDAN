@@ -6,32 +6,41 @@ import { parseISO } from 'date-fns/parseISO';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell as RechartsCell } from 'recharts';
 
 import { useAppContext } from '../../contexts/AppContext';
-import { useUserSettings, CostManagement } from '../../contexts/UserSettingsContext';
+import { useUserSettings, CostManagement, initialAppCustomizationData } from '../../contexts/UserSettingsContext'; // Added initialAppCustomizationData for initialCostManagementData structure
 
 import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Label } from '../../components/ui/Label';
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../../components/ui/Card';
 
+// Use the structure from UserSettingsContext for initial data
+const initialBudgetsData: CostManagement = { 
+    dailyBudget: 0, 
+    weeklyBudget: 0, 
+    monthlyBudget: 0, 
+    alertEmail: '' 
+};
+
 export function CockpitPage() {
     const { lang, tokenUsage, apiSettings } = useAppContext();
     const { costManagement, setCostManagements } = useUserSettings();
 
-    const initialBudgets: CostManagement = {
-        dailyBudget: 0,
-        weeklyBudget: 0,
-        monthlyBudget: 0,
-        alertEmail: ''
-    };
-    const [editingBudgets, setEditingBudgets] = useState<CostManagement>(costManagement || initialBudgets);
+    
+    const [editingBudgets, setEditingBudgets] = useState<CostManagement>(() => {
+        return {
+            dailyBudget: costManagement?.dailyBudget ?? initialBudgetsData.dailyBudget,
+            weeklyBudget: costManagement?.weeklyBudget ?? initialBudgetsData.weeklyBudget,
+            monthlyBudget: costManagement?.monthlyBudget ?? initialBudgetsData.monthlyBudget,
+            alertEmail: costManagement?.alertEmail ?? initialBudgetsData.alertEmail
+        };
+    });
 
     useEffect(() => {
-        // Ensure that costManagement from context is used and defaults are applied if fields are missing/null
         setEditingBudgets({
-            dailyBudget: costManagement?.dailyBudget || 0,
-            weeklyBudget: costManagement?.weeklyBudget || 0,
-            monthlyBudget: costManagement?.monthlyBudget || 0,
-            alertEmail: costManagement?.alertEmail || ''
+            dailyBudget: costManagement?.dailyBudget ?? initialBudgetsData.dailyBudget,
+            weeklyBudget: costManagement?.weeklyBudget ?? initialBudgetsData.weeklyBudget,
+            monthlyBudget: costManagement?.monthlyBudget ?? initialBudgetsData.monthlyBudget,
+            alertEmail: costManagement?.alertEmail ?? initialBudgetsData.alertEmail
         });
     }, [costManagement]);
 
@@ -59,7 +68,7 @@ export function CockpitPage() {
     const chartDataProviders = Object.entries(costByProvider).map(([name, value]) => ({ name, cost: value }));
 
     const costOverTime = tokenUsage
-        .filter(item => { // Filter out invalid dates before processing
+        .filter(item => { 
             try {
                 parseISO(item.date);
                 return true;

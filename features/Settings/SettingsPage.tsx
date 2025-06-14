@@ -77,18 +77,18 @@ function ProfileSettings() {
     const { lang } = useAppContext();
     const { userProfile, setUserProfile } = useUserSettings();
 
-    const [name, setName] = useState(userProfile?.userName || '');
-    const [image, setImage] = useState(userProfile?.userImage || '');
-    const [systemPrompt, setSystemPrompt] = useState(userProfile?.systemPrompt || '');
-    const [botName, setBotName] = useState(userProfile?.botName || 'LUMINA');
-    const [botImage, setBotImage] = useState(userProfile?.botImage || '');
+    const [name, setName] = useState(userProfile?.userName ?? '');
+    const [image, setImage] = useState(userProfile?.userImage ?? ''); // Can be null if no image
+    const [systemPrompt, setSystemPrompt] = useState(userProfile?.systemPrompt ?? '');
+    const [botName, setBotName] = useState(userProfile?.botName ?? 'LUMINA');
+    const [botImage, setBotImage] = useState(userProfile?.botImage ?? ''); // Can be null
 
     useEffect(() => {
-        setName(userProfile?.userName || '');
-        setImage(userProfile?.userImage || '');
-        setSystemPrompt(userProfile?.systemPrompt || '');
-        setBotName(userProfile?.botName || 'LUMINA');
-        setBotImage(userProfile?.botImage || '');
+        setName(userProfile?.userName ?? '');
+        setImage(userProfile?.userImage ?? '');
+        setSystemPrompt(userProfile?.systemPrompt ?? '');
+        setBotName(userProfile?.botName ?? 'LUMINA');
+        setBotImage(userProfile?.botImage ?? '');
     }, [userProfile]);
 
     const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>, setImageCallback: React.Dispatch<React.SetStateAction<string>>) => {
@@ -102,12 +102,12 @@ function ProfileSettings() {
 
     const handleSave = () => {
         setUserProfile({ 
-            ...(userProfile || initialAppCustomizationData), // Ensure userProfile is not null
+            ...(userProfile || initialAppCustomizationData), 
             userName: name, 
-            userImage: image, 
+            userImage: image || null, // Ensure null if empty string
             systemPrompt: systemPrompt, 
             botName: botName, 
-            botImage: botImage 
+            botImage: botImage || null // Ensure null if empty string
         });
     };
 
@@ -158,11 +158,11 @@ function SavedPromptsSettings() {
     const dragOverItem = useRef<number | null>(null);
 
     const handleAddNewPrompt = () => {
-        setEditingPrompt({ title: '', content: '' }); // Ensure title and content are initialized to ''
+        setEditingPrompt({ title: '', content: '' }); 
         setShowPromptDialog(true);
     };
     const handleEditPrompt = (prompt: SavedPrompt) => {
-        setEditingPrompt(prompt);
+        setEditingPrompt(prompt); // prompt object already has non-null title/content
         setShowPromptDialog(true);
     };
     const handleSavePrompt = async () => {
@@ -236,11 +236,11 @@ function SavedPromptsSettings() {
                 <DialogContent className="p-6 space-y-4">
                     <div>
                         <Label htmlFor="promptTitle">{lang === 'he' ? 'כותרת' : 'Title'}</Label>
-                        <Input id="promptTitle" value={editingPrompt?.title || ''} onChange={(e) => setEditingPrompt(p => ({...p, title: e.target.value}))} />
+                        <Input id="promptTitle" value={editingPrompt?.title ?? ''} onChange={(e) => setEditingPrompt(p => ({...(p || { title: '', content: ''}), title: e.target.value}))} />
                     </div>
                     <div>
                         <Label htmlFor="promptContent">{lang === 'he' ? 'תוכן ההנחיה' : 'Prompt Content'}</Label>
-                        <Textarea id="promptContent" value={editingPrompt?.content || ''} onChange={(e) => setEditingPrompt(p => ({...p, content: e.target.value}))} rows={5}/>
+                        <Textarea id="promptContent" value={editingPrompt?.content ?? ''} onChange={(e) => setEditingPrompt(p => ({...(p || { title: '', content: ''}), content: e.target.value}))} rows={5}/>
                     </div>
                 </DialogContent>
                 <DialogFooter>
@@ -256,7 +256,6 @@ function AppearanceSettings() {
     const { lang, theme, toggleTheme, activeVoice, setActiveVoice, availableVoices, speak, openErrorDialog, loadVoices } = useAppContext();
     const { userProfile, setUserProfile } = useUserSettings();
     
-    // Ensure customization state is always initialized with valid, non-null values for controlled components
     const [customization, setCustomizationState] = useState<AppCustomization>(() => {
         const profile = userProfile || initialAppCustomizationData;
         return {
@@ -265,12 +264,11 @@ function AppearanceSettings() {
             chatBgColor: profile.chatBgColor || initialAppCustomizationData.chatBgColor || '#f4f6f8',
             chatFontColor: profile.chatFontColor || initialAppCustomizationData.chatFontColor || '#34495e',
             chatFontSize: profile.chatFontSize || initialAppCustomizationData.chatFontSize || 14,
-            botVoiceURI: profile.botVoiceURI || null, // Fine for Select as it handles null
-            // Other fields from AppCustomization can remain as they are if not directly tied to input values
+            botVoiceURI: profile.botVoiceURI || null,
             userName: profile.userName || initialAppCustomizationData.userName || '',
-            userImage: profile.userImage || initialAppCustomizationData.userImage || null,
+            userImage: profile.userImage || null,
             botName: profile.botName || initialAppCustomizationData.botName || '',
-            botImage: profile.botImage || initialAppCustomizationData.botImage || null,
+            botImage: profile.botImage || null,
             systemPrompt: profile.systemPrompt || initialAppCustomizationData.systemPrompt || '',
         };
     });
@@ -278,18 +276,18 @@ function AppearanceSettings() {
     useEffect(() => {
         const profile = userProfile || initialAppCustomizationData;
         setCustomizationState(prev => ({
-            ...prev, // Keep existing valid states
+            ...prev,
             headerBgColor: profile.headerBgColor || initialAppCustomizationData.headerBgColor || '#2c3e50',
             headerTitleColor: profile.headerTitleColor || initialAppCustomizationData.headerTitleColor || '#ecf0f1',
             chatBgColor: profile.chatBgColor || initialAppCustomizationData.chatBgColor || '#f4f6f8',
             chatFontColor: profile.chatFontColor || initialAppCustomizationData.chatFontColor || '#34495e',
             chatFontSize: profile.chatFontSize || initialAppCustomizationData.chatFontSize || 14,
-            botVoiceURI: (activeVoice && !profile.botVoiceURI) ? activeVoice.voiceURI : (profile.botVoiceURI || null),
-            userName: profile.userName || initialAppCustomizationData.userName || '',
-            userImage: profile.userImage || initialAppCustomizationData.userImage || null,
-            botName: profile.botName || initialAppCustomizationData.botName || '',
-            botImage: profile.botImage || initialAppCustomizationData.botImage || null,
-            systemPrompt: profile.systemPrompt || initialAppCustomizationData.systemPrompt || '',
+            botVoiceURI: (activeVoice && !profile.botVoiceURI) ? activeVoice.voiceURI : (profile.botVoiceURI ?? null),
+            userName: profile.userName ?? initialAppCustomizationData.userName ?? '',
+            userImage: profile.userImage ?? null,
+            botName: profile.botName ?? initialAppCustomizationData.botName ?? '',
+            botImage: profile.botImage ?? null,
+            systemPrompt: profile.systemPrompt ?? initialAppCustomizationData.systemPrompt ?? '',
         }));
     }, [userProfile, activeVoice]);
 
@@ -304,8 +302,8 @@ function AppearanceSettings() {
 
     const handleResetAppearance = async () => {
         const resetData = {
-            ...initialAppCustomizationData, // Start with defaults
-            botVoiceURI: null // Ensure voice is reset if needed, or set to a default from loadVoices
+            ...initialAppCustomizationData,
+            botVoiceURI: null 
         };
         setCustomizationState(resetData);
         await setUserProfile(resetData); 
@@ -435,10 +433,10 @@ function ApiSettingsSection() {
         apiKey: '',
         apiUrl: '',
         costs: KNOWN_MODELS_PRICING[PROVIDER_INFO.openai.defaultModel] || { input: 0, output: 0 },
-        isFreeTier: KNOWN_MODELS_PRICING[PROVIDER_INFO.openai.defaultModel]?.isFreeTier || false,
+        isFreeTier: KNOWN_MODELS_PRICING[PROVIDER_INFO.openai.defaultModel]?.isFreeTier ?? false, // Ensure boolean
         modelSystemPrompt: '',
-        isDefault: false,
-        isValid: false,
+        isDefault: false, // Ensure boolean
+        isValid: false, // Ensure boolean
     });
 
 
@@ -448,16 +446,17 @@ function ApiSettingsSection() {
     };
 
     const handleEditModel = (model: ApiSetting) => {
-        // Ensure all relevant fields from model are spread, and default to empty strings or false for controlled components if necessary
         setEditingModel({
-            ...getInitialEditingModel(), // Start with a full default structure
-            ...model, // Spread the actual model data
-            name: model.name || '',
-            apiKey: model.apiKey || '',
-            apiUrl: model.apiUrl || '',
-            modelSystemPrompt: model.modelSystemPrompt || '',
-            isFreeTier: model.isFreeTier || false,
-            isDefault: model.isDefault || false,
+            ...getInitialEditingModel(), 
+            ...model, 
+            name: model.name ?? '',
+            apiKey: model.apiKey ?? '',
+            apiUrl: model.apiUrl ?? '',
+            modelSystemPrompt: model.modelSystemPrompt ?? '',
+            isFreeTier: model.isFreeTier ?? false,
+            isDefault: model.isDefault ?? false,
+            isValid: model.isValid ?? false,
+            costs: model.costs || {input:0, output:0} // Ensure costs is not undefined
         });
         setShowAddModelDialog(true);
     };
@@ -532,7 +531,7 @@ function ApiSettingsSection() {
 
         const handleCostChange = (type: 'input' | 'output', value: string) => {
             const numValue = parseFloat(value);
-            onChange({ ...(costs || {input:0, output:0}), [type]: isNaN(numValue) ? undefined : numValue }); // ensure costs is not undefined
+            onChange({ ...(costs || {input:0, output:0}), [type]: isNaN(numValue) ? undefined : numValue });
         };
 
         const isGoogleTiered = provider === 'google' && modelId && modelId.includes('gemini-1.5-pro');
@@ -606,7 +605,7 @@ function ApiSettingsSection() {
                                         <Button size="sm" variant="outline" onClick={() => handleValidateModel(model)} disabled={validatingModelId === model.id}>
                                             {validatingModelId === model.id ? <Loader2 className="w-4 h-4 animate-spin"/> : <Check className="w-3 h-3 me-1"/>} {lang === 'he' ? 'בדוק' : 'Validate'}
                                         </Button>
-                                        <Button size="sm" variant="outline" onClick={() => handleSetDefault(model.id)} disabled={model.isDefault}>{lang === 'he' ? 'ברירת מחדל' : 'Set Default'}</Button>
+                                        <Button size="sm" variant="outline" onClick={() => handleSetDefault(model.id)} disabled={model.isDefault ?? false}>{lang === 'he' ? 'ברירת מחדל' : 'Set Default'}</Button>
                                         <Button size="sm" variant="outline" onClick={() => handleEditModel(model)}><Edit3 className="w-3 h-3 me-1"/>{lang === 'he' ? 'ערוך' : 'Edit'}</Button>
                                         <Button size="sm" variant="destructive" onClick={() => handleDeleteConfirm(model.id)}><Trash2 className="w-3 h-3 me-1"/>{lang === 'he' ? 'מחק' : 'Delete'}</Button>
                                         </div>
@@ -626,7 +625,7 @@ function ApiSettingsSection() {
                 <DialogContent className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
                     <div>
                         <Label htmlFor="modelName">{lang === 'he' ? 'שם תצוגה למודל' : 'Model Display Name'} <span className="text-red-500">*</span></Label>
-                        <Input id="modelName" value={editingModel?.name ?? ''} onChange={(e) => setEditingModel(p => ({...p, name: e.target.value}))} placeholder={lang === 'he' ? 'למשל, OpenAI GPT-4 שלי' : 'e.g., My OpenAI GPT-4'}/>
+                        <Input id="modelName" value={editingModel?.name ?? ''} onChange={(e) => setEditingModel(p => ({...(p ?? getInitialEditingModel()), name: e.target.value}))} placeholder={lang === 'he' ? 'למשל, OpenAI GPT-4 שלי' : 'e.g., My OpenAI GPT-4'}/>
                     </div>
                      <div>
                         <Label htmlFor="provider">{lang === 'he' ? 'ספק API' : 'API Provider'} <span className="text-red-500">*</span></Label>
@@ -635,12 +634,12 @@ function ApiSettingsSection() {
                              const defaultModelForProvider = PROVIDER_INFO[selectedProvider]?.defaultModel || '';
                              const knownPricingForModel = KNOWN_MODELS_PRICING[defaultModelForProvider];
                              setEditingModel(p => ({
-                                 ...(p || getInitialEditingModel()), // ensure p is not null
+                                 ...(p ?? getInitialEditingModel()), 
                                  provider: selectedProvider,
                                  modelId: defaultModelForProvider,
                                  costs: knownPricingForModel ? {input: knownPricingForModel.input, output: knownPricingForModel.output} : {input:0, output:0},
-                                 isFreeTier: knownPricingForModel?.isFreeTier || false,
-                                 apiKey: selectedProvider === 'google' ? '' : (p?.apiKey ?? ''), // Clear API key for Google, retain for others
+                                 isFreeTier: knownPricingForModel?.isFreeTier ?? false,
+                                 apiKey: selectedProvider === 'google' ? '' : (p?.apiKey ?? ''), 
                                  apiUrl: PROVIDER_INFO[selectedProvider]?.requiresEndpoint ? '' : undefined 
                             }));
                         }}>
@@ -660,10 +659,10 @@ function ApiSettingsSection() {
                                 const newModelId = e.target.value;
                                 const knownPricing = KNOWN_MODELS_PRICING[newModelId];
                                 setEditingModel(p => ({
-                                    ...(p || getInitialEditingModel()),
+                                    ...(p ?? getInitialEditingModel()),
                                     modelId: newModelId,
                                     costs: knownPricing ? {input: knownPricing.input, output: knownPricing.output} : {input:0, output:0},
-                                    isFreeTier: knownPricing?.isFreeTier || false
+                                    isFreeTier: knownPricing?.isFreeTier ?? false
                                 }));
                             }}>
                                 <option value="" disabled>{lang === 'he' ? 'בחר מזהה מודל...' : 'Select model ID...'}</option>
@@ -675,40 +674,40 @@ function ApiSettingsSection() {
                                 <option value="custom">{lang === 'he' ? 'מותאם אישית...' : 'Custom...'}</option>
                             </Select>
                             {editingModel?.modelId === 'custom' && (
-                                 <Input type="text" value={(editingModel as any)?.modelIdIfCustom || ''} onChange={(e) => setEditingModel(p => ({...(p || getInitialEditingModel()), modelIdIfCustom: e.target.value, modelId: e.target.value}))} placeholder={lang === 'he' ? "הזן מזהה מודל מותאם אישית" : "Enter custom model ID"} className="mt-2"/>
+                                 <Input type="text" value={(editingModel as any)?.modelIdIfCustom || ''} onChange={(e) => setEditingModel(p => ({...(p ?? getInitialEditingModel()), modelIdIfCustom: e.target.value, modelId: e.target.value}))} placeholder={lang === 'he' ? "הזן מזהה מודל מותאם אישית" : "Enter custom model ID"} className="mt-2"/>
                             )}
                         </div>
                     )}
                     {editingModel?.provider !== 'google' && (
                         <div>
                             <Label htmlFor="apiKey">{lang === 'he' ? 'מפתח API' : 'API Key'} <span className="text-red-500">*</span></Label>
-                            <Input id="apiKey" type="password" value={editingModel?.apiKey ?? ''} onChange={(e) => setEditingModel(p => ({...(p || getInitialEditingModel()), apiKey: e.target.value}))} placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxx"/>
+                            <Input id="apiKey" type="password" value={editingModel?.apiKey ?? ''} onChange={(e) => setEditingModel(p => ({...(p ?? getInitialEditingModel()), apiKey: e.target.value}))} placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxx"/>
                         </div>
                     )}
                      {PROVIDER_INFO[editingModel?.provider || '']?.requiresEndpoint && (
                          <div>
                             <Label htmlFor="apiUrl">{lang === 'he' ? 'כתובת API Endpoint (נדרש עבור Azure)' : 'API Endpoint URL (Required for Azure)'}</Label>
-                            <Input id="apiUrl" value={editingModel?.apiUrl ?? ''} onChange={(e) => setEditingModel(p => ({...(p || getInitialEditingModel()), apiUrl: e.target.value}))} placeholder="https://YOUR_RESOURCE_NAME.openai.azure.com"/>
+                            <Input id="apiUrl" value={editingModel?.apiUrl ?? ''} onChange={(e) => setEditingModel(p => ({...(p ?? getInitialEditingModel()), apiUrl: e.target.value}))} placeholder="https://YOUR_RESOURCE_NAME.openai.azure.com"/>
                         </div>
                      )}
                      {!PROVIDER_INFO[editingModel?.provider || '']?.requiresEndpoint && editingModel?.provider !== 'google' && (
                         <div>
                             <Label htmlFor="apiUrl">{lang === 'he' ? 'כתובת API Endpoint (אופציונלי, רק למקרים מיוחדים)' : 'API Endpoint URL (Optional, for special cases only)'}</Label>
-                            <Input id="apiUrl" value={editingModel?.apiUrl ?? ''} onChange={(e) => setEditingModel(p => ({...(p || getInitialEditingModel()), apiUrl: e.target.value}))} placeholder={lang === 'he' ? 'השאר ריק עבור רוב הספקים' : 'Leave blank for most providers'}/>
+                            <Input id="apiUrl" value={editingModel?.apiUrl ?? ''} onChange={(e) => setEditingModel(p => ({...(p ?? getInitialEditingModel()), apiUrl: e.target.value}))} placeholder={lang === 'he' ? 'השאר ריק עבור רוב הספקים' : 'Leave blank for most providers'}/>
                         </div>
                      )}
                     <div>
                         <Label htmlFor="modelSystemPrompt">{lang === 'he' ? 'הנחיית מערכת ספציפית למודל (אופציונלי)' : 'Model-Specific System Prompt (Optional)'}</Label>
-                        <Textarea id="modelSystemPrompt" value={editingModel?.modelSystemPrompt ?? ''} onChange={(e) => setEditingModel(p => ({...(p || getInitialEditingModel()), modelSystemPrompt: e.target.value}))} rows={3} placeholder={lang === 'he' ? 'הנחיה שתחול רק על מודל זה...' : 'Prompt that applies only to this model...'}/>
+                        <Textarea id="modelSystemPrompt" value={editingModel?.modelSystemPrompt ?? ''} onChange={(e) => setEditingModel(p => ({...(p ?? getInitialEditingModel()), modelSystemPrompt: e.target.value}))} rows={3} placeholder={lang === 'he' ? 'הנחיה שתחול רק על מודל זה...' : 'Prompt that applies only to this model...'}/>
                     </div>
                      <CollapsibleCostsEditor
                         costs={editingModel?.costs}
-                        onChange={(newCosts) => setEditingModel(p => ({...(p || getInitialEditingModel()), costs: newCosts}))}
+                        onChange={(newCosts) => setEditingModel(p => ({...(p ?? getInitialEditingModel()), costs: newCosts}))}
                         modelId={editingModel?.modelId}
                         provider={editingModel?.provider}
                     />
                      <div className="flex items-center gap-2 mt-2">
-                        <Switch id="isFreeTier" checked={editingModel?.isFreeTier ?? false} onCheckedChange={(checked) => setEditingModel(p => ({...(p || getInitialEditingModel()), isFreeTier: checked}))} />
+                        <Switch id="isFreeTier" checked={editingModel?.isFreeTier ?? false} onCheckedChange={(checked) => setEditingModel(p => ({...(p ?? getInitialEditingModel()), isFreeTier: checked}))} />
                         <Label htmlFor="isFreeTier" className="mb-0 text-sm">{lang === 'he' ? 'סמן אם למודל זה יש שכבה חינמית משמעותית' : 'Mark if this model has a significant free tier'}</Label>
                     </div>
 
@@ -753,11 +752,11 @@ function PersonasSettings() {
     };
     const handleEditPersona = (persona: Persona) => {
         setEditingPersona({
-            ...getInitialEditingPersona(), // Ensure all fields have defaults
-            ...persona, // Spread actual persona data
-            name: persona.name || '',
-            prompt: persona.prompt || '',
-            isDefault: persona.isDefault || false
+            ...getInitialEditingPersona(), 
+            ...persona, 
+            name: persona.name ?? '',
+            prompt: persona.prompt ?? '',
+            isDefault: persona.isDefault ?? false
         });
         setShowPersonaDialog(true);
     };
@@ -826,9 +825,9 @@ function PersonasSettings() {
                                     </div>
                                 </div>
                                 <div className="space-x-2 flex-shrink-0 ms-2">
-                                    {!persona.isDefault && <Button size="sm" variant="outline" onClick={() => handleSetDefaultPersona(persona.id)}>{lang === 'he' ? 'ברירת מחדל' : 'Set Default'}</Button>}
+                                    {!(persona.isDefault ?? false) && <Button size="sm" variant="outline" onClick={() => handleSetDefaultPersona(persona.id)}>{lang === 'he' ? 'ברירת מחדל' : 'Set Default'}</Button>}
                                     <Button size="sm" variant="outline" onClick={() => handleEditPersona(persona)}><Edit3 className="w-3 h-3 me-1"/>{lang === 'he' ? 'ערוך' : 'Edit'}</Button>
-                                    <Button size="sm" variant="destructive" onClick={() => handleDeletePersona(persona.id)} disabled={personas.length === 1 && persona.isDefault}><Trash2 className="w-3 h-3 me-1"/>{lang === 'he' ? 'מחק' : 'Delete'}</Button>
+                                    <Button size="sm" variant="destructive" onClick={() => handleDeletePersona(persona.id)} disabled={personas.length === 1 && (persona.isDefault ?? false)}><Trash2 className="w-3 h-3 me-1"/>{lang === 'he' ? 'מחק' : 'Delete'}</Button>
                                 </div>
                             </li>
                         ))}
@@ -844,14 +843,14 @@ function PersonasSettings() {
                 <DialogContent className="p-6 space-y-4">
                     <div>
                         <Label htmlFor="personaName">{lang === 'he' ? 'שם הפרסונה' : 'Persona Name'}</Label>
-                        <Input id="personaName" value={editingPersona?.name || ''} onChange={(e) => setEditingPersona(p => ({...(p || getInitialEditingPersona()), name: e.target.value}))} />
+                        <Input id="personaName" value={editingPersona?.name ?? ''} onChange={(e) => setEditingPersona(p => ({...(p ?? getInitialEditingPersona()), name: e.target.value}))} />
                     </div>
                     <div>
                         <Label htmlFor="personaPrompt">{lang === 'he' ? 'הנחיית מערכת לפרסונה' : 'System Prompt for Persona'}</Label>
-                        <Textarea id="personaPrompt" value={editingPersona?.prompt || ''} onChange={(e) => setEditingPersona(p => ({...(p || getInitialEditingPersona()), prompt: e.target.value}))} rows={5}/>
+                        <Textarea id="personaPrompt" value={editingPersona?.prompt ?? ''} onChange={(e) => setEditingPersona(p => ({...(p ?? getInitialEditingPersona()), prompt: e.target.value}))} rows={5}/>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Switch id="personaIsDefault" checked={editingPersona?.isDefault || false} onCheckedChange={(checked) => setEditingPersona(p => ({...(p || getInitialEditingPersona()), isDefault: checked}))} />
+                        <Switch id="personaIsDefault" checked={editingPersona?.isDefault ?? false} onCheckedChange={(checked) => setEditingPersona(p => ({...(p ?? getInitialEditingPersona()), isDefault: checked}))} />
                         <Label htmlFor="personaIsDefault" className="mb-0 text-sm">{lang === 'he' ? 'קבע כפרסונת ברירת מחדל' : 'Set as default persona'}</Label>
                     </div>
                 </DialogContent>
@@ -919,7 +918,7 @@ function UsageDashboard() {
 
     const filteredData = tokenUsage.filter(d => {
         try {
-            const recordDate = parseISO(d.date); // Ensure date is valid before parsing
+            const recordDate = parseISO(d.date); 
             return isSameMonth(recordDate, currentDate);
         } catch (e) {
             console.warn("Invalid date in tokenUsage:", d.date);
