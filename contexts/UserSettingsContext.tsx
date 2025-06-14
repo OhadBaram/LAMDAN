@@ -15,6 +15,7 @@ export interface AppCustomization {
     botName?: string; 
     botImage?: string | null; 
     systemPrompt?: string; 
+    shareLocation?: boolean; // New setting for location sharing
     // Gamification fields
     userXP?: number;
     lastActiveDate?: string | null; // ISO date string
@@ -22,16 +23,16 @@ export interface AppCustomization {
     badges?: string[];
     sessionActivity?: { // To track first-time page visits per session
         visitedArena?: boolean;
-        visitedSpaces?: boolean;
+        visitedOpenSpace?: boolean; // Renamed from visitedSpaces
         visitedAgentArena?: boolean;
-        visitedKnowledgeBase?: boolean;
+        visitedClosedNotebook?: boolean; // Renamed from visitedKnowledgeBase
         visitedCockpit?: boolean;
     };
 }
 export interface SavedPrompt { id: string; title: string; content: string; order: number; }
 export interface Persona { id: string; name: string; prompt: string; order: number; isDefault?: boolean; }
 export interface SpaceFile { id: string; name: string; type: string; size: number; uploadedAt: string; content: string; dataUrl?: string; }
-export interface Space { id: string; name: string; description?: string; files?: SpaceFile[]; }
+export interface Space { id: string; name: string; description?: string; files?: SpaceFile[]; } // Will be "Open Space" conceptually
 export interface Agent { id: string; name: string; goal: string; modelId: string; tools: string[]; }
 export interface CostManagement { dailyBudget: number; weeklyBudget: number; monthlyBudget: number; alertEmail: string; }
 
@@ -42,7 +43,7 @@ export interface KnowledgeBaseSource {
     content: string;
     createdAt: string;
 }
-export interface KnowledgeBase {
+export interface KnowledgeBase { // Will be "Closed Notebook" conceptually
     id: string;
     name: string;
     description?: string;
@@ -54,34 +55,33 @@ export interface KnowledgeBase {
 
 // --- Storage Instances ---
 export const initialAppCustomizationData: AppCustomization = {
-    // These colors are now primarily driven by the theme.
-    // Setting them to generic values or removing if components no longer read them directly.
-    headerBgColor: '#343541', // Matches dark --bg-secondary
-    headerTitleColor: '#FFFFFF', // Matches dark --text-primary
-    chatBgColor: '#202123',    // Matches dark --bg-primary
-    chatFontColor: '#FFFFFF',  // Matches dark --text-primary
-    chatFontSize: 16, // Default to 16px as per typography guidelines
+    headerBgColor: '#FFFFFF', // New default for light theme
+    headerTitleColor: '#3c4043', // New default for light theme
+    chatBgColor: '#FFFFFF',    // New default for light theme
+    chatFontColor: '#3c4043',  // New default for light theme
+    chatFontSize: 16, 
     botVoiceURI: null,
     userName: 'User', 
     userImage: null,
     botName: 'LUMINA', 
     botImage: null,
     systemPrompt: 'You are a helpful AI assistant.',
+    shareLocation: false, // Default for new setting
     // Gamification defaults
     userXP: 0,
     lastActiveDate: null,
     dailyStreak: 0,
     badges: [],
-    sessionActivity: {
+    sessionActivity: { // Renamed keys
         visitedArena: false,
-        visitedSpaces: false,
+        visitedOpenSpace: false,
         visitedAgentArena: false,
-        visitedKnowledgeBase: false,
+        visitedClosedNotebook: false,
         visitedCockpit: false,
     },
 };
 
-const AppCustomizationStorage = mockStorage<AppCustomization>('app_customization_v3', initialAppCustomizationData); // Incremented version for new fields
+const AppCustomizationStorage = mockStorage<AppCustomization>('app_customization_v3', initialAppCustomizationData); 
 const SavedPromptsStorage = mockStorage<SavedPrompt>('saved_prompts_v2', [
     { id: 'news_il', title: 'חדשות אחרונות בישראל', content: 'מהן החדשות האחרונות בישראל ביממה האחרונה?', order: 0 },
     { id: 'translate_he_en', title: 'תרגום מעברית לאנגלית', content: 'תרגם את הטקסט הבא מעברית לאנגלית: ', order: 1 },
@@ -89,9 +89,9 @@ const SavedPromptsStorage = mockStorage<SavedPrompt>('saved_prompts_v2', [
     { id: 'rephrase', title: 'הצע 5 ניסוחים אחרים', content: 'הצע 5 ניסוחים שונים למשפט הבא: ', order: 3 },
 ]);
 const PersonasStorage = mockStorage<Persona>('personas_v2', [{id: 'default', name: 'Default Assistant', prompt: 'You are a general-purpose AI assistant.', order: 0, isDefault: true}]);
-const SpacesStorage = mockStorage<Space>('spaces_v2', []);
+const SpacesStorage = mockStorage<Space>('spaces_v2', []); // For "Open Space"
 const AgentsStorage = mockStorage<Agent>('agents_v2', []);
-const KnowledgeBaseStorage = mockStorage<KnowledgeBase>('knowledge_bases_v1', []); 
+const KnowledgeBaseStorage = mockStorage<KnowledgeBase>('knowledge_bases_v1', []); // For "Closed Notebook"
 
 const initialCostManagementData: CostManagement = { dailyBudget: 0, weeklyBudget: 0, monthlyBudget: 0, alertEmail: '' };
 const CostManagementStorage = mockStorage<CostManagement>('cost_management_v2', initialCostManagementData);
@@ -101,7 +101,6 @@ const BADGE_DEFINITIONS: { [key: string]: { name: string; description: string; i
     EXPLORER: { name: "Explorer", description: "Reached 50 XP.", xpThreshold: 50 },
     COMMUNICATOR: { name: "Communicator", description: "Reached 150 XP.", xpThreshold: 150 },
     ENGAGED_USER: { name: "Engaged User", description: "Reached 300 XP.", xpThreshold: 300 },
-    // Add more badges here
 };
 
 // --- UserSettingsContext Definition ---
@@ -127,7 +126,7 @@ interface UserSettingsContextType {
     reorderPersonas: (personas: Persona[]) => Promise<void>;
     activePersonaId: string | null;
     setActivePersonaId: (id: string | null) => void;
-    spaces: Space[];
+    spaces: Space[]; // For "Open Space"
     loadSpaces: () => Promise<void>;
     addSpace: (space: Omit<Space, 'id'>) => Promise<Space>;
     updateSpace: (spaceId: string, updates: Partial<Space>) => Promise<Space>;
@@ -143,7 +142,7 @@ interface UserSettingsContextType {
     deleteAgent: (agentId: string) => Promise<void>;
     costManagement: CostManagement;
     setCostManagements: (settings: CostManagement) => Promise<void>;
-    knowledgeBases: KnowledgeBase[];
+    knowledgeBases: KnowledgeBase[]; // For "Closed Notebook"
     loadKnowledgeBases: () => Promise<void>;
     addKnowledgeBase: (kb: Omit<KnowledgeBase, 'id' | 'sources' | 'createdAt' | 'updatedAt'>) => Promise<KnowledgeBase>;
     updateKnowledgeBase: (kbId: string, updates: Partial<KnowledgeBase>) => Promise<KnowledgeBase>;
@@ -217,7 +216,6 @@ export function UserSettingsProvider({ children }: { children: React.ReactNode }
             } else if (diffDays > 1) {
                 newStreak = 1; // Reset streak
             }
-            // If diffDays is 0, it's the same day, do nothing to streak
         } else {
             newStreak = 1; // First activity
         }
@@ -231,7 +229,7 @@ export function UserSettingsProvider({ children }: { children: React.ReactNode }
             await updateUserProfilePartial({ 
                 sessionActivity: { ...currentSessionActivity, [feature]: true } 
             });
-            await incrementXP(10); // Award XP for visiting a new feature in session
+            await incrementXP(10); 
         }
     };
     
@@ -253,16 +251,15 @@ export function UserSettingsProvider({ children }: { children: React.ReactNode }
             ]);
 
             const sanitizedProfileData: AppCustomization = {
-                ...initialAppCustomizationData, // Start with all defaults including gamification
-                ...(profileDataFromStorage || {}), // Override with stored data
-                // Ensure gamification fields have defaults if not in storage
+                ...initialAppCustomizationData, 
+                ...(profileDataFromStorage || {}), 
                 userXP: profileDataFromStorage?.userXP ?? initialAppCustomizationData.userXP,
                 lastActiveDate: profileDataFromStorage?.lastActiveDate ?? initialAppCustomizationData.lastActiveDate,
                 dailyStreak: profileDataFromStorage?.dailyStreak ?? initialAppCustomizationData.dailyStreak,
                 badges: profileDataFromStorage?.badges ?? initialAppCustomizationData.badges,
                 sessionActivity: profileDataFromStorage?.sessionActivity ?? initialAppCustomizationData.sessionActivity,
-                // Ensure new theme defaults for visual settings if not present or if we want to override old values
                 chatFontSize: profileDataFromStorage?.chatFontSize ?? initialAppCustomizationData.chatFontSize,
+                shareLocation: profileDataFromStorage?.shareLocation ?? initialAppCustomizationData.shareLocation,
             };
             setUserProfileState(sanitizedProfileData);
 
@@ -299,15 +296,14 @@ export function UserSettingsProvider({ children }: { children: React.ReactNode }
 
     const setUserProfile = async (newProfile: AppCustomization) => {
         const profileToSave: AppCustomization = {
-            ...initialAppCustomizationData, // Ensure all fields have defaults
-            ...userProfile, // Persist existing userProfile fields not being changed
-            ...newProfile // Apply incoming new profile data
+            ...initialAppCustomizationData, 
+            ...userProfile, 
+            ...newProfile 
         };
         const updatedProfile = await AppCustomizationStorage.saveSingle(profileToSave);
         setUserProfileState(updatedProfile); 
     };
 
-    // ... (rest of the existing storage functions: setSavedPrompts, addSavedPrompt, etc.)
     const setSavedPrompts = async (newPrompts: SavedPrompt[]) => {
         await Promise.all(newPrompts.map(async (p, index) => await SavedPromptsStorage.upsert({...p, order: index})));
         setSavedPromptsState(newPrompts.sort((a,b) => a.order - b.order));
@@ -466,15 +462,14 @@ export function UserSettingsProvider({ children }: { children: React.ReactNode }
         if (!existingKb) throw new Error("Knowledge Base not found");
         const updatedKbData = { ...existingKb, ...updates, id: kbId, updatedAt: new Date().toISOString() };
         const savedKb = await KnowledgeBaseStorage.upsert(updatedKbData);
-        await loadKnowledgeBases(); // This will re-sort
-        // Make sure the editingKb in KnowledgeBasePage gets updated if it was being edited
+        await loadKnowledgeBases(); 
         return savedKb;
     };
 
     const deleteKnowledgeBase = async (kbId: string) => {
         await KnowledgeBaseStorage.delete(kbId);
-        const remainingKbs = knowledgeBases.filter(kb => kb.id !== kbId); // Use current state to filter
-        setKnowledgeBasesState(remainingKbs.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())); // re-sort
+        const remainingKbs = knowledgeBases.filter(kb => kb.id !== kbId); 
+        setKnowledgeBasesState(remainingKbs.sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())); 
         if (activeKnowledgeBaseId === kbId) {
              setActiveKnowledgeBaseIdInternal(remainingKbs.length > 0 ? remainingKbs[0].id : null);
         }
@@ -508,7 +503,7 @@ export function UserSettingsProvider({ children }: { children: React.ReactNode }
     const updateSourceInKnowledgeBase = async (kbId: string, sourceId: string, updates: Partial<KnowledgeBaseSource>) => {
         const kb = await KnowledgeBaseStorage.get(kbId);
         if (!kb || !kb.sources) return null;
-        const updatedSources = kb.sources.map(s => s.id === sourceId ? { ...s, ...updates, id: s.id, createdAt: s.createdAt } as KnowledgeBaseSource : s); // Ensure id and createdAt are preserved
+        const updatedSources = kb.sources.map(s => s.id === sourceId ? { ...s, ...updates, id: s.id, createdAt: s.createdAt } as KnowledgeBaseSource : s); 
         return updateKnowledgeBase(kbId, { sources: updatedSources });
     };
 

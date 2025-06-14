@@ -1,33 +1,144 @@
 
 import React, { createContext, useContext, useState, useEffect, useRef, useCallback } from "react";
 import ReactDOM from 'react-dom/client';
-import { Bot, User as UserIcon, Moon, Sun, Cpu, SendHorizontal, Search, MessageSquare, Paperclip, X, Upload, Languages, Loader2, Copy, FileText, Image as ImageIcon, ExternalLink, Share, UploadCloud, Download, Link as LinkIcon, Server, Plus, Check, Trash, ArrowRight, LayoutGrid, CheckCircle, XCircle, AlertCircle, Lock, Unlock, Cloud, RefreshCw, File as FileIconPkg, FileSpreadsheet, Palette, Type, Settings as SettingsIcon, Star, Calendar, ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Sparkles, Brain, SlidersHorizontal, Users, Zap, Briefcase, ChevronDown, ChevronUp, GripVertical, Trash2, Edit3, Eye, Play, StopCircle, Mic, MicOff, Volume2, VolumeX, Maximize, Minimize, LogOut, DollarSign, Menu, Database, Award, Activity, ShieldCheck } from "lucide-react"; // Added Menu, Database, UserIcon (for profile), Award, Activity icons
+import { Bot, User as UserIcon, Moon, Sun, Cpu, SendHorizontal, Search, MessageSquare, Paperclip, X, Upload, Languages, Loader2, Copy, FileText, Image as ImageIcon, ExternalLink, Share, UploadCloud, Download, Link as LinkIcon, Server, Plus, Check, Trash, ArrowRight, LayoutGrid, CheckCircle, XCircle, AlertCircle, Lock, Unlock, Cloud, RefreshCw, File as FileIconPkg, FileSpreadsheet, Palette, Type, Settings as SettingsIcon, Star, Calendar, ChevronLeft, ChevronRight, TrendingUp, TrendingDown, Sparkles, Brain, SlidersHorizontal, Users, Zap, Briefcase, ChevronDown, ChevronUp, GripVertical, Trash2, Edit3, Eye, Play, StopCircle, Mic, MicOff, Volume2, VolumeX, Maximize, Minimize, LogOut, DollarSign, Menu, Database, Award, Activity, ShieldCheck, HelpCircle, MessageCircleQuestion } from "lucide-react";
 
-import './index.css'; // Import global CSS
+import './index.css'; 
 
 import { AppProvider, useAppContext } from './contexts/AppContext';
 import { UserSettingsProvider, useUserSettings } from './contexts/UserSettingsContext';
 
-// Import UI Components
 import { Button } from './components/ui/Button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './components/ui/Dialog'; // Added Dialog for Profile
-import { AlertDialog, AlertDialogContent as AlertDialogContentComponent, AlertDialogHeader as AlertDialogHeaderComponent, AlertDialogTitle as AlertDialogTitleComponent, AlertDialogDescription, AlertDialogFooter as AlertDialogFooterComponent, AlertDialogCancel } from './components/ui/AlertDialog'; // Renamed imports
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './components/ui/Dialog'; 
+import { AlertDialog, AlertDialogContent as AlertDialogContentComponent, AlertDialogHeader as AlertDialogHeaderComponent, AlertDialogTitle as AlertDialogTitleComponent, AlertDialogDescription, AlertDialogFooter as AlertDialogFooterComponent, AlertDialogCancel } from './components/ui/AlertDialog'; 
 
-// Import Pages (Features)
 import { ChatPage } from './features/Chat/ChatPage';
 import { SettingsPage } from './features/Settings/SettingsPage';
-import { CockpitPage } from './features/Cockpit/CockpitPage';
-import { ArenaPage } from './features/Arena/ArenaPage';
-import { SpacesPage } from './features/Spaces/SpacesPage';
-import { AgentArenaPage } from './features/AgentArena/AgentArenaPage';
-import { KnowledgeBasePage } from './features/KnowledgeBase/KnowledgeBasePage'; 
+// The following pages will now be routed through SettingsPage as tabs
+// import { CockpitPage } from './features/Cockpit/CockpitPage';
+// import { ArenaPage } from './features/Arena/ArenaPage';
+// import { SpacesPage } from './features/Spaces/SpacesPage';
+// import { AgentArenaPage } from './features/AgentArena/AgentArenaPage';
+// import { KnowledgeBasePage } from './features/KnowledgeBase/KnowledgeBasePage'; 
 import { OnboardingWizard } from './features/Onboarding/OnboardingWizard';
-
-// Import Layout Components
 import { PageWrapper } from './components/layout/PageWrapper';
 
+// SidePanel Component (New for Gemini-like UI)
+const SidePanel: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+  onNavigate: (pageId: 'chat' | 'settings') => void;
+  currentNavPage: 'chat' | 'settings';
+}> = ({ isOpen, onClose, onNavigate, currentNavPage }) => {
+  const { lang, theme, toggleTheme } = useAppContext();
+  const { userProfile } = useUserSettings();
 
-// --- Main Application Structure ---
+  const handleSettingsNavigation = () => {
+    onNavigate('settings');
+    // onClose(); // Close panel after navigating to settings
+  };
+  const handleChatNavigation = () => {
+    onNavigate('chat');
+    // onClose();
+  }
+
+  return (
+    <>
+      {/* Backdrop for mobile */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 z-30 bg-black/30 md:hidden"
+          onClick={onClose}
+        />
+      )}
+      <div 
+        className={`fixed inset-y-0 h-full shadow-lg transition-transform duration-300 ease-in-out z-40 flex flex-col gemini-sidebar
+                    ${lang === 'he' ? 'right-0 border-l' : 'left-0 border-r'} 
+                    ${isOpen ? 'translate-x-0 w-72' : (lang === 'he' ? 'translate-x-full w-72' : '-translate-x-full w-72')}
+                    md:relative md:translate-x-0 md:border-r md:w-72 ${isOpen ? 'md:w-72' : 'md:w-0 md:invisible md:opacity-0 md:p-0 md:border-none'}`}
+      >
+        <div className={`flex-1 overflow-y-auto scrollbar-thin ${isOpen ? 'p-3' : 'p-0'}`}>
+          {isOpen && (
+            <>
+              <div className="mb-4">
+                <Button onClick={handleChatNavigation} className="w-full gemini-sidebar-button">
+                  <span className="gemini-sidebar-button-icon"><Plus /></span>
+                  {lang === 'he' ? 'שיחה חדשה' : 'New Chat'}
+                </Button>
+              </div>
+
+              {/* Placeholder for Agents - visual only */}
+              <div className="mb-4">
+                <h3 className="gemini-sidebar-section-title">Agents</h3>
+                {/* Example Agent items - replace with dynamic data later */}
+                {[
+                  { name: lang === 'he' ? "מסמכי פרומפטים" : "Prompt Documents", color: "bg-purple-500", letter: "P" },
+                  { name: lang === 'he' ? "חוקר אינטרנט" : "Web Explorer", color: "bg-sky-500", letter: "W" },
+                ].map(agent => (
+                  <a key={agent.name} href="#" className="gemini-sidebar-link group">
+                     <span className={`w-5 h-5 rounded-sm ${agent.color} text-white flex items-center justify-center text-xs font-medium me-2.5 group-hover:opacity-90`}>{agent.letter}</span>
+                    {agent.name}
+                  </a>
+                ))}
+              </div>
+
+              {/* Placeholder for Recent Activity - visual only */}
+              <div className="mb-4">
+                <h3 className="gemini-sidebar-section-title">{lang === 'he' ? 'אחרונות' : 'Recent'}</h3>
+                {/* Example Recent items - replace with dynamic data later */}
+                {["איך להכין עוגת שוקולד?", "רעיונות לחופשה באיטליה"].map(item => (
+                   <a key={item} href="#" className="gemini-sidebar-link group text-sm truncate">
+                     <MessageSquare className="w-4 h-4 me-2.5 text-gray-500 group-hover:text-[var(--text-primary)]"/>
+                    {item}
+                  </a>
+                ))}
+              </div>
+            </>
+          )}
+        </div>
+        
+        {isOpen && (
+          <div className="p-3 border-t border-[var(--border-sidebar-light)]">
+            <div className="flex items-center justify-between mb-3">
+              <Button variant="ghost" size="icon" onClick={onClose} title={lang === 'he' ? 'כווץ סרגל צד' : 'Collapse sidebar'} className="gemini-header-icon p-1.5 rounded-md">
+                <ChevronLeft className={`w-5 h-5 ${lang === 'he' ? 'transform scale-x-[-1]' : ''}`} />
+              </Button>
+              <div className="flex items-center gap-1 p-0.5 rounded-full bg-[var(--bg-tertiary-light)] gemini-sidebar-theme-toggle">
+                <Button variant="ghost" size="icon" onClick={toggleTheme} title={lang === 'he' ? 'מצב בהיר' : 'Light mode'} className={`rounded-full ${theme === 'light' ? 'active' : ''}`}>
+                  <Sun className="w-4 h-4" />
+                </Button>
+                <Button variant="ghost" size="icon" onClick={toggleTheme} title={lang === 'he' ? 'מצב כהה' : 'Dark mode'} className={`rounded-full ${theme === 'dark' ? 'active' : ''}`}>
+                  <Moon className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+            
+            <a href="#" onClick={(e) => { e.preventDefault(); /* TODO: Implement Help */ }} className="gemini-sidebar-link text-sm">
+                <HelpCircle className="w-4 h-4 text-gray-500"/>{lang === 'he' ? 'עזרה' : 'Help'}
+            </a>
+            <a href="#" onClick={(e) => { e.preventDefault(); /* TODO: Implement Feedback */ }} className="gemini-sidebar-link text-sm">
+                <MessageCircleQuestion className="w-4 h-4 text-gray-500"/>{lang === 'he' ? 'שליחת משוב' : 'Send feedback'}
+            </a>
+            <a href="#" onClick={(e) => { e.preventDefault(); handleSettingsNavigation(); }} className={`gemini-sidebar-link text-sm ${currentNavPage === 'settings' ? 'active' : ''}`}>
+                <SettingsIcon className={`w-4 h-4 ${currentNavPage === 'settings' ? 'text-white' : 'text-gray-500'}`}/>{lang === 'he' ? 'הגדרות' : 'Settings'}
+            </a>
+
+            {userProfile?.shareLocation && (
+              <div className="mt-3 pt-3 border-t border-[var(--border-sidebar-light)]">
+                <p className="gemini-location-text px-3">{lang === 'he' ? 'פתח תקווה, ישראל' : 'Petah Tikva, Israel'}</p>
+                <a href="#" onClick={(e) => {e.preventDefault(); handleSettingsNavigation();}} className="gemini-location-link px-3 block hover:underline">
+                  {lang === 'he' ? 'על סמך המקומות שלך (בית) - עדכן את המיקום' : 'From your places (Home) - Update location'}
+                </a>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    </>
+  );
+};
+
+
 const App: React.FC = () => {
   const {
     lang,
@@ -43,38 +154,24 @@ const App: React.FC = () => {
     changeLanguage,
     toggleTheme
   } = useAppContext(); 
-  const { userProfile, markFeatureVisited } = useUserSettings();
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const { userProfile } = useUserSettings(); // Removed markFeatureVisited as it's not used directly here anymore.
+  
+  // Single state for SidePanel visibility
+  const [isSidePanelOpen, setIsSidePanelOpen] = useState(false); 
   const [showProfileModal, setShowProfileModal] = useState(false);
 
-
-  const navItems = [
-    { id: 'chat', label: lang === 'he' ? 'צ\'אט' : 'Chat', icon: MessageSquare, featureKey: null },
-    { id: 'knowledge_base', label: lang === 'he' ? 'מאגר ידע' : 'Knowledge Base', icon: Database, featureKey: 'visitedKnowledgeBase' },
-    { id: 'arena', label: lang === 'he' ? 'זירת השוואות' : 'Arena', icon: Zap, featureKey: 'visitedArena' },
-    { id: 'spaces', label: lang === 'he' ? 'מרחבים' : 'Spaces', icon: LayoutGrid, featureKey: 'visitedSpaces' },
-    { id: 'agent_arena', label: lang === 'he' ? 'סוכנים' : 'Agents', icon: Brain, featureKey: 'visitedAgentArena' },
-    { id: 'cockpit', label: lang === 'he' ? 'קוקפיט' : 'Cockpit', icon: SlidersHorizontal, featureKey: 'visitedCockpit' },
-    { id: 'settings', label: lang === 'he' ? 'הגדרות' : 'Settings', icon: SettingsIcon, featureKey: null },
-  ] as const; // Added 'as const' for featureKey type safety
-
-  const handlePageChange = (pageId: typeof navItems[number]['id']) => {
-    console.log('handlePageChange called with pageId:', pageId); // DEBUG LOG
+  // Simplified navigation for main pages (Chat & Settings)
+  const handlePageNavigation = (pageId: 'chat' | 'settings') => {
     setCurrentPageGlobal(pageId);
-    setIsMobileMenuOpen(false);
-    const navItem = navItems.find(item => item.id === pageId);
-    if (navItem && navItem.featureKey) {
-        markFeatureVisited(navItem.featureKey);
+    if(window.innerWidth < 768) { // Close mobile sidebar on navigation
+        setIsSidePanelOpen(false);
     }
   };
 
 
   const handleCompleteOnboarding = async () => {
-    console.log('handleCompleteOnboarding triggered in App.tsx'); // DEBUG LOG
     setShowOnboarding(false);
-    console.log('setShowOnboarding(false) called in App.tsx'); // DEBUG LOG
     await loadApiSettings();
-    console.log('loadApiSettings finished after onboarding completion in App.tsx'); // DEBUG LOG
   };
 
   const renderPage = () => {
@@ -82,45 +179,23 @@ const App: React.FC = () => {
     switch (currentPage) {
       case 'chat': content = <ChatPage />; break;
       case 'settings': content = <SettingsPage />; break;
-      case 'cockpit': content = <CockpitPage />; break;
-      case 'arena': content = <ArenaPage />; break;
-      case 'spaces': content = <SpacesPage />; break;
-      case 'agent_arena': content = <AgentArenaPage />; break;
-      case 'knowledge_base': content = <KnowledgeBasePage />; break;
       default: content = <ChatPage />;
     }
-
-    // Apply max-width to content for specific pages
-    const constrainedPages = ['settings', 'cockpit', 'arena', 'spaces', 'agent_arena', 'knowledge_base']; // Added knowledge_base
-    const wrapperClass = constrainedPages.includes(currentPage) ? 'max-w-4xl mx-auto w-full' : '';
-
-    return <div className={wrapperClass}>{content}</div>;
+    // max-width is handled by PageWrapper or specific page components
+    return <PageWrapper disablePadding={currentPage === 'chat'}>{content}</PageWrapper>;
   };
-
-  const NavLink: React.FC<{item: typeof navItems[number], isMobile?: boolean}> = ({ item, isMobile }) => (
-    <Button
-      variant={'ghost'} 
-      onClick={() => { console.log('NavLink clicked for item:', item.id); handlePageChange(item.id); }} // DEBUG LOG
-      className={`justify-start text-base transition-std
-                  ${isMobile ? 'w-full px-3 py-2.5 rounded-md' : 'px-2 py-1.5 rounded-md text-sm'}
-                  ${currentPage === item.id 
-                      ? (isMobile ? 'bg-[var(--bg-primary)] text-[var(--accent)] font-medium' : 'bg-white/10 text-white font-medium') // Desktop active retains some contrast on dark header
-                      : (isMobile 
-                          ? `text-[var(--text-primary)] hover:bg-[var(--bg-primary)]` 
-                          : `text-white/80 hover:text-white hover:bg-white/10`)
-                  }`}
-    >
-      <item.icon className={`w-4 h-4 ${isMobile ? 'me-2.5' : 'me-1.5'} flex-shrink-0`} />
-      {item.label}
-    </Button>
-  );
+  
+  const getProfileInitial = () => {
+    const name = userProfile?.userName || (lang === 'he' ? "מ" : "U");
+    return name.charAt(0).toUpperCase();
+  };
 
   const getBadgeIcon = (badgeKey: string) => {
     switch(badgeKey) {
-        case 'EXPLORER': return <Search className="w-5 h-5 text-yellow-400" />;
-        case 'COMMUNICATOR': return <MessageSquare className="w-5 h-5 text-blue-400" />;
-        case 'ENGAGED_USER': return <Star className="w-5 h-5 text-orange-400" />;
-        default: return <Award className="w-5 h-5 text-gray-400" />;
+        case 'EXPLORER': return <Search className="w-5 h-5 text-yellow-500" />;
+        case 'COMMUNICATOR': return <MessageSquare className="w-5 h-5 text-blue-500" />;
+        case 'ENGAGED_USER': return <Star className="w-5 h-5 text-orange-500" />;
+        default: return <Award className="w-5 h-5 text-gray-500" />;
     }
   };
   const badgeDisplayNames: Record<string, { he: string, en: string }> = {
@@ -131,105 +206,64 @@ const App: React.FC = () => {
 
 
   return (
-    <div className={`flex flex-col h-screen font-sans bg-[var(--bg-primary)] text-[var(--text-primary)]`}>
+    <div className={`flex flex-col h-screen font-sans bg-[var(--bg-primary)] text-[var(--text-primary)]`} dir={lang === 'he' ? 'rtl' : 'ltr'}>
+      {/* New Gemini-like Header */}
       <header
-        className="flex items-center justify-between p-3 shadow-md text-white sticky top-0 z-50 bg-[var(--bg-secondary)] border-b border-[var(--border)]"
+        className="flex items-center justify-between px-3 py-2 shadow-sm sticky top-0 z-20"
+        style={{ backgroundColor: '#FFFFFF', borderBottom: '1px solid var(--border-light)' }}
       >
+        {/* Right side (RTL) / Left side (LTR) */}
         <div className="flex items-center gap-2">
-            <Button variant="ghost" size="icon" onClick={() => { console.log('Mobile menu button clicked. Current state:', isMobileMenuOpen); setIsMobileMenuOpen(!isMobileMenuOpen);}} className="md:hidden text-white hover:bg-white/10 active:bg-white/20 rounded-md p-1.5"> {/* DEBUG LOG */}
-                <Menu className="w-5 h-5"/>
-            </Button>
-            <h1 className="text-lg font-medium tracking-tight text-[var(--text-primary)]">{userProfile?.botName || 'LUMINA'}</h1>
+          <Button variant="ghost" size="icon" onClick={() => setIsSidePanelOpen(!isSidePanelOpen)} className="gemini-header-icon p-1.5 rounded-md">
+            <Menu className="w-5 h-5" />
+          </Button>
+          <Button variant="ghost" size="icon" title={lang === 'he' ? 'חיפוש' : 'Search'} className="gemini-header-icon p-1.5 rounded-md">
+            <Search className="w-5 h-5" />
+          </Button>
         </div>
 
-        {/* Desktop Navigation (Simplified to match ChatGPT's focused approach) */}
-        <nav className="hidden md:flex items-center gap-1.5"> {/* Increased gap from 0.5 to 1.5 */}
-            {navItems.filter(item => ['chat', 'settings'].includes(item.id)).map(item => ( // Example: Only show Chat & Settings directly in header
-               <NavLink key={item.id} item={item} />
-            ))}
-             {/* Could add a dropdown for other pages if header space is an issue */}
-        </nav>
+        {/* Center - Model Selector Placeholder */}
+        <div className="gemini-model-selector">
+          <span className="gemini-model-name">Gemini</span>
+          <span className="gemini-model-version-tag">Pro 2.5 (גרסת טרום-השקה) - Preview</span>
+        </div>
 
-        <div className="flex items-center gap-1">
-            {userProfile && (
-                <div className="hidden sm:flex items-center gap-1.5 me-1.5 text-xs">
-                    <div className="flex items-center gap-0.5 p-1 bg-[var(--bg-primary)] rounded-md" title={`XP: ${userProfile.userXP || 0}`}>
-                        <Star className="w-3 h-3 text-yellow-400"/> 
-                        <span className="text-[var(--text-secondary)]">{userProfile.userXP || 0}</span>
-                    </div>
-                    <div className="flex items-center gap-0.5 p-1 bg-[var(--bg-primary)] rounded-md" title={`Daily Streak: ${userProfile.dailyStreak || 0}`}>
-                         <Activity className="w-3 h-3 text-red-400"/> 
-                         <span className="text-[var(--text-secondary)]">{userProfile.dailyStreak || 0}</span>
-                    </div>
-                </div>
-            )}
-           <Button
-            variant="ghost"
-            size="icon" 
-            onClick={() => setShowProfileModal(true)}
-            title={lang === 'he' ? 'פרופיל משתמש' : 'User Profile'}
-            className="text-[var(--text-primary)] hover:bg-[var(--border)] active:bg-[var(--border)] rounded-md p-1.5"
-          >
-            <UserIcon className="w-4 h-4"/>
+        {/* Left side (RTL) / Right side (LTR) */}
+        <div className="flex items-center gap-2">
+          <span className="gemini-pro-tag">PRO</span>
+          <Button variant="ghost" size="icon" onClick={() => setShowProfileModal(true)} title={lang === 'he' ? 'פרופיל' : 'Profile'} className="p-0">
+             <div className="gemini-profile-icon">
+                {getProfileInitial()}
+                <span className="gemini-profile-online-dot"></span>
+            </div>
           </Button>
-          <Button
+          {/* Language toggle moved to SidePanel for cleaner header, or keep here if preferred */}
+           <Button
             variant="ghost"
             size="icon"
             onClick={() => changeLanguage(lang === 'he' ? 'en' : 'he')}
             title={lang === 'he' ? 'שנה שפה לאנגלית' : 'Change Language to Hebrew'}
-            className="text-[var(--text-primary)] hover:bg-[var(--border)] active:bg-[var(--border)] rounded-md p-1.5"
+            className="text-[var(--text-secondary-light)] hover:bg-[var(--border-light)] active:bg-[var(--border-light)] rounded-md p-1.5"
           >
-            <Languages className="w-4 h-4"/>
-          </Button>
-          <Button
-            variant="ghost"
-            size="icon" 
-            onClick={toggleTheme}
-            title={lang === 'he' ? 'שנה ערכת נושא' : 'Toggle Theme'}
-            className="text-[var(--text-primary)] hover:bg-[var(--border)] active:bg-[var(--border)] rounded-md p-1.5"
-          >
-            {theme === 'light' ? <Moon className="w-4 h-4"/> : <Sun className="w-4 h-4"/>}
+            <Languages className="w-5 h-5"/>
           </Button>
         </div>
       </header>
       
-      {/* Mobile Navigation Menu (Sidebar-like) */}
-      {isMobileMenuOpen && (
-        <div 
-            className="fixed inset-0 z-40 md:hidden"
-            onClick={() => setIsMobileMenuOpen(false)}
-        >
-            <div 
-                className={`absolute top-0 h-full w-64 bg-[var(--bg-secondary)] shadow-xl p-4 border-[var(--border)] transition-std 
-                            ${lang === 'he' ? 'right-0 border-l' : 'left-0 border-r'}`}
-                onClick={(e) => e.stopPropagation()}
-            >
-                <Button variant="ghost" size="icon" onClick={() => setIsMobileMenuOpen(false)} 
-                        className={`absolute top-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] p-1.5 
-                                    ${lang === 'he' ? 'left-2' : 'right-2'}`}>
-                    <X className="w-5 h-5"/>
-                </Button>
-                <div className="mt-8 flex flex-col gap-1.5">
-                    {navItems.map(item => (
-                        <NavLink key={item.id} item={item} isMobile={true} />
-                    ))}
-                </div>
-                 {/* Language toggle removed from here */}
-            </div>
-        </div>
-      )}
-
-
-      <div className="flex flex-1 overflow-hidden" dir={lang === 'he' ? 'rtl' : 'ltr'}>
+      <div className="flex flex-1 overflow-hidden">
+        <SidePanel 
+          isOpen={isSidePanelOpen} 
+          onClose={() => setIsSidePanelOpen(false)} 
+          onNavigate={handlePageNavigation}
+          currentNavPage={currentPage as ('chat' | 'settings')}
+        />
         <main className="flex-1 flex flex-col overflow-y-auto bg-[var(--bg-primary)]">
              { (showOnboarding || apiSettings.length === 0 || !apiSettings.some(s=>s.isValid)) ? (
                 <div className="flex-1 flex items-center justify-center p-4">
                     <OnboardingWizard onComplete={handleCompleteOnboarding} />
                 </div>
             ) : (
-                 <PageWrapper disablePadding={currentPage === 'chat'}> 
-                    {renderPage()}
-                </PageWrapper>
+                renderPage() // PageWrapper is inside renderPage now
             )}
         </main>
       </div>
@@ -260,13 +294,13 @@ const App: React.FC = () => {
                         <p className="text-sm text-[var(--text-secondary)]">{lang === 'he' ? 'בוט:' : 'Bot:'} {userProfile.botName || 'LUMINA'}</p>
                     </div>
                     <div className="grid grid-cols-2 gap-3">
-                        <div className="flex flex-col items-center p-3 bg-[var(--bg-primary)] border border-[var(--border)] rounded-md">
-                            <Star className="w-7 h-7 text-yellow-400 mb-1.5"/>
+                        <div className="flex flex-col items-center p-3 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-md">
+                            <Star className="w-7 h-7 text-yellow-500 mb-1.5"/>
                             <span className="text-xl font-medium text-[var(--text-primary)]">{userProfile.userXP || 0}</span>
                             <span className="text-xs text-[var(--text-secondary)]">XP</span>
                         </div>
-                        <div className="flex flex-col items-center p-3 bg-[var(--bg-primary)] border border-[var(--border)] rounded-md">
-                            <Activity className="w-7 h-7 text-red-400 mb-1.5"/>
+                        <div className="flex flex-col items-center p-3 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-md">
+                            <Activity className="w-7 h-7 text-red-500 mb-1.5"/>
                             <span className="text-xl font-medium text-[var(--text-primary)]">{userProfile.dailyStreak || 0}</span>
                             <span className="text-xs text-[var(--text-secondary)]">{lang === 'he' ? 'ימי רצף' : 'Day Streak'}</span>
                         </div>
@@ -276,7 +310,7 @@ const App: React.FC = () => {
                         {(userProfile.badges && userProfile.badges.length > 0) ? (
                             <ul className="space-y-1.5">
                                 {userProfile.badges.map(badgeKey => (
-                                    <li key={badgeKey} className="flex items-center gap-2 p-2 bg-[var(--bg-primary)] border border-[var(--border)] rounded-md">
+                                    <li key={badgeKey} className="flex items-center gap-2 p-2 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-md">
                                         {getBadgeIcon(badgeKey)}
                                         <span className="text-sm font-normal text-[var(--text-secondary)]">{badgeDisplayNames[badgeKey]?.[lang as 'he' | 'en'] || badgeKey}</span>
                                     </li>
@@ -293,7 +327,6 @@ const App: React.FC = () => {
             <Button variant="ghost" onClick={() => setShowProfileModal(false)}>{lang === 'he' ? 'סגור' : 'Close'}</Button>
         </DialogFooter>
       </Dialog>
-
     </div>
   );
 };

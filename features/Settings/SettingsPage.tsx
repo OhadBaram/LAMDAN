@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from "react";
-import { User as UserIcon, Palette, Server, Users, TrendingUp, Plus, Edit3, Trash2, GripVertical, Star, Calendar, ChevronLeft, ChevronRight, DollarSign, ChevronDown, ChevronUp, CheckCircle, XCircle, Loader2, Check, Play, ExternalLink, Cpu, TrendingDown } from "lucide-react";
+import { User as UserIcon, Palette, Server, Users, TrendingUp, Plus, Edit3, Trash2, GripVertical, Star, Calendar, ChevronLeft, ChevronRight, DollarSign, ChevronDown, ChevronUp, CheckCircle, XCircle, Loader2, Check, Play, ExternalLink, Cpu, TrendingDown, BookLock, BookOpen, Zap as ArenaIcon, Brain as AgentsIcon, SlidersHorizontal as CockpitIcon, ShieldCheck, Settings as SettingsIconMain } from "lucide-react"; // Added new icons for tabs
 import { format, endOfMonth, eachDayOfInterval, getDay, addMonths, isSameMonth } from "date-fns";
 import startOfMonth from 'date-fns/startOfMonth';
 import subMonths from 'date-fns/subMonths';
@@ -20,42 +20,43 @@ import { Dialog, DialogHeader, DialogTitle, DialogContent, DialogFooter } from '
 import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '../../components/ui/AlertDialog';
 import { Select } from '../../components/ui/Select';
 import { Switch } from '../../components/ui/Switch';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/Tabs';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/Tabs'; // Tabs are not used here, SettingsLayout uses its own tab structure
 import { Table, TableHeader, TableHead, TableBody, TableRow, TableCell } from '../../components/ui/Table';
 
+// Import the actual page components that will now be rendered as tabs
+import { KnowledgeBasePage } from '../KnowledgeBase/KnowledgeBasePage';
+import { SpacesPage } from '../Spaces/SpacesPage';
+import { ArenaPage } from '../Arena/ArenaPage';
+import { AgentArenaPage } from '../AgentArena/AgentArenaPage';
+import { CockpitPage } from '../Cockpit/CockpitPage';
 
 interface SettingsLayoutProps {
     children: (props: { activeSettingsTab: string }) => React.ReactNode;
+    activeTab: string;
+    setActiveTab: (tabId: string) => void;
+    tabsConfig: Array<{ id: string; label: string; icon: React.ElementType }>;
 }
 
-function SettingsLayout(props: SettingsLayoutProps) {
-    const { children } = props;
+function SettingsLayout({ children, activeTab, setActiveTab, tabsConfig }: SettingsLayoutProps) {
     const { lang } = useAppContext();
-    const [activeTab, setActiveTab] = useState("profile");
-
-    const tabsConfig = [
-        { id: "profile", label: lang === 'he' ? 'פרופיל והנחיות' : 'Profile & Prompts', icon: UserIcon },
-        { id: "appearance", label: lang === 'he' ? 'מראה וקול' : 'Appearance & Voice', icon: Palette },
-        { id: "api", label: lang === 'he' ? 'API וספקים' : 'API & Providers', icon: Server },
-        { id: "personas", label: lang === 'he' ? 'פרסונות' : 'Personas', icon: Users },
-        { id: "usage", label: lang === 'he' ? 'שימוש ועלויות' : 'Usage & Costs', icon: TrendingUp },
-    ];
-
     return (
         <div className="container mx-auto max-w-5xl py-6 md:py-8 px-2 sm:px-4 lg:px-6"> 
-            <h1 className="text-2xl font-bold mb-6 text-[var(--text-primary)]">{lang === 'he' ? 'הגדרות' : 'Settings'}</h1>
+            <h1 className="text-2xl font-bold mb-6 text-[var(--text-primary)] flex items-center gap-2">
+              <SettingsIconMain className="w-7 h-7 text-[var(--accent-primary-light)]" />
+              {lang === 'he' ? 'הגדרות' : 'Settings'}
+            </h1>
             <div className="flex flex-col md:flex-row gap-6 md:gap-8">
-                <nav className={`md:w-56 lg:w-60 flex-shrink-0 md:sticky md:top-24 md:max-h-[calc(100vh-8rem)] overflow-y-auto scrollbar-thin`}>
-                    <div className="flex flex-row md:flex-col gap-1.5 overflow-x-auto md:overflow-x-visible pb-2 md:pb-0">
+                <nav className={`md:w-64 lg:w-72 flex-shrink-0 md:sticky md:top-24 md:max-h-[calc(100vh-8rem)] overflow-y-auto scrollbar-thin bg-[var(--bg-secondary)] p-2 rounded-lg border border-[var(--border)]`}>
+                    <div className="flex flex-col gap-1">
                         {tabsConfig.map(tab => (
                             <Button
                                 key={tab.id} 
                                 variant="ghost"
                                 onClick={() => setActiveTab(tab.id)} 
-                                className={`w-full md:w-full flex-shrink-0 justify-start text-left px-3 py-2.5 rounded-md text-sm
+                                className={`w-full justify-start text-left px-3 py-2.5 rounded-md text-sm
                                             ${activeTab === tab.id 
-                                                ? 'bg-[var(--accent)]/15 text-[var(--accent)] font-medium' 
-                                                : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)] hover:bg-[var(--border)]'
+                                                ? 'bg-[var(--accent-primary-light)] text-white font-medium shadow-sm' 
+                                                : 'text-[var(--text-primary)] hover:bg-[var(--accent-primary-light)]/10 hover:text-[var(--accent-primary-light)]'
                                             }`}
                             >
                                 <tab.icon className="w-4 h-4 me-2.5 flex-shrink-0"/>{tab.label}
@@ -73,15 +74,19 @@ function SettingsLayout(props: SettingsLayoutProps) {
     );
 }
 
+// Settings Sections (Original + New Wrappers)
+function ProfileAndPromptsSettings() {
+    return <><ProfileSettings /><div className="my-6 border-t border-[var(--border)]"></div><SavedPromptsSettings /></>;
+}
 function ProfileSettings() {
     const { lang } = useAppContext();
-    const { userProfile, setUserProfile } = useUserSettings();
+    const { userProfile, setUserProfile, updateUserProfilePartial } = useUserSettings();
 
     const [name, setName] = useState(userProfile?.userName ?? '');
-    const [image, setImage] = useState(userProfile?.userImage ?? ''); // Can be null if no image
+    const [image, setImage] = useState(userProfile?.userImage ?? ''); 
     const [systemPrompt, setSystemPrompt] = useState(userProfile?.systemPrompt ?? '');
     const [botName, setBotName] = useState(userProfile?.botName ?? 'LUMINA');
-    const [botImage, setBotImage] = useState(userProfile?.botImage ?? ''); // Can be null
+    const [botImage, setBotImage] = useState(userProfile?.botImage ?? ''); 
 
     useEffect(() => {
         setName(userProfile?.userName ?? '');
@@ -101,8 +106,7 @@ function ProfileSettings() {
     };
 
     const handleSave = () => {
-        setUserProfile({ 
-            ...(userProfile || initialAppCustomizationData), 
+        updateUserProfilePartial({ 
             userName: name, 
             userImage: image || null, 
             systemPrompt: systemPrompt, 
@@ -113,7 +117,7 @@ function ProfileSettings() {
 
     return (
          <Card>
-            <CardHeader><CardTitle>{lang === 'he' ? 'פרופיל והנחיית מערכת' : 'User Profile & System Prompt'}</CardTitle></CardHeader>
+            <CardHeader><CardTitle>{lang === 'he' ? 'פרופיל משתמש והנחיית מערכת' : 'User Profile & System Prompt'}</CardTitle></CardHeader>
             <CardContent className="space-y-4">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
                     <div>
@@ -122,7 +126,7 @@ function ProfileSettings() {
                     </div>
                     <div>
                         <Label htmlFor="userImage">{lang === 'he' ? 'תמונת פרופיל (משתמש)' : 'User Profile Image'}</Label>
-                        <Input id="userImage" type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setImage)} className="file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-[var(--accent)]/20 file:text-[var(--accent)] hover:file:bg-[var(--accent)]/30"/>
+                        <Input id="userImage" type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setImage)} className="file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-[var(--accent-primary-light)]/20 file:text-[var(--accent-primary-light)] hover:file:bg-[var(--accent-primary-light)]/30"/>
                         {image && <img src={image} alt="User Preview" className="w-16 h-16 rounded-md mt-2 object-cover"/>}
                     </div>
                 </div>
@@ -133,7 +137,7 @@ function ProfileSettings() {
                     </div>
                     <div>
                         <Label htmlFor="botImage">{lang === 'he' ? 'תמונת פרופיל (בוט)' : 'Bot Profile Image'}</Label>
-                        <Input id="botImage" type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setBotImage)} className="file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-[var(--accent)]/20 file:text-[var(--accent)] hover:file:bg-[var(--accent)]/30"/>
+                        <Input id="botImage" type="file" accept="image/*" onChange={(e) => handleImageUpload(e, setBotImage)} className="file:mr-3 file:py-1.5 file:px-3 file:rounded-md file:border-0 file:text-xs file:font-medium file:bg-[var(--accent-primary-light)]/20 file:text-[var(--accent-primary-light)] hover:file:bg-[var(--accent-primary-light)]/30"/>
                         {botImage && <img src={botImage} alt="Bot Preview" className="w-16 h-16 rounded-md mt-2 object-cover"/>}
                     </div>
                 </div>
@@ -148,7 +152,6 @@ function ProfileSettings() {
         </Card>
     );
 }
-
 function SavedPromptsSettings() {
     const { lang } = useAppContext();
     const { savedPrompts, addSavedPrompt, updateSavedPrompt, deleteSavedPrompt, reorderSavedPrompts } = useUserSettings();
@@ -251,12 +254,10 @@ function SavedPromptsSettings() {
         </Card>
     );
 }
-
 function AppearanceSettings() {
     const { lang, theme, toggleTheme, activeVoice, setActiveVoice, availableVoices, speak, openErrorDialog, loadVoices } = useAppContext();
     const { userProfile, setUserProfile, updateUserProfilePartial } = useUserSettings();
     
-    // chatFontSize and botVoiceURI are the only customizable appearance settings left.
     const [chatFontSize, setChatFontSize] = useState(userProfile?.chatFontSize || 16);
     const [botVoiceURI, setBotVoiceURIState] = useState(userProfile?.botVoiceURI || null);
 
@@ -278,7 +279,7 @@ function AppearanceSettings() {
             chatFontSize: defaultFontSize, 
             botVoiceURI: null 
         });
-        loadVoices(); // To reset activeVoice if needed
+        loadVoices(); 
     };
 
     const handlePlaySampleVoice = () => {
@@ -363,7 +364,6 @@ function AppearanceSettings() {
         </Card>
     );
 }
-
 function ApiSettingsSection() {
     const { lang, apiSettings, loadApiSettings, openErrorDialog, ApiSettingsStorage, validateApiKey } = useAppContext();
     const [showAddModelDialog, setShowAddModelDialog] = useState(false);
@@ -372,6 +372,8 @@ function ApiSettingsSection() {
     const [deleteModelId, setDeleteModelId] = useState<string | null>(null);
     const [savingModel, setSavingModel] = useState(false);
     const [validatingModelId, setValidatingModelId] = useState<string | null>(null);
+    const [validationStatusMessages, setValidationStatusMessages] = useState<Record<string, { message: string, type: 'success' | 'error' | 'validating' }>>({});
+
 
     const getInitialEditingModel = (): Partial<ApiSetting> => ({
         name: '',
@@ -434,10 +436,10 @@ function ApiSettingsSection() {
             id: editingModel.id || `api-${Date.now()}`,
             name: editingModel.name,
             provider: editingModel.provider,
-            modelId: editingModel.modelId.trim(),
+            modelId: (editingModel.modelId === 'custom' ? (editingModel as any).modelIdIfCustom : editingModel.modelId)?.trim() || '',
             apiKey: editingModel.provider === 'google' ? '' : (editingModel.apiKey || ''),
             apiUrl: editingModel.apiUrl?.trim() || undefined,
-            costs: editingModel.costs || KNOWN_MODELS_PRICING[editingModel.modelId.trim()] || { input: 0, output: 0 },
+            costs: editingModel.costs || KNOWN_MODELS_PRICING[(editingModel.modelId === 'custom' ? (editingModel as any).modelIdIfCustom : editingModel.modelId)?.trim() || ''] || { input: 0, output: 0 },
             isFreeTier: editingModel.isFreeTier || false,
             modelSystemPrompt: editingModel.modelSystemPrompt || '',
             isDefault: editingModel.isDefault || false,
@@ -462,16 +464,20 @@ function ApiSettingsSection() {
 
     const handleValidateModel = async (modelToValidate: ApiSetting) => {
         setValidatingModelId(modelToValidate.id);
+        setValidationStatusMessages(prev => ({ ...prev, [modelToValidate.id]: { message: lang === 'he' ? 'בודק...' : 'Validating...', type: 'validating' } }));
         const result = await validateApiKey(modelToValidate);
         let updatedModel = { ...modelToValidate, isValid: result.isValid, lastValidated: new Date().toISOString() };
+        
         if(result.error) {
+            setValidationStatusMessages(prev => ({ ...prev, [modelToValidate.id]: { message: lang === 'he' ? 'הבדיקה נכשלה' : 'Validation Failed', type: 'error' } }));
             openErrorDialog(lang === 'he' ? 'שגיאת ולידציה' : 'Validation Error', `${lang === 'he' ? 'הבדיקה נכשלה: ' : 'Validation failed: '}${result.error}`);
         } else {
-             openErrorDialog(lang === 'he' ? 'ולידציה הצליחה' : 'Validation Successful', lang === 'he' ? 'המודל תקין ומוכן לשימוש.' : 'Model is valid and ready to use.');
+            setValidationStatusMessages(prev => ({ ...prev, [modelToValidate.id]: { message: lang === 'he' ? 'תקין!' : 'Validated!', type: 'success' } }));
         }
         await ApiSettingsStorage.upsert(updatedModel);
         await loadApiSettings();
         setValidatingModelId(null);
+        setTimeout(() => setValidationStatusMessages(prev => { const {[modelToValidate.id]: _, ...rest} = prev; return rest; }), 3000);
     };
 
     const CollapsibleCostsEditor = ({ costs, onChange, modelId, provider }: { costs?: {input?:number, output?:number}, onChange: (newCosts: {input?:number, output?:number}) => void, modelId?: string, provider?:string }) => {
@@ -509,9 +515,8 @@ function ApiSettingsSection() {
         );
     };
 
-
     return (
-        <Card>
+        <Card className="w-full"> {/* Ensure it takes full width of its container */}
             <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2">
                 <CardTitle>{lang === 'he' ? 'ניהול מודלי API' : 'API Model Management'}</CardTitle>
                 <Button onClick={handleAddNewModel} size="sm" variant="default"><Plus className="w-3.5 h-3.5 me-1.5"/>{lang === 'he' ? 'הוסף מודל חדש' : 'Add New Model'}</Button>
@@ -540,10 +545,17 @@ function ApiSettingsSection() {
                                     <TableCell>{PROVIDER_INFO[model.provider]?.name || model.provider}</TableCell>
                                     <TableCell className="font-mono text-xs">{model.modelId}</TableCell>
                                     <TableCell>
-                                        {model.isValid ?
+                                         {validationStatusMessages[model.id] ? (
+                                            <span className={`flex items-center text-xs ${validationStatusMessages[model.id].type === 'success' ? 'text-green-500' : validationStatusMessages[model.id].type === 'error' ? 'text-red-500' : 'text-yellow-500'}`}>
+                                                {validationStatusMessages[model.id].type === 'validating' && <Loader2 className="w-3 h-3 animate-spin me-1"/>}
+                                                {validationStatusMessages[model.id].type === 'success' && <CheckCircle className="w-3 h-3 me-1"/>}
+                                                {validationStatusMessages[model.id].type === 'error' && <XCircle className="w-3 h-3 me-1"/>}
+                                                {validationStatusMessages[model.id].message}
+                                            </span>
+                                        ) : model.isValid ?
                                             <span className="flex items-center text-green-500"><CheckCircle className="w-3.5 h-3.5 me-1"/> {lang === 'he' ? 'תקין' : 'Valid'}</span> :
                                             <span className="flex items-center text-red-500"><XCircle className="w-3.5 h-3.5 me-1"/> {lang === 'he' ? 'לא תקין' : 'Invalid'}</span>}
-                                        {model.lastValidated && <p className="text-xs text-[var(--text-secondary)]">{lang === 'he' ? 'נבדק: ' : 'Validated: '}{new Date(model.lastValidated).toLocaleDateString()}</p>}
+                                        {model.lastValidated && !validationStatusMessages[model.id] && <p className="text-xs text-[var(--text-secondary)]">{lang === 'he' ? 'נבדק: ' : 'Validated: '}{new Date(model.lastValidated).toLocaleDateString()}</p>}
                                     </TableCell>
                                     <TableCell className="text-xs">
                                         I: ${model.costs?.input?.toFixed(2) ?? KNOWN_MODELS_PRICING[model.modelId]?.input?.toFixed(2) ?? 'N/A'}<br/>
@@ -604,15 +616,20 @@ function ApiSettingsSection() {
                      {editingModel?.provider && (
                         <div>
                             <Label htmlFor="modelId">{lang === 'he' ? 'מזהה מודל (ID)' : 'Model ID'} <span className="text-red-500">*</span></Label>
-                            <Select id="modelId" value={editingModel?.modelId ?? ''} onChange={(e) => {
-                                const newModelId = e.target.value;
-                                const knownPricing = KNOWN_MODELS_PRICING[newModelId];
-                                setEditingModel(p => ({
-                                    ...(p ?? getInitialEditingModel()),
-                                    modelId: newModelId,
-                                    costs: knownPricing ? {input: knownPricing.input, output: knownPricing.output} : {input:0, output:0},
-                                    isFreeTier: knownPricing?.isFreeTier ?? false
-                                }));
+                            <Select id="modelId" value={(editingModel as any)?.modelIdIfCustom ? 'custom' : (editingModel?.modelId ?? '')} onChange={(e) => {
+                                const newModelIdSelection = e.target.value;
+                                if (newModelIdSelection === 'custom') {
+                                    setEditingModel(p => ({...(p ?? getInitialEditingModel()), modelId: 'custom', modelIdIfCustom: ''}));
+                                } else {
+                                    const knownPricing = KNOWN_MODELS_PRICING[newModelIdSelection];
+                                    setEditingModel(p => ({
+                                        ...(p ?? getInitialEditingModel()),
+                                        modelId: newModelIdSelection,
+                                        modelIdIfCustom: undefined,
+                                        costs: knownPricing ? {input: knownPricing.input, output: knownPricing.output} : {input:0, output:0},
+                                        isFreeTier: knownPricing?.isFreeTier ?? false
+                                    }));
+                                }
                             }}>
                                 <option value="" disabled>{lang === 'he' ? 'בחר מזהה מודל...' : 'Select model ID...'}</option>
                                 {Object.keys(KNOWN_MODELS_PRICING)
@@ -623,14 +640,14 @@ function ApiSettingsSection() {
                                 <option value="custom">{lang === 'he' ? 'מותאם אישית...' : 'Custom...'}</option>
                             </Select>
                             {editingModel?.modelId === 'custom' && (
-                                 <Input type="text" value={(editingModel as any)?.modelIdIfCustom || ''} onChange={(e) => setEditingModel(p => ({...(p ?? getInitialEditingModel()), modelIdIfCustom: e.target.value, modelId: e.target.value}))} placeholder={lang === 'he' ? "הזן מזהה מודל מותאם אישית" : "Enter custom model ID"} className="mt-2"/>
+                                 <Input type="text" value={(editingModel as any)?.modelIdIfCustom || ''} onChange={(e) => setEditingModel(p => ({...(p ?? getInitialEditingModel()), modelIdIfCustom: e.target.value}))} placeholder={lang === 'he' ? "הזן מזהה מודל מותאם אישית" : "Enter custom model ID"} className="mt-2"/>
                             )}
                         </div>
                     )}
                     {editingModel?.provider !== 'google' && (
                         <div>
                             <Label htmlFor="apiKey">{lang === 'he' ? 'מפתח API' : 'API Key'} <span className="text-red-500">*</span></Label>
-                            <Input id="apiKey" type="password" value={editingModel?.apiKey ?? ''} onChange={(e) => setEditingModel(p => ({...(p ?? getInitialEditingModel()), apiKey: e.target.value}))} placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxx"/>
+                            <Input id="apiKey" type="password" value={editingModel?.apiKey ?? ''} onChange={(e) => setEditingModel(p => ({...(p ?? getInitialEditingModel()), apiKey: e.target.value}))} placeholder="sk-xxxxxxxxxx או מפתח אחר"/>
                             {editingModel?.provider && PROVIDER_INFO[editingModel.provider]?.apiKeyUrl && (
                                 <a href={PROVIDER_INFO[editingModel.provider]?.apiKeyUrl} target="_blank" rel="noopener noreferrer" className="text-xs text-[var(--accent)] hover:underline flex items-center gap-1 mt-1">
                                    <ExternalLink className="w-3 h-3"/> {lang === 'he' ? 'קבל מפתח API' : 'Get API Key'}
@@ -651,8 +668,8 @@ function ApiSettingsSection() {
                         </div>
                      )}
                      {editingModel?.provider === 'google' && (
-                        <div className="p-2.5 bg-[var(--accent)]/10 rounded-md text-sm text-[var(--accent)]">
-                            {lang === 'he' ? 'עבור Google Gemini, מפתח ה-API נטען אוטומטית. אין צורך להזין אותו כאן.' : 'For Google Gemini, the API key is automatically loaded. No need to enter it here.'}
+                        <div className="p-2.5 bg-[var(--accent-primary-light)]/10 rounded-md text-sm text-[var(--accent-primary-light)] border border-[var(--accent-primary-light)]/20">
+                            {lang === 'he' ? 'עבור Google Gemini, מפתח ה-API נטען אוטומטית מקובץ הסביבה. אין צורך להזין אותו כאן.' : 'For Google Gemini, the API key is automatically loaded from the environment. No need to enter it here.'}
                         </div>
                      )}
                     <div>
@@ -662,7 +679,7 @@ function ApiSettingsSection() {
                      <CollapsibleCostsEditor
                         costs={editingModel?.costs}
                         onChange={(newCosts) => setEditingModel(p => ({...(p ?? getInitialEditingModel()), costs: newCosts}))}
-                        modelId={editingModel?.modelId}
+                        modelId={editingModel?.modelId === 'custom' ? (editingModel as any)?.modelIdIfCustom : editingModel?.modelId}
                         provider={editingModel?.provider}
                     />
                      <div className="flex items-center gap-2 mt-2">
@@ -689,7 +706,6 @@ function ApiSettingsSection() {
         </Card>
     );
 }
-
 function PersonasSettings() {
     const { lang } = useAppContext();
     const { personas, addPersona, updatePersona, deletePersona, reorderPersonas, activePersonaId, setActivePersonaId } = useUserSettings();
@@ -821,7 +837,6 @@ function PersonasSettings() {
         </Card>
     );
 }
-
 interface CalendarViewProps { 
     date: Date;
     data: {[key: number]: { incomingTokens: number; outgoingTokens: number; cost: number }};
@@ -869,7 +884,6 @@ function CalendarView({ date, data, lang }: CalendarViewProps) {
         </div>
     );
 }
-
 function UsageDashboard() {
     const { lang, tokenUsage } = useAppContext();
     const [currentDate, setCurrentDate] = useState(new Date());
@@ -938,19 +952,92 @@ function UsageDashboard() {
         </Card>
     );
 }
+// New Privacy Settings Tab Content
+function PrivacySettings() {
+    const { lang } = useAppContext();
+    const { userProfile, updateUserProfilePartial } = useUserSettings();
+    const [shareLocation, setShareLocation] = useState(userProfile?.shareLocation ?? false);
+
+    useEffect(() => {
+        setShareLocation(userProfile?.shareLocation ?? false);
+    }, [userProfile?.shareLocation]);
+
+    const handleShareLocationChange = (checked: boolean) => {
+        setShareLocation(checked);
+        updateUserProfilePartial({ shareLocation: checked });
+    };
+
+    return (
+        <Card>
+            <CardHeader>
+                <CardTitle>{lang === 'he' ? 'הגדרות פרטיות' : 'Privacy Settings'}</CardTitle>
+                <CardDescription>{lang === 'he' ? 'נהל את הגדרות המיקום והפרטיות שלך.' : 'Manage your location and privacy settings.'}</CardDescription>
+            </CardHeader>
+            <CardContent>
+                <div className="flex items-center justify-between p-3 rounded-md bg-[var(--bg-primary)] border border-[var(--border)]">
+                    <Label htmlFor="shareLocationSwitch" className="mb-0 text-sm">
+                        {lang === 'he' ? 'שתף מיקום עבור התאמה אישית והצעות' : 'Share location for personalization and suggestions'}
+                    </Label>
+                    <Switch
+                        id="shareLocationSwitch"
+                        checked={shareLocation}
+                        onCheckedChange={handleShareLocationChange}
+                    />
+                </div>
+                 <p className="text-xs text-[var(--text-secondary)] mt-2">
+                    {lang === 'he' ? 'שיתוף המיקום שלך עוזר לנו לספק תוצאות והצעות רלוונטיות יותר. המידע שלך נשמר בצורה מאובטחת.' : 'Sharing your location helps us provide more relevant results and suggestions. Your information is kept secure.'}
+                </p>
+            </CardContent>
+            {/* <CardFooter>
+                <Button onClick={() => updateUserProfilePartial({ shareLocation })} variant="default">{lang === 'he' ? 'שמור הגדרות פרטיות' : 'Save Privacy Settings'}</Button>
+            </CardFooter> */}
+        </Card>
+    );
+}
+
+
+// Wrappers for feature pages to be rendered as tabs
+const ClosedNotebookTab = () => <KnowledgeBasePage />;
+const OpenSpaceTab = () => <SpacesPage />;
+const ArenaTab = () => <ArenaPage />;
+const AgentsTab = () => <AgentArenaPage />;
+const CockpitTab = () => <CockpitPage />;
 
 
 export function SettingsPage() {
     const { lang } = useAppContext();
+    const [activeTab, setActiveTab] = useState("profile_prompts"); // Default to the first tab
+
+    const tabsConfig = [
+        { id: "profile_prompts", label: lang === 'he' ? 'פרופיל והנחיות' : 'Profile & Prompts', icon: UserIcon },
+        { id: "appearance_voice", label: lang === 'he' ? 'מראה וקול' : 'Appearance & Voice', icon: Palette },
+        { id: "api_providers", label: lang === 'he' ? 'API וספקים' : 'API & Providers', icon: Server },
+        { id: "personas", label: lang === 'he' ? 'פרסונות' : 'Personas', icon: Users },
+        { id: "privacy", label: lang === 'he' ? 'פרטיות' : 'Privacy', icon: ShieldCheck },
+        { id: "closed_notebook", label: lang === 'he' ? 'מחברת סגורה' : 'Closed Notebook', icon: BookLock },
+        { id: "open_space", label: lang === 'he' ? 'מרחב פתוח' : 'Open Space', icon: BookOpen },
+        { id: "arena", label: lang === 'he' ? 'זירת השוואות' : 'Arena', icon: ArenaIcon },
+        { id: "agents_arena", label: lang === 'he' ? 'סוכנים' : 'Agents', icon: AgentsIcon },
+        { id: "cockpit", label: lang === 'he' ? 'קוקפיט' : 'Cockpit', icon: CockpitIcon },
+        { id: "usage_costs", label: lang === 'he' ? 'שימוש ועלויות' : 'Usage & Costs', icon: TrendingUp },
+    ];
+
+
     return (
-        <SettingsLayout> 
+        <SettingsLayout activeTab={activeTab} setActiveTab={setActiveTab} tabsConfig={tabsConfig}> 
             {({ activeSettingsTab }) => {
                 switch (activeSettingsTab) {
-                    case 'profile': return <><ProfileSettings /><div className="my-6 border-t border-[var(--border)]"></div><SavedPromptsSettings /></>;
-                    case 'appearance': return <AppearanceSettings />;
-                    case 'api': return <ApiSettingsSection />;
+                    case 'profile_prompts': return <ProfileAndPromptsSettings />;
+                    case 'appearance_voice': return <AppearanceSettings />;
+                    case 'api_providers': return <ApiSettingsSection />;
                     case 'personas': return <PersonasSettings />;
-                    case 'usage': return <UsageDashboard />;
+                    case 'privacy': return <PrivacySettings />;
+                    case 'closed_notebook': return <ClosedNotebookTab />;
+                    case 'open_space': return <OpenSpaceTab />;
+                    case 'arena': return <ArenaTab />;
+                    case 'agents_arena': return <AgentsTab />;
+                    case 'cockpit': return <CockpitTab />;
+                    case 'usage_costs': return <UsageDashboard />;
                     default: return <div className="p-4 text-center text-[var(--text-secondary)]">{lang === 'he' ? 'בחר קטגוריה מהתפריט' : 'Select a category from the menu'}</div>;
                 }
             }}

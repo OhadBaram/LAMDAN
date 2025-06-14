@@ -454,7 +454,7 @@ export const useAppContext = () => {
 function AppProviderInternal({ children }: { children: React.ReactNode }) {
     const userSettings = useUserSettings(); // Hook into UserSettingsContext
     const [lang, setLang] = useState(() => localStorage.getItem('app_lang') || 'he');
-    const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light');
+    const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'light'); // Default to 'light' for Gemini-like UI
     const [apiSettings, setApiSettingsState] = useState<ApiSetting[]>([]);
     const [tokenUsage, setTokenUsageState] = useState<TokenUsage[]>([]);
     const [currentPage, setCurrentPageGlobal] = useState('chat');

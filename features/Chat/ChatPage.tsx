@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Paperclip, X, Plus, Sparkles, SendHorizontal, Loader2, Mic, MicOff, Info, MessageCircle } from "lucide-react"; 
+import { Paperclip, X, Plus, Sparkles, SendHorizontal, Loader2, Mic, MicOff, Info, MessageCircle, Palette, Brain as BrainIcon } from "lucide-react"; 
 import { useAppContext, ChatMessageItem, InvokeLLM } from '../../contexts/AppContext';
 import { useUserSettings } from '../../contexts/UserSettingsContext';
 
@@ -8,7 +8,7 @@ import { Button } from '../../components/ui/Button';
 import { Input } from '../../components/ui/Input';
 import { Textarea } from '../../components/ui/Textarea';
 import { Label } from '../../components/ui/Label';
-import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card'; // Card used in InfoPanel
+import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card'; 
 import { Dialog, DialogHeader, DialogTitle, DialogContent, DialogFooter } from '../../components/ui/Dialog';
 import { Select } from '../../components/ui/Select';
 import { Switch } from '../../components/ui/Switch';
@@ -35,7 +35,7 @@ const thinkingMessages = {
     ]
 };
 
-const welcomeMessages = {
+const welcomeMessages = { // Used for initial bot message if history is empty, and prompt bar placeholder
     en: [
         "Hello! How can I assist you today?",
         "Hi there! What can LUMINA do for you?",
@@ -50,21 +50,8 @@ const welcomeMessages = {
     ]
 };
 
-const promptStarters = {
-    en: [
-        "Explain quantum computing in simple terms.",
-        "What are some healthy dinner recipes?",
-        "Tell me a fun fact.",
-        "Write a poem about nature."
-    ],
-    he: [
-        "הסבר לי על מחשוב קוונטי בפשטות.",
-        "אילו מתכונים בריאים יש לארוחת ערב?",
-        "ספר לי עובדה מעניינת.",
-        "כתוב שיר על הטבע."
-    ]
-};
-
+// Prompt starters are removed from below input, will be part of the empty chat state message if desired.
+// For now, the large welcome message replaces them in empty state.
 
 export function ChatPage() {
   const { lang, apiSettings, recordTokenUsage, speak, continuousConversation, setContinuousConversation, isListening, startListening, stopListening, transcript, setTranscript, clearTranscript, openErrorDialog, ChatHistoryStorage, InvokeLLM: InvokeLLMFromContext } = useAppContext(); 
@@ -95,8 +82,10 @@ export function ChatPage() {
             setCurrentConversationCost(history.cost || 0);
             setCurrentConversationTokens(history.tokens || { incoming: 0, outgoing: 0 });
         } else {
-             const initialWelcome = getRandomMessage(welcomeMessages[lang as 'he' | 'en']);
-             setMessages([{ role: "assistant", content: initialWelcome, timestamp: new Date().toISOString() }]);
+             // Initial bot message logic is simplified. The large welcome text handles the empty state visually.
+             // We can still add a default bot greeting if needed, or rely on the user starting.
+             // For now, let's keep it clean for the new UI.
+             setMessages([]); 
              setCurrentConversationCost(0);
              setCurrentConversationTokens({ incoming: 0, outgoing: 0 });
         }
@@ -105,7 +94,8 @@ export function ChatPage() {
   }, [currentChatId, lang, ChatHistoryStorage]);
 
   useEffect(() => {
-      if (messages.length > 1 || currentConversationCost > 0 || (messages.length === 1 && messages[0].role === 'assistant' && !welcomeMessages[lang as 'he' | 'en'].includes(messages[0].content))) { // Save if not default welcome or more than 1 msg
+      // Save if there are any messages (user or bot)
+      if (messages.length > 0) { 
           ChatHistoryStorage.upsert({ id: currentChatId, messages, cost: currentConversationCost, tokens: currentConversationTokens, lastUpdated: new Date().toISOString() });
       }
   }, [messages, currentConversationCost, currentConversationTokens, currentChatId, ChatHistoryStorage, lang]);
@@ -131,7 +121,7 @@ export function ChatPage() {
         const intervalId = setInterval(() => {
             setCurrentThinkingMessage(getRandomMessage(thinkingMessages[lang as 'he' | 'en']));
         }, 2500);
-        setCurrentThinkingMessage(getRandomMessage(thinkingMessages[lang as 'he' | 'en'])); // Initial message
+        setCurrentThinkingMessage(getRandomMessage(thinkingMessages[lang as 'he' | 'en'])); 
         return () => clearInterval(intervalId);
     }
   }, [isLoading, lang]);
@@ -146,7 +136,7 @@ export function ChatPage() {
     const userMessageContent = submissionInput;
     const userMessage: ChatMessageItem = { role: "user", content: userMessageContent, timestamp: new Date().toISOString(), files: attachedFiles };
     setMessages(prev => [...prev, userMessage]);
-    incrementXP(5); // Award XP for sending a message
+    incrementXP(5); 
 
     setInput("");
     setAttachedFiles([]);
@@ -180,7 +170,7 @@ export function ChatPage() {
         modelConfig: activeModelConfig,
         prompt: fullPrompt,
         systemPrompt: systemPrompt,
-        conversationHistory: messages.slice(-10), // Send last 10 messages for context
+        conversationHistory: messages.slice(-10), 
         files: attachedFiles,
     });
 
@@ -198,7 +188,7 @@ export function ChatPage() {
             role: "assistant", 
             content: response.message, 
             timestamp: new Date().toISOString(),
-            suggestions: [ // Static suggestions for now
+            suggestions: [ 
                 lang === 'he' ? "ספר לי עוד" : "Tell me more",
                 lang === 'he' ? "הסבר את זה אחרת" : "Explain that differently",
                 lang === 'he' ? "מה המשמעות של זה?" : "What does this mean?"
@@ -302,63 +292,36 @@ export function ChatPage() {
     setShowSavedPromptsDialog(false);
   };
   
-  const handlePromptStarterClick = (promptText: string) => {
-    setInput(promptText);
-    // Optionally, auto-submit:
-    // handleSubmit(); // or handleSubmit({ preventDefault: () => {} } as any);
-  };
-
   const currentPersonaName = personas.find(p => p.id === activePersonaId)?.name || (lang === 'he' ? "ברירת מחדל" : "Default");
-  const chatAreaBg = "var(--bg-primary)"; // Use CSS variable
-
+  const chatAreaBg = "var(--bg-primary)"; 
   const activeSpaceDetails = spaces.find(s => s.id === activeSpaceId);
-
-  // Chat page header using theme colors
   const chatPageHeaderBg = "var(--bg-primary)"; 
   const chatPageHeaderBorder = "var(--border)";
   const chatPageInputAreaBg = "var(--bg-primary)";
 
+  const promptBarPlaceholder = lang === 'he' ? `יש לך שאלה? - ${userProfile?.userName || 'משתמש'}` : `Got a question? - ${userProfile?.userName || 'User'}`;
+
 
   return (
     <div className="flex flex-col h-full bg-[var(--bg-primary)] relative"> 
-      <div className={`px-3 py-2 border-b border-[${chatPageHeaderBorder}] flex items-center justify-between sticky top-0 bg-[${chatPageHeaderBg}] z-10`}>
-        <div className="flex items-center gap-1.5">
-            <Button onClick={() => { 
-                const newChatId = `chat-${Date.now()}`;
-                setCurrentChatId(newChatId); 
-                const initialWelcome = getRandomMessage(welcomeMessages[lang as 'he' | 'en']);
-                setMessages([{ role: "assistant", content: initialWelcome, timestamp: new Date().toISOString() }]); 
-                setCurrentConversationCost(0); 
-                setCurrentConversationTokens({ incoming: 0, outgoing: 0 }); 
-            }} variant="outline" size="sm" className="text-xs">
-                <Plus className="w-3.5 h-3.5 me-1.5"/> {lang === 'he' ? 'שיחה חדשה' : 'New Chat'}
-            </Button>
-            {validModels.length > 0 && currentModelId && (
-                <div className="flex items-center gap-1">
-                    <Label htmlFor="model-select-chat" className="text-xs whitespace-nowrap mb-0 sr-only">{lang === 'he' ? 'מודל:' : 'Model:'}</Label>
-                    <Select
-                        id="model-select-chat"
-                        value={currentModelId}
-                        onChange={(e) => setCurrentModelId(e.target.value)}
-                        className="text-xs p-1.5 min-w-[100px] sm:min-w-[130px] rounded-md h-8" 
-                        disabled={isLoading}
-                    >
-                        {validModels.map(model => <option key={model.id} value={model.id}>{model.name}</option>)}
-                    </Select>
-                </div>
-            )}
-        </div>
-        <Button variant="ghost" size="icon" onClick={() => setIsChatInfoPanelOpen(!isChatInfoPanelOpen)} title={lang === 'he' ? 'הצג/הסתר מידע שיחה' : 'Toggle Conversation Info'} className="rounded-md p-1.5">
-            <Info className="w-4 h-4 text-[var(--text-secondary)] hover:text-[var(--text-primary)]"/> 
-        </Button>
-      </div>
-
+      {/* Header section inside ChatPage is removed as per new design (controlled by index.tsx) */}
+      
       <div className="flex-1 flex flex-col overflow-hidden"> 
             <div 
               aria-live="polite"
               className="flex-1 overflow-y-auto p-3 md:p-4" 
               style={{ backgroundColor: chatAreaBg }}
             >
+                {/* Large Welcome Message for Empty Chat */}
+                {messages.length === 0 && !isLoading && (
+                    <div className="flex flex-col items-center justify-center h-full text-center">
+                         <h2 className="gemini-welcome-text">
+                            {lang === 'he' ? `שלום, ${userProfile?.userName || 'משתמש'}!` : `Hello, ${userProfile?.userName || 'User'}!`}
+                        </h2>
+                        {/* Optionally add some prompt starter cards here later if needed */}
+                    </div>
+                )}
+
                 {messages.map((message, index) =>
                     <ChatMessage
                         key={index}
@@ -366,15 +329,14 @@ export function ChatPage() {
                         onSpeak={speak}
                         onSuggestionClick={(suggestionText) => {
                             setInput(suggestionText);
-                            // Optionally auto-submit: handleSubmit();
                         }}
                     />
                 )}
                  {isLoading && (
                     <div className="flex items-center justify-start mb-4">
-                        <MessageCircle className="w-8 h-8 p-1.5 rounded-md self-start flex-shrink-0 bg-[var(--accent)]/20 text-[var(--accent)] me-2" />
+                        <MessageCircle className="w-8 h-8 p-1.5 rounded-md self-start flex-shrink-0 bg-[var(--bg-secondary)] text-[var(--text-primary)] me-2" /> {/* Adapted icon style */}
                         <div className="flex items-center space-x-2 bg-[var(--bg-secondary)] text-[var(--text-primary)] p-3 rounded-lg shadow-sm">
-                            <Loader2 className="h-4 w-4 animate-spin text-[var(--accent)]" />
+                            <Loader2 className="h-4 w-4 animate-spin text-[var(--accent-primary-light)]" />
                             <span className="text-sm">{currentThinkingMessage}</span>
                         </div>
                     </div>
@@ -382,38 +344,28 @@ export function ChatPage() {
                 <div ref={messagesEndRef} />
             </div>
 
-            <div className={`p-3 border-t border-[var(--border)] bg-[${chatPageInputAreaBg}]`}>
-                {(!isLoading && messages.length <= 2) && (
-                     <div className="mb-2 flex flex-wrap gap-1.5 items-center justify-center">
-                        <span className="text-xs text-[var(--text-secondary)] me-1.5">{lang === 'he' ? 'נסה לשאול:' : 'Try asking:'}</span>
-                        {promptStarters[lang as 'he' | 'en'].slice(0,3).map((starter, idx) => (
-                            <Button key={idx} variant="outline" size="sm" className="text-xs !px-2 !py-1 rounded-md" onClick={() => handlePromptStarterClick(starter)}>
-                                {starter}
-                            </Button>
-                        ))}
-                    </div>
-                )}
+            {/* New Gemini-like Prompt Bar */}
+            <div className={`p-3 border-t border-[var(--border-light)] bg-[var(--bg-primary-light)]`}>
                 {attachedFiles.length > 0 && (
                     <div className="mb-1.5 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-1.5">
                         {attachedFiles.map(file => <FilePreview key={file.id} file={file} onRemove={() => removeAttachedFile(file.id)} />)}
                     </div>
                 )}
-                <form id="chat-form" onSubmit={handleSubmit} className="flex items-end gap-1.5">
-                    <Button type="button" variant="ghost" size="icon" onClick={() => fileInputRef.current?.click()} title={lang === 'he' ? 'צרף קובץ' : 'Attach File'} className="rounded-md p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
-                        <Paperclip className="w-4 h-4"/>
-                    </Button>
-                    <input type="file" multiple ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*,application/pdf,.doc,.docx,.txt,.md,text/plain" />
-
-                    <Button type="button" variant="ghost" size="icon" onClick={() => setShowSavedPromptsDialog(true)} title={lang === 'he' ? 'הנחיות שמורות' : 'Saved Prompts'} className="rounded-md p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)]">
-                        <Sparkles className="w-4 h-4"/>
-                    </Button>
-
+                <form 
+                    id="chat-form" 
+                    onSubmit={handleSubmit} 
+                    className="flex items-end gap-2 gemini-prompt-bar"
+                >
+                    <button type="button" onClick={handleSpeechToText} title={lang === 'he' ? (isListening ? 'הפסק הקלטה' : 'הקלט קול') : (isListening ? 'Stop Listening' : 'Record Voice')} className={`gemini-prompt-bar-icon p-1 rounded-full hover:bg-black/5 ${isListening ? "text-[var(--error)] bg-[var(--error)]/10" : ""}`}>
+                        {isListening ? <MicOff /> : <Mic />}
+                    </button>
+                    
                     <Textarea
                         value={input}
                         onChange={(e) => setInput(e.target.value)}
-                        placeholder={isListening ? (lang === 'he' ? "מאזין..." : "Listening...") : (getRandomMessage(welcomeMessages[lang as 'he' | 'en'].map(s => s.replace("!", "?"))))}
+                        placeholder={isListening ? (lang === 'he' ? "מאזין..." : "Listening...") : promptBarPlaceholder}
                         disabled={isLoading}
-                        className="flex-1 min-h-[40px] max-h-[120px] resize-none rounded-md px-3 py-2 text-base" // Standard text size for input
+                        className="gemini-prompt-bar textarea" // Specific class for easier targeting if needed
                         rows={1}
                         onKeyDown={(e) => {
                             if (e.key === 'Enter' && !e.shiftKey) {
@@ -422,16 +374,28 @@ export function ChatPage() {
                             }
                         }}
                     />
-                    <Button type="button" variant="ghost" size="icon" onClick={handleSpeechToText} title={lang === 'he' ? (isListening ? 'הפסק הקלטה' : 'הקלט קול') : (isListening ? 'Stop Listening' : 'Record Voice')} className={`rounded-md p-2 text-[var(--text-secondary)] hover:text-[var(--text-primary)] ${isListening ? "text-[var(--error)] bg-[var(--error)]/10" : ""}`}>
-                        {isListening ? <MicOff className="w-4 h-4"/> : <Mic className="w-4 h-4"/>}
-                    </Button>
-                    <Button id="chat-submit-button" type="submit" disabled={isLoading || (!input.trim() && !transcript.trim() && attachedFiles.length === 0)} size="icon" className="p-2 rounded-md bg-[var(--accent)] text-[var(--text-primary-light)] hover:brightness-90 active:brightness-80">
-                        {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <SendHorizontal className="w-4 h-4"/>}
-                    </Button>
+                    {/* Visual Placeholders for Canvas, Deep Research, File Upload */}
+                    <div className="flex items-center gap-1.5">
+                        <button type="button" title="Canvas (Visual Placeholder)" className="gemini-prompt-bar-tag">
+                            <Palette className="gemini-prompt-bar-icon" /> Canvas
+                        </button>
+                        <button type="button" title="Deep Research (Visual Placeholder)" className="gemini-prompt-bar-tag">
+                            <BrainIcon className="gemini-prompt-bar-icon" /> Deep Research
+                        </button>
+                         <button type="button" onClick={() => fileInputRef.current?.click()} title={lang === 'he' ? 'צרף קובץ' : 'Attach File'} className="gemini-prompt-bar-icon p-1 rounded-full hover:bg-black/5">
+                            <Plus />
+                        </button>
+                    </div>
+                    <input type="file" multiple ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*,application/pdf,.doc,.docx,.txt,.md,text/plain" />
+                    
+                    <button id="chat-submit-button" type="submit" disabled={isLoading || (!input.trim() && !transcript.trim() && attachedFiles.length === 0)} className="gemini-send-button">
+                        {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <SendHorizontal className="w-5 h-5"/>}
+                    </button>
                 </form>
             </div>
       </div>
         
+      {/* Side info panel (styling might need minor tweaks for new theme) */}
       <div 
         className={`fixed inset-y-0 ${lang === 'he' ? 'left-0 border-r' : 'right-0 border-l'} 
                     w-64 sm:w-72 bg-[var(--bg-secondary)] shadow-xl 
@@ -501,14 +465,12 @@ export function ChatPage() {
               )}
           </div>
       </div>
-       {/* Backdrop for off-canvas panel */}
       {isChatInfoPanelOpen && (
         <div 
             className="fixed inset-0 bg-black/50 z-20 md:hidden" 
             onClick={() => setIsChatInfoPanelOpen(false)}
         />
       )}
-
 
       <Dialog open={showSavedPromptsDialog} onOpenChange={setShowSavedPromptsDialog} size="lg">
         <DialogHeader>
