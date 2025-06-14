@@ -1,3 +1,4 @@
+
 import React, { createContext, useContext, useState, useEffect } from "react";
 import { mockStorage } from '../utils/storage'; // *** ייבוא חדש ***
 // ApiSetting, ChatMessageItem, TokenUsage might not be needed here if not directly used
@@ -15,12 +16,12 @@ export interface CostManagement { dailyBudget: number; weeklyBudget: number; mon
 
 // --- Storage Instances (specific to UserSettingsContext) ---
 export const initialAppCustomizationData: AppCustomization = { 
-    headerBgColor: '#2c3e50', // Darker, more modern blue-gray
-    headerTitleColor: '#ecf0f1', // Light gray/white for contrast
-    chatBgColor: '#f4f6f8', // Slightly off-white/light gray
-    chatFontColor: '#34495e', // Darker gray for text
+    headerBgColor: '#2c3e50', 
+    headerTitleColor: '#ecf0f1',
+    chatBgColor: '#f4f6f8', 
+    chatFontColor: '#34495e',
     chatFontSize: 14, 
-    botVoiceURI: null, 
+    botVoiceURI: null, // This is fine as Select component handles null
     userName: 'User', 
     userImage: null, 
     botName: 'LUMINA', 
@@ -38,7 +39,9 @@ const SavedPromptsStorage = mockStorage<SavedPrompt>('saved_prompts_v2', [
 const PersonasStorage = mockStorage<Persona>('personas_v2', [{id: 'default', name: 'Default Assistant', prompt: 'You are a general-purpose AI assistant.', order: 0, isDefault: true}]);
 const SpacesStorage = mockStorage<Space>('spaces_v2', []);
 const AgentsStorage = mockStorage<Agent>('agents_v2', []);
-const CostManagementStorage = mockStorage<CostManagement>('cost_management_v2', { dailyBudget: 0, weeklyBudget: 0, monthlyBudget: 0, alertEmail: '' });
+
+const initialCostManagementData: CostManagement = { dailyBudget: 0, weeklyBudget: 0, monthlyBudget: 0, alertEmail: '' };
+const CostManagementStorage = mockStorage<CostManagement>('cost_management_v2', initialCostManagementData);
 
 
 // --- UserSettingsContext Definition ---
@@ -94,11 +97,11 @@ export function UserSettingsProvider({ children }: { children: React.ReactNode }
     const [spaces, setSpacesState] = useState<Space[]>([]);
     const [activeSpaceId, setActiveSpaceIdState] = useState<string | null>(null);
     const [agents, setAgentsState] = useState<Agent[]>([]);
-    const [costManagement, setCostManagementState] = useState<CostManagement>({ dailyBudget: 0, weeklyBudget: 0, monthlyBudget: 0, alertEmail: '' });
+    const [costManagement, setCostManagementState] = useState<CostManagement>(initialCostManagementData);
 
     useEffect(() => {
         const loadAllUserSettings = async () => {
-            const [profile, prompts, loadedPersonas, loadedSpaces, loadedAgents, loadedCostManagementData] = await Promise.all([
+            const [profileData, promptsData, personasData, spacesData, agentsData, costManagementData] = await Promise.all([
                 AppCustomizationStorage.getSingle(),
                 SavedPromptsStorage.list(),
                 PersonasStorage.list(),
@@ -106,22 +109,23 @@ export function UserSettingsProvider({ children }: { children: React.ReactNode }
                 AgentsStorage.list(),
                 CostManagementStorage.getSingle(),
             ]);
-            setUserProfileState(profile || initialAppCustomizationData);
-            setSavedPromptsState(prompts.sort((a,b) => a.order - b.order));
-            setPersonasState(loadedPersonas.sort((a,b) => a.order - b.order));
-            const defaultPersona = loadedPersonas.find(p => p.isDefault) || (loadedPersonas.length > 0 ? loadedPersonas[0] : null);
+
+            setUserProfileState(profileData || initialAppCustomizationData);
+            setSavedPromptsState(promptsData.sort((a,b) => a.order - b.order));
+            setPersonasState(personasData.sort((a,b) => a.order - b.order));
+            const defaultPersona = personasData.find(p => p.isDefault) || (personasData.length > 0 ? personasData[0] : null);
             if (defaultPersona) setActivePersonaIdState(defaultPersona.id);
 
-            setSpacesState(loadedSpaces);
+            setSpacesState(spacesData);
             const storedActiveSpaceId = localStorage.getItem('activeSpaceId_v2');
-            if (storedActiveSpaceId && loadedSpaces.find(s => s.id === storedActiveSpaceId)) {
+            if (storedActiveSpaceId && spacesData.find(s => s.id === storedActiveSpaceId)) {
                 setActiveSpaceIdState(storedActiveSpaceId);
-            } else if (loadedSpaces.length > 0) {
-                setActiveSpaceIdState(loadedSpaces[0].id);
+            } else if (spacesData.length > 0) {
+                setActiveSpaceIdState(spacesData[0].id);
             }
 
-            setAgentsState(loadedAgents);
-            setCostManagementState(loadedCostManagementData || { dailyBudget: 0, weeklyBudget: 0, monthlyBudget: 0, alertEmail: '' });
+            setAgentsState(agentsData);
+            setCostManagementState(costManagementData || initialCostManagementData);
         };
         loadAllUserSettings();
     }, []);

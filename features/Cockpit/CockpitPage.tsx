@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import { format } from "date-fns";
-import { parseISO } from 'date-fns/parseISO'; // Corrected import: parseISO is a named export
+import { parseISO } from 'date-fns/parseISO'; 
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell as RechartsCell } from 'recharts';
 
 import { useAppContext } from '../../contexts/AppContext';
@@ -17,14 +17,29 @@ export function CockpitPage() {
     const { lang, tokenUsage, apiSettings } = useAppContext();
     const { costManagement, setCostManagements } = useUserSettings();
 
-    const [editingBudgets, setEditingBudgets] = useState(costManagement);
+    const initialBudgets: CostManagement = {
+        dailyBudget: 0,
+        weeklyBudget: 0,
+        monthlyBudget: 0,
+        alertEmail: ''
+    };
+    const [editingBudgets, setEditingBudgets] = useState<CostManagement>(costManagement || initialBudgets);
 
     useEffect(() => {
-        setEditingBudgets(costManagement);
+        // Ensure that costManagement from context is used and defaults are applied if fields are missing/null
+        setEditingBudgets({
+            dailyBudget: costManagement?.dailyBudget || 0,
+            weeklyBudget: costManagement?.weeklyBudget || 0,
+            monthlyBudget: costManagement?.monthlyBudget || 0,
+            alertEmail: costManagement?.alertEmail || ''
+        });
     }, [costManagement]);
 
     const handleBudgetChange = (field: keyof CostManagement, value: string) => {
-        setEditingBudgets(prev => ({...prev, [field]: field === 'alertEmail' ? value : parseFloat(value) || 0 }));
+        setEditingBudgets(prev => ({
+            ...prev, 
+            [field]: field === 'alertEmail' ? value : parseFloat(value) || 0 
+        }));
     };
     const handleSaveBudgets = () => {
         setCostManagements(editingBudgets);
@@ -44,6 +59,14 @@ export function CockpitPage() {
     const chartDataProviders = Object.entries(costByProvider).map(([name, value]) => ({ name, cost: value }));
 
     const costOverTime = tokenUsage
+        .filter(item => { // Filter out invalid dates before processing
+            try {
+                parseISO(item.date);
+                return true;
+            } catch {
+                return false;
+            }
+        })
         .sort((a,b) => parseISO(a.date).getTime() - parseISO(b.date).getTime())
         .map(item => ({ date: format(parseISO(item.date), 'MMM dd'), cost: item.cost || 0}));
     

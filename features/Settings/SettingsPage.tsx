@@ -1,11 +1,12 @@
+
 import React, { useState, useEffect, useRef } from "react";
 import { User as UserIcon, Palette, Server, Users, TrendingUp, Plus, Edit3, Trash2, GripVertical, Star, Calendar, ChevronLeft, ChevronRight, DollarSign, ChevronDown, ChevronUp, CheckCircle, XCircle, Loader2, Check, Play, ExternalLink, Cpu, TrendingDown } from "lucide-react";
 import { format, endOfMonth, eachDayOfInterval, getDay, addMonths, isSameMonth } from "date-fns";
 import startOfMonth from 'date-fns/startOfMonth';
 import subMonths from 'date-fns/subMonths';
 import parseISO from 'date-fns/parseISO';
-import { he } from 'date-fns/locale/he'; // Updated locale imports
-import { enUS } from 'date-fns/locale/en-US'; // Updated locale imports
+import { he } from 'date-fns/locale/he'; 
+import { enUS } from 'date-fns/locale/en-US'; 
 
 import { useAppContext, ApiSetting, KNOWN_MODELS_PRICING, PROVIDER_INFO } from '../../contexts/AppContext';
 import { useUserSettings, initialAppCustomizationData, SavedPrompt, Persona, AppCustomization, CostManagement } from '../../contexts/UserSettingsContext';
@@ -41,7 +42,7 @@ function SettingsLayout(props: SettingsLayoutProps) {
     ];
 
     return (
-        <div className="container mx-auto max-w-7xl py-8 px-4 sm:px-6 lg:px-8"> {/* Added padding to container */}
+        <div className="container mx-auto max-w-7xl py-8 px-4 sm:px-6 lg:px-8"> 
             <h1 className="text-3xl font-bold mb-8 text-slate-900 dark:text-slate-100">{lang === 'he' ? 'הגדרות' : 'Settings'}</h1>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="flex flex-col md:flex-row gap-8">
                 <TabsList className={`flex md:flex-col md:border-b-0 md:pr-6 md:space-y-1 w-full md:w-1/4 lg:w-1/5 
@@ -60,9 +61,9 @@ function SettingsLayout(props: SettingsLayoutProps) {
                         </TabsTrigger>
                     ))}
                 </TabsList>
-                <div className="flex-1 min-h-0"> {/* Added min-h-0 to ensure flex-1 works correctly */}
+                <div className="flex-1 min-h-0"> 
                     {tabsConfig.map(tab => (
-                        <TabsContent key={tab.id} value={tab.id} className="h-full"> {/* Ensure TabsContent can fill height */}
+                        <TabsContent key={tab.id} value={tab.id} className="h-full"> 
                             {children({ activeSettingsTab: tab.id })}
                         </TabsContent>
                     ))}
@@ -100,7 +101,14 @@ function ProfileSettings() {
     };
 
     const handleSave = () => {
-        setUserProfile({ ...userProfile, userName: name, userImage: image, systemPrompt, botName, botImage } as AppCustomization);
+        setUserProfile({ 
+            ...(userProfile || initialAppCustomizationData), // Ensure userProfile is not null
+            userName: name, 
+            userImage: image, 
+            systemPrompt: systemPrompt, 
+            botName: botName, 
+            botImage: botImage 
+        });
     };
 
     return (
@@ -150,7 +158,7 @@ function SavedPromptsSettings() {
     const dragOverItem = useRef<number | null>(null);
 
     const handleAddNewPrompt = () => {
-        setEditingPrompt({ title: '', content: '' });
+        setEditingPrompt({ title: '', content: '' }); // Ensure title and content are initialized to ''
         setShowPromptDialog(true);
     };
     const handleEditPrompt = (prompt: SavedPrompt) => {
@@ -247,16 +255,42 @@ function SavedPromptsSettings() {
 function AppearanceSettings() {
     const { lang, theme, toggleTheme, activeVoice, setActiveVoice, availableVoices, speak, openErrorDialog, loadVoices } = useAppContext();
     const { userProfile, setUserProfile } = useUserSettings();
-    const [customization, setCustomizationState] = useState<AppCustomization>(userProfile || initialAppCustomizationData);
+    
+    // Ensure customization state is always initialized with valid, non-null values for controlled components
+    const [customization, setCustomizationState] = useState<AppCustomization>(() => {
+        const profile = userProfile || initialAppCustomizationData;
+        return {
+            headerBgColor: profile.headerBgColor || initialAppCustomizationData.headerBgColor || '#2c3e50',
+            headerTitleColor: profile.headerTitleColor || initialAppCustomizationData.headerTitleColor || '#ecf0f1',
+            chatBgColor: profile.chatBgColor || initialAppCustomizationData.chatBgColor || '#f4f6f8',
+            chatFontColor: profile.chatFontColor || initialAppCustomizationData.chatFontColor || '#34495e',
+            chatFontSize: profile.chatFontSize || initialAppCustomizationData.chatFontSize || 14,
+            botVoiceURI: profile.botVoiceURI || null, // Fine for Select as it handles null
+            // Other fields from AppCustomization can remain as they are if not directly tied to input values
+            userName: profile.userName || initialAppCustomizationData.userName || '',
+            userImage: profile.userImage || initialAppCustomizationData.userImage || null,
+            botName: profile.botName || initialAppCustomizationData.botName || '',
+            botImage: profile.botImage || initialAppCustomizationData.botImage || null,
+            systemPrompt: profile.systemPrompt || initialAppCustomizationData.systemPrompt || '',
+        };
+    });
 
     useEffect(() => {
-        const baseCustomization = userProfile || initialAppCustomizationData;
-        let finalCustomization = { ...baseCustomization };
-
-        if (activeVoice && !baseCustomization.botVoiceURI) {
-            finalCustomization.botVoiceURI = activeVoice.voiceURI;
-        }
-        setCustomizationState(finalCustomization);
+        const profile = userProfile || initialAppCustomizationData;
+        setCustomizationState(prev => ({
+            ...prev, // Keep existing valid states
+            headerBgColor: profile.headerBgColor || initialAppCustomizationData.headerBgColor || '#2c3e50',
+            headerTitleColor: profile.headerTitleColor || initialAppCustomizationData.headerTitleColor || '#ecf0f1',
+            chatBgColor: profile.chatBgColor || initialAppCustomizationData.chatBgColor || '#f4f6f8',
+            chatFontColor: profile.chatFontColor || initialAppCustomizationData.chatFontColor || '#34495e',
+            chatFontSize: profile.chatFontSize || initialAppCustomizationData.chatFontSize || 14,
+            botVoiceURI: (activeVoice && !profile.botVoiceURI) ? activeVoice.voiceURI : (profile.botVoiceURI || null),
+            userName: profile.userName || initialAppCustomizationData.userName || '',
+            userImage: profile.userImage || initialAppCustomizationData.userImage || null,
+            botName: profile.botName || initialAppCustomizationData.botName || '',
+            botImage: profile.botImage || initialAppCustomizationData.botImage || null,
+            systemPrompt: profile.systemPrompt || initialAppCustomizationData.systemPrompt || '',
+        }));
     }, [userProfile, activeVoice]);
 
 
@@ -269,8 +303,12 @@ function AppearanceSettings() {
     };
 
     const handleResetAppearance = async () => {
-        setCustomizationState(initialAppCustomizationData);
-        await setUserProfile(initialAppCustomizationData); 
+        const resetData = {
+            ...initialAppCustomizationData, // Start with defaults
+            botVoiceURI: null // Ensure voice is reset if needed, or set to a default from loadVoices
+        };
+        setCustomizationState(resetData);
+        await setUserProfile(resetData); 
         loadVoices(); 
     };
 
@@ -348,7 +386,7 @@ function AppearanceSettings() {
                     <div className="flex items-center gap-2">
                         <Select
                             id="botVoice"
-                            value={customization.botVoiceURI ?? ''} // Ensure Select handles null/undefined
+                            value={customization.botVoiceURI ?? ''} 
                             onChange={handleVoiceChange}
                             disabled={currentLangVoices.length === 0}
                             className="flex-grow"
@@ -390,13 +428,37 @@ function ApiSettingsSection() {
     const [savingModel, setSavingModel] = useState(false);
     const [validatingModelId, setValidatingModelId] = useState<string | null>(null);
 
+    const getInitialEditingModel = (): Partial<ApiSetting> => ({
+        name: '',
+        provider: 'openai',
+        modelId: PROVIDER_INFO.openai.defaultModel,
+        apiKey: '',
+        apiUrl: '',
+        costs: KNOWN_MODELS_PRICING[PROVIDER_INFO.openai.defaultModel] || { input: 0, output: 0 },
+        isFreeTier: KNOWN_MODELS_PRICING[PROVIDER_INFO.openai.defaultModel]?.isFreeTier || false,
+        modelSystemPrompt: '',
+        isDefault: false,
+        isValid: false,
+    });
+
+
     const handleAddNewModel = () => {
-        setEditingModel({ provider: 'openai', costs: { input: 0, output: 0 }, isFreeTier: false });
+        setEditingModel(getInitialEditingModel());
         setShowAddModelDialog(true);
     };
 
     const handleEditModel = (model: ApiSetting) => {
-        setEditingModel({...model});
+        // Ensure all relevant fields from model are spread, and default to empty strings or false for controlled components if necessary
+        setEditingModel({
+            ...getInitialEditingModel(), // Start with a full default structure
+            ...model, // Spread the actual model data
+            name: model.name || '',
+            apiKey: model.apiKey || '',
+            apiUrl: model.apiUrl || '',
+            modelSystemPrompt: model.modelSystemPrompt || '',
+            isFreeTier: model.isFreeTier || false,
+            isDefault: model.isDefault || false,
+        });
         setShowAddModelDialog(true);
     };
 
@@ -415,7 +477,7 @@ function ApiSettingsSection() {
     };
 
     const handleSaveModel = async () => {
-        if (!editingModel || !editingModel.name?.trim() || !editingModel.provider?.trim() || !editingModel.modelId?.trim() || (editingModel.provider !== 'google' && !editingModel.apiKey?.trim()) ) {
+        if (!editingModel || !editingModel.name?.trim() || !editingModel.provider?.trim() || !editingModel.modelId?.trim() || (editingModel.provider !== 'google' && !(editingModel.apiKey||'').trim()) ) {
              openErrorDialog(lang === 'he' ? 'שדות חסרים' : 'Missing Fields', lang === 'he' ? 'אנא מלא את כל שדות החובה (שם, ספק, מזהה מודל, ומפתח API אם לא Google).' : 'Please fill all required fields (Name, Provider, Model ID, and API Key unless Google).');
             return;
         }
@@ -425,7 +487,7 @@ function ApiSettingsSection() {
             name: editingModel.name,
             provider: editingModel.provider,
             modelId: editingModel.modelId.trim(),
-            apiKey: editingModel.apiKey || '', // API key can be empty for Google as it uses process.env
+            apiKey: editingModel.apiKey || '', 
             apiUrl: editingModel.apiUrl?.trim() || undefined,
             costs: editingModel.costs || KNOWN_MODELS_PRICING[editingModel.modelId.trim()] || { input: 0, output: 0 },
             isFreeTier: editingModel.isFreeTier || false,
@@ -470,7 +532,7 @@ function ApiSettingsSection() {
 
         const handleCostChange = (type: 'input' | 'output', value: string) => {
             const numValue = parseFloat(value);
-            onChange({ ...costs, [type]: isNaN(numValue) ? undefined : numValue });
+            onChange({ ...(costs || {input:0, output:0}), [type]: isNaN(numValue) ? undefined : numValue }); // ensure costs is not undefined
         };
 
         const isGoogleTiered = provider === 'google' && modelId && modelId.includes('gemini-1.5-pro');
@@ -564,20 +626,21 @@ function ApiSettingsSection() {
                 <DialogContent className="p-6 space-y-4 max-h-[70vh] overflow-y-auto">
                     <div>
                         <Label htmlFor="modelName">{lang === 'he' ? 'שם תצוגה למודל' : 'Model Display Name'} <span className="text-red-500">*</span></Label>
-                        <Input id="modelName" value={editingModel?.name || ''} onChange={(e) => setEditingModel(p => ({...p, name: e.target.value}))} placeholder={lang === 'he' ? 'למשל, OpenAI GPT-4 שלי' : 'e.g., My OpenAI GPT-4'}/>
+                        <Input id="modelName" value={editingModel?.name ?? ''} onChange={(e) => setEditingModel(p => ({...p, name: e.target.value}))} placeholder={lang === 'he' ? 'למשל, OpenAI GPT-4 שלי' : 'e.g., My OpenAI GPT-4'}/>
                     </div>
                      <div>
                         <Label htmlFor="provider">{lang === 'he' ? 'ספק API' : 'API Provider'} <span className="text-red-500">*</span></Label>
-                        <Select id="provider" value={editingModel?.provider || ''} onChange={(e) => {
+                        <Select id="provider" value={editingModel?.provider ?? ''} onChange={(e) => {
                              const selectedProvider = e.target.value;
                              const defaultModelForProvider = PROVIDER_INFO[selectedProvider]?.defaultModel || '';
                              const knownPricingForModel = KNOWN_MODELS_PRICING[defaultModelForProvider];
                              setEditingModel(p => ({
-                                 ...p,
+                                 ...(p || getInitialEditingModel()), // ensure p is not null
                                  provider: selectedProvider,
                                  modelId: defaultModelForProvider,
                                  costs: knownPricingForModel ? {input: knownPricingForModel.input, output: knownPricingForModel.output} : {input:0, output:0},
                                  isFreeTier: knownPricingForModel?.isFreeTier || false,
+                                 apiKey: selectedProvider === 'google' ? '' : (p?.apiKey ?? ''), // Clear API key for Google, retain for others
                                  apiUrl: PROVIDER_INFO[selectedProvider]?.requiresEndpoint ? '' : undefined 
                             }));
                         }}>
@@ -593,11 +656,11 @@ function ApiSettingsSection() {
                      {editingModel?.provider && (
                         <div>
                             <Label htmlFor="modelId">{lang === 'he' ? 'מזהה מודל (ID)' : 'Model ID'} <span className="text-red-500">*</span></Label>
-                            <Select id="modelId" value={editingModel?.modelId || ''} onChange={(e) => {
+                            <Select id="modelId" value={editingModel?.modelId ?? ''} onChange={(e) => {
                                 const newModelId = e.target.value;
                                 const knownPricing = KNOWN_MODELS_PRICING[newModelId];
                                 setEditingModel(p => ({
-                                    ...p,
+                                    ...(p || getInitialEditingModel()),
                                     modelId: newModelId,
                                     costs: knownPricing ? {input: knownPricing.input, output: knownPricing.output} : {input:0, output:0},
                                     isFreeTier: knownPricing?.isFreeTier || false
@@ -612,40 +675,40 @@ function ApiSettingsSection() {
                                 <option value="custom">{lang === 'he' ? 'מותאם אישית...' : 'Custom...'}</option>
                             </Select>
                             {editingModel?.modelId === 'custom' && (
-                                 <Input type="text" value={(editingModel as any)?.modelIdIfCustom || ''} onChange={(e) => setEditingModel(p => ({...p, modelIdIfCustom: e.target.value, modelId: e.target.value}))} placeholder={lang === 'he' ? "הזן מזהה מודל מותאם אישית" : "Enter custom model ID"} className="mt-2"/>
+                                 <Input type="text" value={(editingModel as any)?.modelIdIfCustom || ''} onChange={(e) => setEditingModel(p => ({...(p || getInitialEditingModel()), modelIdIfCustom: e.target.value, modelId: e.target.value}))} placeholder={lang === 'he' ? "הזן מזהה מודל מותאם אישית" : "Enter custom model ID"} className="mt-2"/>
                             )}
                         </div>
                     )}
                     {editingModel?.provider !== 'google' && (
                         <div>
                             <Label htmlFor="apiKey">{lang === 'he' ? 'מפתח API' : 'API Key'} <span className="text-red-500">*</span></Label>
-                            <Input id="apiKey" type="password" value={editingModel?.apiKey || ''} onChange={(e) => setEditingModel(p => ({...p, apiKey: e.target.value}))} placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxx"/>
+                            <Input id="apiKey" type="password" value={editingModel?.apiKey ?? ''} onChange={(e) => setEditingModel(p => ({...(p || getInitialEditingModel()), apiKey: e.target.value}))} placeholder="sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxx"/>
                         </div>
                     )}
                      {PROVIDER_INFO[editingModel?.provider || '']?.requiresEndpoint && (
                          <div>
                             <Label htmlFor="apiUrl">{lang === 'he' ? 'כתובת API Endpoint (נדרש עבור Azure)' : 'API Endpoint URL (Required for Azure)'}</Label>
-                            <Input id="apiUrl" value={editingModel?.apiUrl || ''} onChange={(e) => setEditingModel(p => ({...p, apiUrl: e.target.value}))} placeholder="https://YOUR_RESOURCE_NAME.openai.azure.com"/>
+                            <Input id="apiUrl" value={editingModel?.apiUrl ?? ''} onChange={(e) => setEditingModel(p => ({...(p || getInitialEditingModel()), apiUrl: e.target.value}))} placeholder="https://YOUR_RESOURCE_NAME.openai.azure.com"/>
                         </div>
                      )}
-                     {!PROVIDER_INFO[editingModel?.provider || '']?.requiresEndpoint && (
+                     {!PROVIDER_INFO[editingModel?.provider || '']?.requiresEndpoint && editingModel?.provider !== 'google' && (
                         <div>
                             <Label htmlFor="apiUrl">{lang === 'he' ? 'כתובת API Endpoint (אופציונלי, רק למקרים מיוחדים)' : 'API Endpoint URL (Optional, for special cases only)'}</Label>
-                            <Input id="apiUrl" value={editingModel?.apiUrl || ''} onChange={(e) => setEditingModel(p => ({...p, apiUrl: e.target.value}))} placeholder={lang === 'he' ? 'השאר ריק עבור רוב הספקים' : 'Leave blank for most providers'}/>
+                            <Input id="apiUrl" value={editingModel?.apiUrl ?? ''} onChange={(e) => setEditingModel(p => ({...(p || getInitialEditingModel()), apiUrl: e.target.value}))} placeholder={lang === 'he' ? 'השאר ריק עבור רוב הספקים' : 'Leave blank for most providers'}/>
                         </div>
                      )}
                     <div>
                         <Label htmlFor="modelSystemPrompt">{lang === 'he' ? 'הנחיית מערכת ספציפית למודל (אופציונלי)' : 'Model-Specific System Prompt (Optional)'}</Label>
-                        <Textarea id="modelSystemPrompt" value={editingModel?.modelSystemPrompt || ''} onChange={(e) => setEditingModel(p => ({...p, modelSystemPrompt: e.target.value}))} rows={3} placeholder={lang === 'he' ? 'הנחיה שתחול רק על מודל זה...' : 'Prompt that applies only to this model...'}/>
+                        <Textarea id="modelSystemPrompt" value={editingModel?.modelSystemPrompt ?? ''} onChange={(e) => setEditingModel(p => ({...(p || getInitialEditingModel()), modelSystemPrompt: e.target.value}))} rows={3} placeholder={lang === 'he' ? 'הנחיה שתחול רק על מודל זה...' : 'Prompt that applies only to this model...'}/>
                     </div>
                      <CollapsibleCostsEditor
                         costs={editingModel?.costs}
-                        onChange={(newCosts) => setEditingModel(p => ({...p, costs: newCosts}))}
+                        onChange={(newCosts) => setEditingModel(p => ({...(p || getInitialEditingModel()), costs: newCosts}))}
                         modelId={editingModel?.modelId}
                         provider={editingModel?.provider}
                     />
                      <div className="flex items-center gap-2 mt-2">
-                        <Switch id="isFreeTier" checked={editingModel?.isFreeTier || false} onCheckedChange={(checked) => setEditingModel(p => ({...p, isFreeTier: checked}))} />
+                        <Switch id="isFreeTier" checked={editingModel?.isFreeTier ?? false} onCheckedChange={(checked) => setEditingModel(p => ({...(p || getInitialEditingModel()), isFreeTier: checked}))} />
                         <Label htmlFor="isFreeTier" className="mb-0 text-sm">{lang === 'he' ? 'סמן אם למודל זה יש שכבה חינמית משמעותית' : 'Mark if this model has a significant free tier'}</Label>
                     </div>
 
@@ -672,17 +735,30 @@ function ApiSettingsSection() {
 function PersonasSettings() {
     const { lang } = useAppContext();
     const { personas, addPersona, updatePersona, deletePersona, reorderPersonas, activePersonaId, setActivePersonaId } = useUserSettings();
+    
+    const getInitialEditingPersona = (): Partial<Persona> => ({
+        name: '', 
+        prompt: '', 
+        isDefault: personas.length === 0
+    });
+
     const [editingPersona, setEditingPersona] = useState<Partial<Persona> | null>(null);
     const [showPersonaDialog, setShowPersonaDialog] = useState(false);
     const dragItem = useRef<number | null>(null);
     const dragOverItem = useRef<number | null>(null);
 
     const handleAddNewPersona = () => {
-        setEditingPersona({ name: '', prompt: '', isDefault: personas.length === 0 });
+        setEditingPersona(getInitialEditingPersona());
         setShowPersonaDialog(true);
     };
     const handleEditPersona = (persona: Persona) => {
-        setEditingPersona(persona);
+        setEditingPersona({
+            ...getInitialEditingPersona(), // Ensure all fields have defaults
+            ...persona, // Spread actual persona data
+            name: persona.name || '',
+            prompt: persona.prompt || '',
+            isDefault: persona.isDefault || false
+        });
         setShowPersonaDialog(true);
     };
     const handleSavePersona = async () => {
@@ -768,14 +844,14 @@ function PersonasSettings() {
                 <DialogContent className="p-6 space-y-4">
                     <div>
                         <Label htmlFor="personaName">{lang === 'he' ? 'שם הפרסונה' : 'Persona Name'}</Label>
-                        <Input id="personaName" value={editingPersona?.name || ''} onChange={(e) => setEditingPersona(p => ({...p, name: e.target.value}))} />
+                        <Input id="personaName" value={editingPersona?.name || ''} onChange={(e) => setEditingPersona(p => ({...(p || getInitialEditingPersona()), name: e.target.value}))} />
                     </div>
                     <div>
                         <Label htmlFor="personaPrompt">{lang === 'he' ? 'הנחיית מערכת לפרסונה' : 'System Prompt for Persona'}</Label>
-                        <Textarea id="personaPrompt" value={editingPersona?.prompt || ''} onChange={(e) => setEditingPersona(p => ({...p, prompt: e.target.value}))} rows={5}/>
+                        <Textarea id="personaPrompt" value={editingPersona?.prompt || ''} onChange={(e) => setEditingPersona(p => ({...(p || getInitialEditingPersona()), prompt: e.target.value}))} rows={5}/>
                     </div>
                     <div className="flex items-center gap-2">
-                        <Switch id="personaIsDefault" checked={editingPersona?.isDefault || false} onCheckedChange={(checked) => setEditingPersona(p => ({...p, isDefault: checked}))} />
+                        <Switch id="personaIsDefault" checked={editingPersona?.isDefault || false} onCheckedChange={(checked) => setEditingPersona(p => ({...(p || getInitialEditingPersona()), isDefault: checked}))} />
                         <Label htmlFor="personaIsDefault" className="mb-0 text-sm">{lang === 'he' ? 'קבע כפרסונת ברירת מחדל' : 'Set as default persona'}</Label>
                     </div>
                 </DialogContent>
@@ -842,16 +918,25 @@ function UsageDashboard() {
     const currentLocale = lang === 'he' ? he : enUS;
 
     const filteredData = tokenUsage.filter(d => {
-        const recordDate = parseISO(d.date);
-        return isSameMonth(recordDate, currentDate);
+        try {
+            const recordDate = parseISO(d.date); // Ensure date is valid before parsing
+            return isSameMonth(recordDate, currentDate);
+        } catch (e) {
+            console.warn("Invalid date in tokenUsage:", d.date);
+            return false;
+        }
     });
 
     const dataByDay = filteredData.reduce((acc: {[key: number]: { incomingTokens: number; outgoingTokens: number; cost: number }}, curr) => {
-        const day = parseISO(curr.date).getDate();
-        if (!acc[day]) acc[day] = { incomingTokens: 0, outgoingTokens: 0, cost: 0 };
-        acc[day].incomingTokens += curr.incomingTokens;
-        acc[day].outgoingTokens += curr.outgoingTokens;
-        acc[day].cost += curr.cost;
+        try {
+            const day = parseISO(curr.date).getDate();
+            if (!acc[day]) acc[day] = { incomingTokens: 0, outgoingTokens: 0, cost: 0 };
+            acc[day].incomingTokens += curr.incomingTokens;
+            acc[day].outgoingTokens += curr.outgoingTokens;
+            acc[day].cost += curr.cost;
+        } catch (e) {
+            console.warn("Could not process date for day aggregation:", curr.date);
+        }
         return acc;
     }, {});
 
