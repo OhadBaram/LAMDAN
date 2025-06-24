@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '../components/ui/Tabs';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "./components/ui/Tabs";
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('first');
