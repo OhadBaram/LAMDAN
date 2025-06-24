@@ -14,22 +14,12 @@ export default function Home() {
           gap: '8px',
           background: '#4CAF50',
           borderRadius: '12px',
-          padding: '6px'
         }}>
-          <TabsTrigger value="first">שיחה חדשה</TabsTrigger>
-          <TabsTrigger value="second">חיפוש שיחות</TabsTrigger>
-          <TabsTrigger value="third">ספריה</TabsTrigger>
-          {/* הוסף כאן לשוניות נוספות בעברית בלבד */}
+          <TabsTrigger value="first">ראשון</TabsTrigger>
+          <TabsTrigger value="second">שני</TabsTrigger>
         </TabsList>
-        <TabsContent value="first">
-          כאן מתחילים שיחה חדשה.
-        </TabsContent>
-        <TabsContent value="second">
-          כאן מחפשים שיחות קודמות.
-        </TabsContent>
-        <TabsContent value="third">
-          כאן מוצגת הספריה שלך.
-        </TabsContent>
+        <TabsContent value="first">תוכן הלשונית הראשונה</TabsContent>
+        <TabsContent value="second">תוכן הלשונית השנייה</TabsContent>
       </Tabs>
     </div>
   );
