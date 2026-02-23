@@ -1,18 +1,18 @@
 {
-  "name": "your-package-name",
+  "name": "lamdan",
   "version": "1.0.0",
   "private": true,
   "dependencies": {
     "react": "^17.0.0",
     "react-dom": "^17.0.0",
-    "lucide-react": "^1.0.0",
-    "date-fns": "^2.0.0",
-    "recharts": "^2.0.0",
-    "@google/genai": "^1.0.0",
-    "@vitejs/plugin-react": "^1.0.0",
-    "tailwindcss": "^2.0.0",
-    "postcss": "^7.0.0",
-    "autoprefixer": "^10.0.0",
+    "lucide-react": "^0.263.1",
+    "date-fns": "^2.30.0",
+    "recharts": "^2.7.2",
+    "@google/genai": "^0.1.0",
+    "@vitejs/plugin-react": "^1.3.0",
+    "tailwindcss": "^3.3.0",
+    "postcss": "^8.4.0",
+    "autoprefixer": "^10.4.0",
     "@types/react": "^17.0.0",
     "@types/react-dom": "^17.0.0"
   },
@@ -22,6 +22,6 @@
     "serve": "vite preview"
   },
   "devDependencies": {
-    "vite": "^2.0.0"
+    "vite": "^2.9.0"
   }
 }
