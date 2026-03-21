@@ -594,6 +594,21 @@ body {
     border-radius: var(--radius-xl);
   }
   
+  .message-bubble.user {
+    background: var(--bg-user-message-new);
+    color: white;
+    align-self: flex-end;
+    border-bottom-right-radius: var(--radius-sm);
+  }
+
+  .message-bubble.assistant {
+    background: var(--bg-bot-message-new);
+    color: var(--text-normal-new);
+    align-self: flex-start;
+    border-bottom-left-radius: var(--radius-sm);
+    border: 1px solid var(--border-bot-message-new);
+  }
+  
   .tabs-modern {
     flex-wrap: wrap;
     border-radius: var(--radius-xl);
