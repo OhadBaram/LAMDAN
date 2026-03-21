@@ -12,7 +12,7 @@ import { ThemeSelector } from "./components/ThemeSelector";
 import { ChatSidebar } from "./components/ChatSidebar";
 import { ModernHomeScreen } from "./components/ModernHomeScreen";
 import { RightSidebar } from "./components/RightSidebar";
-import { MessageSquare, Brain as BrainIcon, Trophy, Gauge, Database, Layers, Settings as SettingsIcon, Menu, X } from 'lucide-react';
+import { MessageSquare, Brain as BrainIcon, Trophy, Gauge, Database, Layers, Settings as SettingsIcon, Menu, X, Sparkles } from 'lucide-react';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('home');
@@ -32,24 +32,46 @@ export default function Home() {
 
   return (
     <div dir="rtl" className="min-h-screen flex page-transition" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
-      {/* Mobile Sidebar Toggle */}
-      <button
-        onClick={() => setSidebarOpen(!sidebarOpen)}
-        className="lg:hidden fixed top-4 right-4 z-50 btn-modern"
-        style={{
-          background: 'var(--bg-secondary)',
-          color: 'var(--text-primary)',
-          padding: '0.5rem',
-          borderRadius: 'var(--radius-full)'
-        }}
-      >
-        {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
-      </button>
+      {/* Gemini Header */}
+      <div className="fixed top-0 right-0 left-0 z-50 flex items-center justify-between px-4 py-3" style={{ 
+        background: 'var(--bg-primary)',
+        borderBottom: '1px solid var(--border)'
+      }}>
+        <div className="flex items-center gap-4">
+          {/* Mobile Menu Toggle */}
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            style={{ color: 'var(--text-primary)' }}
+          >
+            {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
+          </button>
+        </div>
+
+        {/* Gemini Logo */}
+        <div className="flex items-center gap-2">
+          <span className="text-xl font-bold" style={{ 
+            background: 'var(--gradient-primary)',
+            WebkitBackgroundClip: 'text',
+            backgroundClip: 'text',
+            color: 'transparent'
+          }}>
+            Gemini
+          </span>
+          <Sparkles size={20} style={{ color: 'var(--accent)' }} />
+        </div>
+
+        {/* Right Side */}
+        <div className="flex items-center gap-3">
+          {/* Theme Selector */}
+          <ThemeSelector />
+        </div>
+      </div>
 
       {/* Right Sidebar Toggle */}
       <button
         onClick={() => setRightSidebarOpen(!rightSidebarOpen)}
-        className="fixed top-4 left-20 z-40 btn-modern lg:hidden"
+        className="fixed top-20 left-4 z-40 btn-modern lg:hidden"
         style={{
           background: 'var(--bg-secondary)',
           color: 'var(--text-primary)',
@@ -66,12 +88,7 @@ export default function Home() {
         onClose={() => setRightSidebarOpen(false)} 
       />
 
-      {/* Theme Selector */}
-      <div className="fixed top-4 left-4 z-40">
-        <ThemeSelector />
-      </div>
-
-      {/* Sidebar */}
+      {/* Left Sidebar */}
       <div className={`fixed lg:relative lg:translate-x-0 transition-transform duration-300 z-30 h-full ${
         sidebarOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'
       }`}>
