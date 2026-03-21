@@ -253,7 +253,7 @@ export function ChatPage() {
                                     {lang === 'he' ? '🧠 הסבר מושגים' : '🧠 Explain Concepts'}
                                 </div>
                                 <div className="text-sm" style={{ color: 'var(--text-tertiary)' }}>
-                                    {lang === 'he' ? 'פירוש ברור' : 'Clear explanations'}
+                                    {lang === 'he' ? 'הסברים ברורים' : 'Clear explanations'}
                                 </div>
                             </button>
                             <button 
@@ -264,7 +264,7 @@ export function ChatPage() {
                                     {lang === 'he' ? '💡 רעיונות יצירתיים' : '💡 Creative Ideas'}
                                 </div>
                                 <div className="text-sm" style={{ color: 'var(--text-tertiary)' }}>
-                                    {lang === 'he' ? 'בראשית פרויקטים' : 'Project brainstorming'}
+                                    {lang === 'he' ? 'בריינסטורמינג פרויקטים' : 'Project brainstorming'}
                                 </div>
                             </button>
                             <button 
