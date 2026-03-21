@@ -4,10 +4,10 @@ import { Zap, Loader2 } from "lucide-react";
 import { useAppContext, InvokeLLM } from '../../contexts/AppContext';
 import { useUserSettings } from '../../contexts/UserSettingsContext';
 
-import { Button } from '../../components/ui/Button';
-import { Textarea } from '../../components/ui/Textarea';
-import { Label } from '../../components/ui/Label';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../../components/ui/Card';
+import { Button } from '../../src/components/ui/Button';
+import { Textarea } from '../../src/components/ui/Textarea';
+import { Label } from '../../src/components/ui/Label';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../../src/components/ui/Card';
 
 
 export function ArenaPage() {

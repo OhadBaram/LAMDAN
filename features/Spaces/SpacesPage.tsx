@@ -4,13 +4,13 @@ import { Plus, Edit3, Trash2, UploadCloud, X, ImageIcon, File as FileIconPkg } f
 import { useAppContext } from '../../contexts/AppContext';
 import { useUserSettings, Space, SpaceFile } from '../../contexts/UserSettingsContext';
 
-import { Button } from '../../components/ui/Button';
-import { Input } from '../../components/ui/Input';
-import { Textarea } from '../../components/ui/Textarea';
-import { Label } from '../../components/ui/Label';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../../components/ui/Card';
-import { Dialog, DialogHeader, DialogTitle, DialogContent, DialogFooter } from '../../components/ui/Dialog';
-import { Select } from '../../components/ui/Select';
+import { Button } from '../../src/components/ui/Button';
+import { Input } from '../../src/components/ui/Input';
+import { Textarea } from '../../src/components/ui/Textarea';
+import { Label } from '../../src/components/ui/Label';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../../src/components/ui/Card';
+import { Dialog, DialogHeader, DialogTitle, DialogContent, DialogFooter } from '../../src/components/ui/Dialog';
+import { Select } from '../../src/components/ui/Select';
 
 
 export function SpacesPage() {

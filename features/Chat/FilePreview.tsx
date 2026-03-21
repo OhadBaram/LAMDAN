@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { X, ImageIcon, File as FileIconPkg } from "lucide-react";
-import { Button } from '../../components/ui/Button';
+import { Button } from '../../src/components/ui/Button';
 
 interface FilePreviewProps {
     file: { id: string; name: string; type: string; dataUrl: string; content: string };

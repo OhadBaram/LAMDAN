@@ -8,10 +8,10 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, Responsive
 import { useAppContext } from '../../contexts/AppContext';
 import { useUserSettings, CostManagement, initialAppCustomizationData } from '../../contexts/UserSettingsContext'; 
 
-import { Button } from '../../components/ui/Button';
-import { Input } from '../../components/ui/Input';
-import { Label } from '../../components/ui/Label';
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../../components/ui/Card';
+import { Button } from '../../src/components/ui/Button';
+import { Input } from '../../src/components/ui/Input';
+import { Label } from '../../src/components/ui/Label';
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from '../../src/components/ui/Card';
 
 const initialBudgetsData: CostManagement = { 
     dailyBudget: 0, 

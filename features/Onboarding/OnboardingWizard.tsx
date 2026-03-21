@@ -4,11 +4,11 @@ import React, { useState } from "react";
 import { Cpu, Loader2, ExternalLink, Play } from "lucide-react";
 import { useAppContext, ApiSetting, KNOWN_MODELS_PRICING, PROVIDER_INFO } from '../../contexts/AppContext';
 
-import { Button } from '../../components/ui/Button';
-import { Input } from '../../components/ui/Input';
-import { Label } from '../../components/ui/Label';
-import { Card, CardHeader, CardTitle, CardContent } from '../../components/ui/Card';
-import { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogContent, DialogFooter } from '../../components/ui/Dialog';
+import { Button } from '../../src/components/ui/Button';
+import { Input } from '../../src/components/ui/Input';
+import { Label } from '../../src/components/ui/Label';
+import { Card, CardHeader, CardTitle, CardContent } from '../../src/components/ui/Card';
+import { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogContent, DialogFooter } from '../../src/components/ui/Dialog';
 
 export function OnboardingWizard({ onComplete }: { onComplete: () => void }) {
     const { lang, loadApiSettings, openErrorDialog, ApiSettingsStorage, validateApiKey } = useAppContext();

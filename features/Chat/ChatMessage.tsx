@@ -3,7 +3,7 @@ import React from 'react';
 import { Bot, User as UserIcon, Volume2, Copy,ThumbsUp, ThumbsDown, Share } from "lucide-react"; 
 import { useAppContext, ChatMessageItem } from '../../contexts/AppContext';
 import { useUserSettings } from '../../contexts/UserSettingsContext';
-import { Button } from '../../components/ui/Button';
+import { Button } from '../../src/components/ui/Button';
 
 interface ChatMessageProps {
     message: ChatMessageItem;

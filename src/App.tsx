@@ -1,37 +1,93 @@
 import React, { useState } from 'react';
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "./components/ui/Tabs";
+import { ChatPage } from "../features/Chat/ChatPage";
+import { AgentArenaPage } from "../features/AgentArena/AgentArenaPage";
+import { ArenaPage } from "../features/Arena/ArenaPage";
+import { CockpitPage } from "../features/Cockpit/CockpitPage";
+import { KnowledgeBasePage } from "../features/KnowledgeBase/KnowledgeBasePage";
+import { OnboardingWizard } from "../features/Onboarding/OnboardingWizard";
+import { SettingsPage } from "../features/Settings/SettingsPage";
+import { SpacesPage } from "../features/Spaces/SpacesPage";
 
 export default function Home() {
-  const [activeTab, setActiveTab] = useState('first');
+  const [activeTab, setActiveTab] = useState('chat');
 
   return (
-    <div dir="rtl" className="min-h-screen bg-white p-6">
-      <div className="max-w-4xl mx-auto">
+    <div dir="rtl" className="min-h-screen bg-white">
+      <div className="mx-auto">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="bg-green-600 p-2 rounded-xl flex gap-2 justify-end">
+          <TabsList className="bg-green-600 p-2 flex gap-2 justify-end">
             <TabsTrigger 
-              value="first" 
+              value="chat" 
               className="px-4 py-2 rounded-lg data-[state=active]:bg-white data-[state=active]:text-green-700 text-white"
             >
-              ראשון
+              צ'אט
             </TabsTrigger>
             <TabsTrigger 
-              value="second"
+              value="agentarena"
               className="px-4 py-2 rounded-lg data-[state=active]:bg-white data-[state=active]:text-green-700 text-white"
             >
-              שני
+              ארנת סוכנים
+            </TabsTrigger>
+            <TabsTrigger 
+              value="arena"
+              className="px-4 py-2 rounded-lg data-[state=active]:bg-white data-[state=active]:text-green-700 text-white"
+            >
+              ארנה
+            </TabsTrigger>
+            <TabsTrigger 
+              value="cockpit"
+              className="px-4 py-2 rounded-lg data-[state=active]:bg-white data-[state=active]:text-green-700 text-white"
+            >
+              קוקפיט
+            </TabsTrigger>
+            <TabsTrigger 
+              value="knowledge"
+              className="px-4 py-2 rounded-lg data-[state=active]:bg-white data-[state=active]:text-green-700 text-white"
+            >
+              מקורות ידע
+            </TabsTrigger>
+            <TabsTrigger 
+              value="spaces"
+              className="px-4 py-2 rounded-lg data-[state=active]:bg-white data-[state=active]:text-green-700 text-white"
+            >
+              ספייסים
+            </TabsTrigger>
+            <TabsTrigger 
+              value="settings"
+              className="px-4 py-2 rounded-lg data-[state=active]:bg-white data-[state=active]:text-green-700 text-white"
+            >
+              הגדרות
             </TabsTrigger>
           </TabsList>
           
-          <div className="mt-6 p-4 border rounded-lg shadow-sm">
-            <TabsContent value="first">
-              <h2 className="text-xl font-bold mb-2">לשונית ראשונה</h2>
-              <p>כאן יוצג התוכן המרכזי של החלק הראשון.</p>
+          <div className="p-4">
+            <TabsContent value="chat">
+              <ChatPage />
             </TabsContent>
             
-            <TabsContent value="second">
-              <h2 className="text-xl font-bold mb-2">לשונית שנייה</h2>
-              <p>כאן יוצג התוכן המרכזי של החלק השני.</p>
+            <TabsContent value="agentarena">
+              <AgentArenaPage />
+            </TabsContent>
+            
+            <TabsContent value="arena">
+              <ArenaPage />
+            </TabsContent>
+            
+            <TabsContent value="cockpit">
+              <CockpitPage />
+            </TabsContent>
+            
+            <TabsContent value="knowledge">
+              <KnowledgeBasePage />
+            </TabsContent>
+            
+            <TabsContent value="spaces">
+              <SpacesPage />
+            </TabsContent>
+            
+            <TabsContent value="settings">
+              <SettingsPage />
             </TabsContent>
           </div>
         </Tabs>

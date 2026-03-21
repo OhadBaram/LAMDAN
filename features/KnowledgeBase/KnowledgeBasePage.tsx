@@ -4,13 +4,13 @@ import { Plus, Edit3, Trash2, Database, SendHorizontal, Loader2, BookOpen, FileT
 import { useAppContext, ChatMessageItem } from '../../contexts/AppContext';
 import { useUserSettings, KnowledgeBase, KnowledgeBaseSource } from '../../contexts/UserSettingsContext';
 
-import { Button as UiButton } from '../../components/ui/Button'; // Aliased import
-import { Input as UiInput } from '../../components/ui/Input'; // Aliased import for Input
-import { Textarea } from '../../components/ui/Textarea';
-import { Label } from '../../components/ui/Label';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../../components/ui/Card';
-import { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogContent, DialogFooter } from '../../components/ui/Dialog';
-import { Select } from '../../components/ui/Select';
+import { Button as UiButton } from '../../src/components/ui/Button'; // Aliased import
+import { Input as UiInput } from '../../src/components/ui/Input'; // Aliased import for Input
+import { Textarea } from '../../src/components/ui/Textarea';
+import { Label } from '../../src/components/ui/Label';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../../src/components/ui/Card';
+import { Dialog, DialogHeader, DialogTitle, DialogDescription, DialogContent, DialogFooter } from '../../src/components/ui/Dialog';
+import { Select } from '../../src/components/ui/Select';
 import { ChatMessage } from '../Chat/ChatMessage'; 
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent as AlertDialogContentComponent, AlertDialogDescription, AlertDialogFooter as AlertDialogFooterComponent, AlertDialogHeader as AlertDialogHeaderComponent, AlertDialogTitle as AlertDialogTitleComponent } from "../../components/ui/AlertDialog";
 

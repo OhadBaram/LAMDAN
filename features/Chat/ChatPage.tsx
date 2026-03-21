@@ -4,8 +4,8 @@ import { Paperclip, X, Plus, Sparkles, SendHorizontal, Loader2, Mic, MicOff, Pal
 import { useAppContext, ChatMessageItem } from '../../contexts/AppContext';
 import { useUserSettings } from '../../contexts/UserSettingsContext';
 
-import { Button } from '../../components/ui/Button';
-import { Textarea } from '../../components/ui/Textarea';
+import { Button } from '../../src/components/ui/Button';
+import { Textarea } from '../../src/components/ui/Textarea';
 import { ChatMessage } from './ChatMessage';
 import { FilePreview } from './FilePreview';
 

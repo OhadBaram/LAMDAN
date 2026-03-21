@@ -11,17 +11,17 @@ import { enUS } from 'date-fns/locale/en-US';
 import { useAppContext, ApiSetting, KNOWN_MODELS_PRICING, PROVIDER_INFO } from '../../contexts/AppContext';
 import { useUserSettings, initialAppCustomizationData, SavedPrompt, Persona, AppCustomization, CostManagement } from '../../contexts/UserSettingsContext';
 
-import { Button } from '../../components/ui/Button';
-import { Input } from '../../components/ui/Input';
-import { Textarea } from '../../components/ui/Textarea';
-import { Label } from '../../components/ui/Label';
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../../components/ui/Card';
-import { Dialog, DialogHeader, DialogTitle, DialogContent, DialogFooter } from '../../components/ui/Dialog';
-import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '../../components/ui/AlertDialog';
-import { Select } from '../../components/ui/Select';
-import { Switch } from '../../components/ui/Switch';
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../components/ui/Tabs'; // Tabs are not used here, SettingsLayout uses its own tab structure
-import { Table, TableHeader, TableHead, TableBody, TableRow, TableCell } from '../../components/ui/Table';
+import { Button } from '../../src/components/ui/Button';
+import { Input } from '../../src/components/ui/Input';
+import { Textarea } from '../../src/components/ui/Textarea';
+import { Label } from '../../src/components/ui/Label';
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '../../src/components/ui/Card';
+import { Dialog, DialogHeader, DialogTitle, DialogContent, DialogFooter } from '../../src/components/ui/Dialog';
+import { AlertDialog, AlertDialogContent, AlertDialogHeader, AlertDialogTitle, AlertDialogDescription, AlertDialogFooter, AlertDialogCancel, AlertDialogAction } from '../../src/components/ui/AlertDialog';
+import { Select } from '../../src/components/ui/Select';
+import { Switch } from '../../src/components/ui/Switch';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '../../src/components/ui/Tabs'; // Tabs are not used here, SettingsLayout uses its own tab structure
+import { Table, TableHeader, TableHead, TableBody, TableRow, TableCell } from '../../src/components/ui/Table';
 
 // Import the actual page components that will now be rendered as tabs
 import { KnowledgeBasePage } from '../KnowledgeBase/KnowledgeBasePage';
