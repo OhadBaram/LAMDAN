@@ -372,125 +372,129 @@ export function ChatPage() {
                 <div ref={messagesEndRef} />
             </div>
 
-            <div className="chatbot-ui-input-bar-container sticky bottom-0 p-4 fade-in" style={{ background: 'var(--bg-primary)', borderTop: '1px solid var(--border)' }}>
-                {attachedFiles.length > 0 && (
-                    <div className="mb-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 px-1">
-                        {attachedFiles.map(file => <FilePreview key={file.id} file={file} onRemove={() => removeAttachedFile(file.id)} />)}
-                    </div>
-                )}
-                <form 
-                    id="chat-form" 
-                    onSubmit={handleSubmit} 
-                    className="chatbot-ui-input-bar flex items-end gap-2"
-                >
-                    <div className="flex gap-2">
-                        <button 
-                            type="button" 
-                            onClick={() => fileInputRef.current?.click()} 
-                            title={lang === 'he' ? 'צרף קובץ' : 'Attach File'} 
-                            className="btn-modern"
-                            style={{ 
-                                background: 'var(--bg-secondary)', 
-                                color: 'var(--text-primary)',
-                                border: '1px solid var(--border)',
-                                borderRadius: '50%',
-                                width: '44px',
-                                height: '44px',
-                                padding: '0'
-                            }}
-                        >
-                            <Plus size={20}/>
-                        </button>
-                        <button 
-                            type="button" 
-                            onClick={handleSpeechToText} 
-                            title={lang === 'he' ? (isListening ? 'הפסק הקלטה' : 'הקלט קול') : (isListening ? 'Stop Listening' : 'Record Voice')} 
-                            className="btn-modern"
-                            style={{ 
-                                background: isListening ? 'var(--error)' : 'var(--bg-secondary)', 
-                                color: isListening ? 'white' : 'var(--text-primary)',
-                                border: '1px solid var(--border)',
-                                borderRadius: '50%',
-                                width: '44px',
-                                height: '44px',
-                                padding: '0'
-                            }}
-                        >
-                            {isListening ? <MicOff size={20} /> : <Mic size={20} />}
-                        </button>
-                    </div>
-                    
-                    <div className="flex-1 relative">
-                        <Textarea
-                            value={input}
-                            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setInput(e.target.value)}
-                            placeholder={isListening ? (lang === 'he' ? "מאזין..." : "Listening...") : promptBarPlaceholderText}
-                            disabled={isLoading}
-                            className="chatbot-ui-input-bar-textarea"
-                            rows={1}
-                            onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-                                if (e.key === 'Enter' && !e.shiftKey && !isLoading) {
-                                    e.preventDefault();
-                                    handleSubmit(e);
-                                }
-                            }}
-                            aria-label={lang === 'he' ? "הודעה" : "Message"}
-                        />
-                        {transcript && (
-                            <div className="absolute top-full left-0 right-0 mt-1 p-2 text-sm rounded-lg" style={{ 
-                                background: 'var(--accent-light)', 
-                                color: 'var(--text-primary)',
-                                border: '1px solid var(--accent)'
-                            }}>
-                                {transcript}
+            <div className="chatbot-ui-input-bar-container sticky bottom-0 p-4" style={{ background: 'var(--bg-primary)' }}>
+                {messages.length > 0 && (
+                    <>
+                        {attachedFiles.length > 0 && (
+                            <div className="mb-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 px-1">
+                                {attachedFiles.map(file => <FilePreview key={file.id} file={file} onRemove={() => removeAttachedFile(file.id)} />)}
                             </div>
                         )}
-                    </div>
-                    
-                    <div className="flex items-center gap-1.5 flex-shrink-0">
-                        <button 
-                            type="button" 
-                            title="Canvas (Visual)" 
-                            className="btn-modern hidden md:flex"
-                            style={{ 
-                                background: 'var(--bg-secondary)', 
-                                color: 'var(--text-primary)',
-                                border: '1px solid var(--border)',
-                                padding: '0.5rem'
-                            }}
+                        <form 
+                            id="chat-form" 
+                            onSubmit={handleSubmit} 
+                            className="chatbot-ui-input-bar flex items-end gap-2"
                         >
-                            <Palette size={18} /> 
-                        </button>
-                        <button 
-                            type="button" 
-                            title="Deep Research (Visual)" 
-                            className="btn-modern hidden md:flex"
-                            style={{ 
-                                background: 'var(--bg-secondary)', 
-                                color: 'var(--text-primary)',
-                                border: '1px solid var(--border)',
-                                padding: '0.5rem'
-                            }}
-                        >
-                            <BrainIcon size={18} />
-                        </button>
-                    </div>
-                    
-                    <button 
-                        id="chat-submit-button" 
-                        type="submit" 
-                        disabled={isLoading || (!input.trim() && !transcript.trim() && attachedFiles.length === 0)} 
-                        className={`chatbot-ui-send-button ${(isLoading || (!input.trim() && !transcript.trim() && attachedFiles.length === 0)) ? 'opacity-50 cursor-not-allowed' : ''}`}
-                        style={{
-                            opacity: (isLoading || (!input.trim() && !transcript.trim() && attachedFiles.length === 0)) ? 0.5 : 1,
-                            cursor: (isLoading || (!input.trim() && !transcript.trim() && attachedFiles.length === 0)) ? 'not-allowed' : 'pointer'
-                        }}
-                        aria-label={lang === 'he' ? "שלח" : "Send"}
-                    >
-                        {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="w-5 h-5"/>}
-                    </button>
-                    <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" multiple />
-                </form>
+                            <div className="flex gap-2">
+                                <button 
+                                    type="button" 
+                                    onClick={() => fileInputRef.current?.click()} 
+                                    title={lang === 'he' ? 'צרף קובץ' : 'Attach File'} 
+                                    className="btn-modern"
+                                    style={{ 
+                                        background: 'var(--bg-secondary)', 
+                                        color: 'var(--text-primary)',
+                                        border: '1px solid var(--border)',
+                                        borderRadius: '50%',
+                                        width: '44px',
+                                        height: '44px',
+                                        padding: '0'
+                                    }}
+                                >
+                                    <Plus size={20}/>
+                                </button>
+                                <button 
+                                    type="button" 
+                                    onClick={handleSpeechToText} 
+                                    title={lang === 'he' ? (isListening ? 'הפסק הקלטה' : 'הקלט קול') : (isListening ? 'Stop Listening' : 'Record Voice')} 
+                                    className="btn-modern"
+                                    style={{ 
+                                        background: isListening ? 'var(--error)' : 'var(--bg-secondary)', 
+                                        color: isListening ? 'white' : 'var(--text-primary)',
+                                        border: '1px solid var(--border)',
+                                        borderRadius: '50%',
+                                        width: '44px',
+                                        height: '44px',
+                                        padding: '0'
+                                    }}
+                                >
+                                    {isListening ? <MicOff size={20} /> : <Mic size={20} />}
+                                </button>
+                            </div>
+                            
+                            <div className="flex-1 relative">
+                                <Textarea
+                                    value={input}
+                                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setInput(e.target.value)}
+                                    placeholder={isListening ? (lang === 'he' ? "מאזין..." : "Listening...") : promptBarPlaceholderText}
+                                    disabled={isLoading}
+                                    className="chatbot-ui-input-bar-textarea"
+                                    rows={1}
+                                    onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+                                        if (e.key === 'Enter' && !e.shiftKey && !isLoading) {
+                                            e.preventDefault();
+                                            handleSubmit(e);
+                                        }
+                                    }}
+                                    aria-label={lang === 'he' ? "הודעה" : "Message"}
+                                />
+                                {transcript && (
+                                    <div className="absolute top-full left-0 right-0 mt-1 p-2 text-sm rounded-lg" style={{ 
+                                        background: 'var(--accent-light)', 
+                                        color: 'var(--text-primary)',
+                                        border: '1px solid var(--accent)'
+                                    }}>
+                                        {transcript}
+                                    </div>
+                                )}
+                            </div>
+                            
+                            <div className="flex items-center gap-1.5 flex-shrink-0">
+                                <button 
+                                    type="button" 
+                                    title="Canvas (Visual)" 
+                                    className="btn-modern hidden md:flex"
+                                    style={{ 
+                                        background: 'var(--bg-secondary)', 
+                                        color: 'var(--text-primary)',
+                                        border: '1px solid var(--border)',
+                                        padding: '0.5rem'
+                                    }}
+                                >
+                                    <Palette size={18} /> 
+                                </button>
+                                <button 
+                                    type="button" 
+                                    title="Deep Research (Visual)" 
+                                    className="btn-modern hidden md:flex"
+                                    style={{ 
+                                        background: 'var(--bg-secondary)', 
+                                        color: 'var(--text-primary)',
+                                        border: '1px solid var(--border)',
+                                        padding: '0.5rem'
+                                    }}
+                                >
+                                    <BrainIcon size={18} />
+                                </button>
+                            </div>
+                            
+                            <button 
+                                id="chat-submit-button" 
+                                type="submit" 
+                                disabled={isLoading || (!input.trim() && !transcript.trim() && attachedFiles.length === 0)} 
+                                className={`chatbot-ui-send-button ${(isLoading || (!input.trim() && !transcript.trim() && attachedFiles.length === 0)) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                style={{
+                                    opacity: (isLoading || (!input.trim() && !transcript.trim() && attachedFiles.length === 0)) ? 0.5 : 1,
+                                    cursor: (isLoading || (!input.trim() && !transcript.trim() && attachedFiles.length === 0)) ? 'not-allowed' : 'pointer'
+                                }}
+                                aria-label={lang === 'he' ? "שלח" : "Send"}
+                            >
+                                {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="w-5 h-5"/>}
+                            </button>
+                            <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" multiple />
+                        </form>
+                    </>
+                )}
             </div>
       </div>
     </div>
