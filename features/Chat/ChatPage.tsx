@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Paperclip, X, Plus, Sparkles, SendHorizontal, Loader2, Mic, MicOff, Palette, Brain as BrainIcon, MessageSquare } from "lucide-react"; 
+import { Paperclip, X, Plus, Sparkles, Send, Loader2, Mic, MicOff, Palette, Brain as BrainIcon, MessageSquare } from "lucide-react"; 
 import { useAppContext, ChatMessageItem } from '../../contexts/AppContext';
 import { useUserSettings } from '../../contexts/UserSettingsContext';
 
@@ -299,7 +299,7 @@ export function ChatPage() {
                         className={`chatbot-ui-send-button ${(isLoading || (!input.trim() && !transcript.trim() && attachedFiles.length === 0)) ? 'hidden' : ''}`}
                         aria-label={lang === 'he' ? "שלח" : "Send"}
                     >
-                        {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <SendHorizontal className="w-5 h-5"/>}
+                        {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="w-5 h-5"/>}
                     </button>
                     <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" multiple />
                 </form>

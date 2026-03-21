@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef } from "react";
-import { Plus, Edit3, Trash2, Database, SendHorizontal, Loader2, BookOpen, FileText as FileTextIcon, AlertTriangle, X } from "lucide-react";
+import { Plus, Edit3, Trash2, Database, Send, Loader2, BookOpen, FileText as FileTextIcon, AlertTriangle, X } from "lucide-react";
 import { useAppContext, ChatMessageItem } from '../../contexts/AppContext';
 import { useUserSettings, KnowledgeBase, KnowledgeBaseSource } from '../../contexts/UserSettingsContext';
 
@@ -307,7 +307,7 @@ export function KnowledgeBasePage() {
                                             disabled={isLoadingQuery || currentKbDetails.sources.length === 0}
                                         />
                                         <UiButton type="submit" disabled={isLoadingQuery || !query.trim() || currentKbDetails.sources.length === 0} size="icon" className="p-2.5 bg-[var(--accent)] text-[var(--text-primary-light)]">
-                                            {isLoadingQuery ? <Loader2 className="w-4 h-4 animate-spin"/> : <SendHorizontal className="w-4 h-4"/>}
+                                            {isLoadingQuery ? <Loader2 className="w-4 h-4 animate-spin"/> : <Send className="w-4 h-4"/>}
                                         </UiButton>
                                     </form>
                                 </div>
