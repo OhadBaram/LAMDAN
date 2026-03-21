@@ -33,9 +33,10 @@ export default function Home() {
   return (
     <div dir="rtl" className="min-h-screen flex page-transition" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
       {/* LAMDAN Header */}
-      <div className="fixed top-0 right-0 left-0 z-50 flex items-center justify-between px-4 py-3" style={{ 
+      <div className="fixed top-0 right-0 left-0 z-[100] flex items-center justify-between px-4 py-3" style={{ 
         background: 'var(--bg-primary)',
-        borderBottom: '1px solid var(--border)'
+        borderBottom: '1px solid var(--border)',
+        boxShadow: 'var(--shadow-sm)'
       }}>
         <div className="flex items-center gap-4">
           {/* Mobile Menu Toggle */}
@@ -69,7 +70,7 @@ export default function Home() {
       </div>
 
       {/* Main Content Wrapper */}
-      <div className="flex-1 flex flex-row min-w-0 pt-16">
+      <div className="flex-1 flex flex-row min-w-0 pt-[60px]">
         {/* Right Sidebar */}
         <RightSidebar 
           isOpen={rightSidebarOpen} 
