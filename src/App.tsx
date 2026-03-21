@@ -8,85 +8,73 @@ import { KnowledgeBasePage } from "../features/KnowledgeBase/KnowledgeBasePage";
 import { OnboardingWizard } from "../features/Onboarding/OnboardingWizard";
 import { SettingsPage } from "../features/Settings/SettingsPage";
 import { SpacesPage } from "../features/Spaces/SpacesPage";
+import { ThemeToggle } from "./components/ThemeToggle";
+import { MessageSquare, Brain as BrainIcon, Trophy, Gauge, Database, Layers, Settings as SettingsIcon } from 'lucide-react';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('chat');
 
+  const tabs = [
+    { value: 'chat', label: 'צ\'אט', icon: MessageSquare },
+    { value: 'agentarena', label: 'ארנת סוכנים', icon: BrainIcon },
+    { value: 'arena', label: 'ארנה', icon: Trophy },
+    { value: 'cockpit', label: 'קוקפיט', icon: Gauge },
+    { value: 'knowledge', label: 'מקורות ידע', icon: Database },
+    { value: 'spaces', label: 'ספייסים', icon: Layers },
+    { value: 'settings', label: 'הגדרות', icon: SettingsIcon }
+  ];
+
   return (
-    <div dir="rtl" className="min-h-screen bg-white">
+    <div dir="rtl" className="min-h-screen" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
+      <ThemeToggle />
+      
       <div className="mx-auto">
         <Tabs value={activeTab} onValueChange={setActiveTab}>
-          <TabsList className="bg-green-600 p-2 flex gap-2 justify-end">
-            <TabsTrigger 
-              value="chat" 
-              className="px-4 py-2 rounded-lg data-[state=active]:bg-white data-[state=active]:text-green-700 text-white"
-            >
-              צ'אט
-            </TabsTrigger>
-            <TabsTrigger 
-              value="agentarena"
-              className="px-4 py-2 rounded-lg data-[state=active]:bg-white data-[state=active]:text-green-700 text-white"
-            >
-              ארנת סוכנים
-            </TabsTrigger>
-            <TabsTrigger 
-              value="arena"
-              className="px-4 py-2 rounded-lg data-[state=active]:bg-white data-[state=active]:text-green-700 text-white"
-            >
-              ארנה
-            </TabsTrigger>
-            <TabsTrigger 
-              value="cockpit"
-              className="px-4 py-2 rounded-lg data-[state=active]:bg-white data-[state=active]:text-green-700 text-white"
-            >
-              קוקפיט
-            </TabsTrigger>
-            <TabsTrigger 
-              value="knowledge"
-              className="px-4 py-2 rounded-lg data-[state=active]:bg-white data-[state=active]:text-green-700 text-white"
-            >
-              מקורות ידע
-            </TabsTrigger>
-            <TabsTrigger 
-              value="spaces"
-              className="px-4 py-2 rounded-lg data-[state=active]:bg-white data-[state=active]:text-green-700 text-white"
-            >
-              ספייסים
-            </TabsTrigger>
-            <TabsTrigger 
-              value="settings"
-              className="px-4 py-2 rounded-lg data-[state=active]:bg-white data-[state=active]:text-green-700 text-white"
-            >
-              הגדרות
-            </TabsTrigger>
+          <TabsList className="tabs-modern sticky top-0 z-50 mb-4 fade-in" style={{ background: 'var(--bg-secondary)' }}>
+            <div className="flex flex-wrap gap-2 justify-end w-full">
+              {tabs.map((tab) => {
+                const Icon = tab.icon;
+                return (
+                  <TabsTrigger 
+                    key={tab.value}
+                    value={tab.value} 
+                    className="tab-modern flex items-center gap-2 px-4 py-2"
+                  >
+                    <Icon className="w-4 h-4" />
+                    <span className="hidden sm:inline">{tab.label}</span>
+                    <span className="sm:hidden">{tab.label.charAt(0)}</span>
+                  </TabsTrigger>
+                );
+              })}
+            </div>
           </TabsList>
           
-          <div className="p-4">
-            <TabsContent value="chat">
+          <div className="p-4 fade-in">
+            <TabsContent value="chat" className="fade-in">
               <ChatPage />
             </TabsContent>
             
-            <TabsContent value="agentarena">
+            <TabsContent value="agentarena" className="fade-in">
               <AgentArenaPage />
             </TabsContent>
             
-            <TabsContent value="arena">
+            <TabsContent value="arena" className="fade-in">
               <ArenaPage />
             </TabsContent>
             
-            <TabsContent value="cockpit">
+            <TabsContent value="cockpit" className="fade-in">
               <CockpitPage />
             </TabsContent>
             
-            <TabsContent value="knowledge">
+            <TabsContent value="knowledge" className="fade-in">
               <KnowledgeBasePage />
             </TabsContent>
             
-            <TabsContent value="spaces">
+            <TabsContent value="spaces" className="fade-in">
               <SpacesPage />
             </TabsContent>
             
-            <TabsContent value="settings">
+            <TabsContent value="settings" className="fade-in">
               <SettingsPage />
             </TabsContent>
           </div>

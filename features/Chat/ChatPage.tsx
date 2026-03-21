@@ -204,28 +204,81 @@ export function ChatPage() {
 
 
   return (
-    <div className="flex flex-col h-full bg-[var(--bg-main-new)] relative overflow-hidden"> 
-      {/* ChatPage does not have its own header anymore, global header is used */}
-      
+    <div className="flex flex-col h-screen relative overflow-hidden" style={{ background: 'var(--bg-primary)' }}>
       <div className="flex-1 flex flex-col overflow-hidden"> 
             <div 
               aria-live="polite"
-              className="flex-1 overflow-y-auto p-4 sm:p-6 scrollbar-thin" /* Added scrollbar-thin */
-              style={{ backgroundColor: 'var(--bg-main-new)' }} /* Ensure white background for chat content area */
+              className="flex-1 overflow-y-auto p-4 sm:p-6 fade-in"
+              style={{ backgroundColor: 'var(--bg-primary)' }}
             >
                 {messages.length === 0 && !isLoading && (
-                    <div className="flex flex-col items-center justify-center h-full text-center">
-                         <h1 className="text-[56px] font-semibold mb-4" style={{
-                             backgroundImage: `linear-gradient(to left, var(--gradient-start-new), var(--gradient-end-new))`,
-                             WebkitBackgroundClip: 'text',
-                             backgroundClip: 'text',
-                             color: 'transparent'
-                         }}>
-                            {lang === 'he' ? `שלום, ${userProfile?.userName || 'משתמש'}!` : `Hello, ${userProfile?.userName || 'User'}!`}
-                        </h1>
-                        <p className="text-xl text-[var(--text-muted-new)]">
+                    <div className="flex flex-col items-center justify-center h-full text-center max-w-2xl mx-auto">
+                         <div className="mb-8">
+                            <div className="w-24 h-24 rounded-full flex items-center justify-center mb-6 pulse" style={{
+                                background: 'var(--gradient-accent)',
+                                boxShadow: 'var(--shadow-lg)'
+                            }}>
+                                <MessageSquare className="w-12 h-12 text-white" />
+                            </div>
+                            <h1 className="text-4xl md:text-5xl font-bold mb-4" style={{
+                                background: 'var(--gradient-primary)',
+                                WebkitBackgroundClip: 'text',
+                                backgroundClip: 'text',
+                                color: 'transparent'
+                            }}>
+                                {lang === 'he' ? `שלום, ${userProfile?.userName || 'משתמש'}!` : `Hello, ${userProfile?.userName || 'User'}!`}
+                            </h1>
+                        </div>
+                        <p className="text-xl mb-8" style={{ color: 'var(--text-secondary)' }}>
                             {lang === 'he' ? 'איך אוכל לעזור לך היום?' : 'How can I help you today?'}
                         </p>
+                        
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-md">
+                            <button 
+                                onClick={() => setInput(lang === 'he' ? "עזור לי לכתוב אימייל מקצועי" : "Help me write a professional email")}
+                                className="card-modern text-left p-4 hover:scale-105 transition-transform cursor-pointer"
+                            >
+                                <div className="font-medium mb-1" style={{ color: 'var(--text-primary)' }}>
+                                    {lang === 'he' ? '✉️ אימייל מקצועי' : '✉️ Professional Email'}
+                                </div>
+                                <div className="text-sm" style={{ color: 'var(--text-tertiary)' }}>
+                                    {lang === 'he' ? 'כתיבת אימייל עסקי' : 'Business email writing'}
+                                </div>
+                            </button>
+                            <button 
+                                onClick={() => setInput(lang === 'he' ? "הסבר לי מושג מורכב" : "Explain a complex concept")}
+                                className="card-modern text-left p-4 hover:scale-105 transition-transform cursor-pointer"
+                            >
+                                <div className="font-medium mb-1" style={{ color: 'var(--text-primary)' }}>
+                                    {lang === 'he' ? '🧠 הסבר מושגים' : '🧠 Explain Concepts'}
+                                </div>
+                                <div className="text-sm" style={{ color: 'var(--text-tertiary)' }}>
+                                    {lang === 'he' ? 'פירוש ברור' : 'Clear explanations'}
+                                </div>
+                            </button>
+                            <button 
+                                onClick={() => setInput(lang === 'he' ? "רעיונות לפרויקט חדש" : "Ideas for a new project")}
+                                className="card-modern text-left p-4 hover:scale-105 transition-transform cursor-pointer"
+                            >
+                                <div className="font-medium mb-1" style={{ color: 'var(--text-primary)' }}>
+                                    {lang === 'he' ? '💡 רעיונות יצירתיים' : '💡 Creative Ideas'}
+                                </div>
+                                <div className="text-sm" style={{ color: 'var(--text-tertiary)' }}>
+                                    {lang === 'he' ? 'בראשית פרויקטים' : 'Project brainstorming'}
+                                </div>
+                            </button>
+                            <button 
+                                onClick={() => setInput(lang === 'he' ? "תרגום טקסט" : "Translate text")}
+                                className="card-modern text-left p-4 hover:scale-105 transition-transform cursor-pointer"
+                            >
+                                <div className="font-medium mb-1" style={{ color: 'var(--text-primary)' }}>
+                                    {lang === 'he' ? '🌐 תרגום' : '🌐 Translation'}
+                                </div>
+                                <div className="text-sm" style={{ color: 'var(--text-tertiary)' }}>
+                                    {lang === 'he' ? 'תרגום בין שפות' : 'Language translation'}
+                                </div>
+                            </button>
+                        </div>
                     </div>
                 )}
 
@@ -249,45 +302,106 @@ export function ChatPage() {
                 <div ref={messagesEndRef} />
             </div>
 
-            <div className="chatbot-ui-input-bar-container sticky">
+            <div className="chatbot-ui-input-bar-container sticky bottom-0 p-4 fade-in" style={{ background: 'var(--bg-primary)', borderTop: '1px solid var(--border)' }}>
                 {attachedFiles.length > 0 && (
-                    <div className="mb-2 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 px-1">
+                    <div className="mb-3 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-2 px-1">
                         {attachedFiles.map(file => <FilePreview key={file.id} file={file} onRemove={() => removeAttachedFile(file.id)} />)}
                     </div>
                 )}
                 <form 
                     id="chat-form" 
                     onSubmit={handleSubmit} 
-                    className="chatbot-ui-input-bar"
+                    className="chatbot-ui-input-bar flex items-end gap-2"
                 >
-                    <button type="button" onClick={() => fileInputRef.current?.click()} title={lang === 'he' ? 'צרף קובץ' : 'Attach File'} className="chatbot-ui-input-icon-button">
-                        <Plus size={22}/> {/* Using Plus to match Gemini's visual for "add" */}
-                    </button>
-                    <button type="button" onClick={handleSpeechToText} title={lang === 'he' ? (isListening ? 'הפסק הקלטה' : 'הקלט קול') : (isListening ? 'Stop Listening' : 'Record Voice')} className={`chatbot-ui-input-icon-button ${isListening ? "text-[var(--error)]" : ""}`}>
-                        {isListening ? <MicOff /> : <Mic />}
-                    </button>
+                    <div className="flex gap-2">
+                        <button 
+                            type="button" 
+                            onClick={() => fileInputRef.current?.click()} 
+                            title={lang === 'he' ? 'צרף קובץ' : 'Attach File'} 
+                            className="btn-modern"
+                            style={{ 
+                                background: 'var(--bg-secondary)', 
+                                color: 'var(--text-primary)',
+                                border: '1px solid var(--border)',
+                                borderRadius: '50%',
+                                width: '44px',
+                                height: '44px',
+                                padding: '0'
+                            }}
+                        >
+                            <Plus size={20}/>
+                        </button>
+                        <button 
+                            type="button" 
+                            onClick={handleSpeechToText} 
+                            title={lang === 'he' ? (isListening ? 'הפסק הקלטה' : 'הקלט קול') : (isListening ? 'Stop Listening' : 'Record Voice')} 
+                            className="btn-modern"
+                            style={{ 
+                                background: isListening ? 'var(--error)' : 'var(--bg-secondary)', 
+                                color: isListening ? 'white' : 'var(--text-primary)',
+                                border: '1px solid var(--border)',
+                                borderRadius: '50%',
+                                width: '44px',
+                                height: '44px',
+                                padding: '0'
+                            }}
+                        >
+                            {isListening ? <MicOff size={20} /> : <Mic size={20} />}
+                        </button>
+                    </div>
                     
-                    <Textarea
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        placeholder={isListening ? (lang === 'he' ? "מאזין..." : "Listening...") : promptBarPlaceholderText}
-                        disabled={isLoading}
-                        className="chatbot-ui-input-bar-textarea"
-                        rows={1}
-                        onKeyDown={(e) => {
-                            if (e.key === 'Enter' && !e.shiftKey && !isLoading) {
-                                e.preventDefault();
-                                handleSubmit(e);
-                            }
-                        }}
-                        aria-label={lang === 'he' ? "הודעה" : "Message"}
-                    />
+                    <div className="flex-1 relative">
+                        <Textarea
+                            value={input}
+                            onChange={(e) => setInput(e.target.value)}
+                            placeholder={isListening ? (lang === 'he' ? "מאזין..." : "Listening...") : promptBarPlaceholderText}
+                            disabled={isLoading}
+                            className="chatbot-ui-input-bar-textarea"
+                            rows={1}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter' && !e.shiftKey && !isLoading) {
+                                    e.preventDefault();
+                                    handleSubmit(e);
+                                }
+                            }}
+                            aria-label={lang === 'he' ? "הודעה" : "Message"}
+                        />
+                        {transcript && (
+                            <div className="absolute top-full left-0 right-0 mt-1 p-2 text-sm rounded-lg" style={{ 
+                                background: 'var(--accent-light)', 
+                                color: 'var(--text-primary)',
+                                border: '1px solid var(--accent)'
+                            }}>
+                                {transcript}
+                            </div>
+                        )}
+                    </div>
                     
-                    <div className="flex items-center gap-1.5 ml-2 flex-shrink-0 self-center"> {/* Use self-center for vertical alignment */}
-                        <button type="button" title="Canvas (Visual)" className="chatbot-ui-input-icon-button hidden md:flex text-xs p-1.5 rounded-lg bg-[var(--bg-main-new)] hover:bg-[var(--border-light-new)] flex items-center gap-1">
+                    <div className="flex items-center gap-1.5 flex-shrink-0">
+                        <button 
+                            type="button" 
+                            title="Canvas (Visual)" 
+                            className="btn-modern hidden md:flex"
+                            style={{ 
+                                background: 'var(--bg-secondary)', 
+                                color: 'var(--text-primary)',
+                                border: '1px solid var(--border)',
+                                padding: '0.5rem'
+                            }}
+                        >
                             <Palette size={18} /> 
                         </button>
-                        <button type="button" title="Deep Research (Visual)" className="chatbot-ui-input-icon-button hidden md:flex text-xs p-1.5 rounded-lg bg-[var(--bg-main-new)] hover:bg-[var(--border-light-new)] flex items-center gap-1">
+                        <button 
+                            type="button" 
+                            title="Deep Research (Visual)" 
+                            className="btn-modern hidden md:flex"
+                            style={{ 
+                                background: 'var(--bg-secondary)', 
+                                color: 'var(--text-primary)',
+                                border: '1px solid var(--border)',
+                                padding: '0.5rem'
+                            }}
+                        >
                             <BrainIcon size={18} />
                         </button>
                     </div>
@@ -296,7 +410,12 @@ export function ChatPage() {
                         id="chat-submit-button" 
                         type="submit" 
                         disabled={isLoading || (!input.trim() && !transcript.trim() && attachedFiles.length === 0)} 
-                        className={`chatbot-ui-send-button ${(isLoading || (!input.trim() && !transcript.trim() && attachedFiles.length === 0)) ? 'hidden' : ''}`}
+                        className={`chatbot-ui-send-button ${(isLoading || (!input.trim() && !transcript.trim() && attachedFiles.length === 0)) ? 'opacity-50 cursor-not-allowed' : ''}`}
+                        style={{
+                            opacity: (isLoading || (!input.trim() && !transcript.trim() && attachedFiles.length === 0)) ? 0.5 : 1,
+                            cursor: (isLoading || (!input.trim() && !transcript.trim() && attachedFiles.length === 0)) ? 'not-allowed' : 'pointer'
+                        }}
+                    >
                         aria-label={lang === 'he' ? "שלח" : "Send"}
                     >
                         {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="w-5 h-5"/>}
