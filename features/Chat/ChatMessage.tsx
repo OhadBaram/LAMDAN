@@ -37,8 +37,11 @@ export const ChatMessage: React.FC<ChatMessageProps> = ({ message, onSpeak }) =>
     return (
         <div className={`flex w-full mb-4 message-appear ${isUser ? (lang === 'he' ? 'justify-end' : 'justify-start') : (lang === 'he' ? 'justify-start' : 'justify-end')}`}>
             <div 
-                className={`max-w-[80%] p-3 shadow-sm ${bubbleClass}`} /* Increased max-width slightly */
-                style={{ borderRadius: 'var(--message-border-radius, 18px)', /* Slightly more rounded */ }}
+                className={`max-w-[80%] p-4 shadow-md message-bubble ${isUser ? 'user' : 'assistant'} ${bubbleClass}`}
+                style={{ 
+                    borderRadius: 'var(--radius-2xl)',
+                    backdropFilter: 'blur(10px)'
+                }}
             >
                 <p
                     className="whitespace-pre-wrap leading-relaxed"
