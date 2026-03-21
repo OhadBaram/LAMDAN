@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from "react"; // Added useEffect
 import { Loader2 } from "lucide-react";
 import { format } from "date-fns";
-import { parseISO } from 'date-fns/parseISO'; 
+import { parseISO } from 'date-fns'; 
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer, LineChart, Line, PieChart, Pie, Cell as RechartsCell } from 'recharts';
 
 import { useAppContext } from '../../contexts/AppContext';

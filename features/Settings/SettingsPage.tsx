@@ -2,9 +2,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { User as UserIcon, Palette, Server, Users, TrendingUp, Plus, Edit3, Trash2, GripVertical, Star, Calendar, ChevronLeft, ChevronRight, DollarSign, ChevronDown, ChevronUp, CheckCircle, XCircle, Loader2, Check, Play, ExternalLink, Cpu, TrendingDown, BookLock, BookOpen, Zap as ArenaIcon, Brain as AgentsIcon, SlidersHorizontal as CockpitIcon, ShieldCheck, Settings as SettingsIconMain } from "lucide-react"; // Added new icons for tabs
 import { format, endOfMonth, eachDayOfInterval, getDay, addMonths, isSameMonth } from "date-fns";
-import startOfMonth from 'date-fns/startOfMonth';
-import subMonths from 'date-fns/subMonths';
-import parseISO from 'date-fns/parseISO';
+import { startOfMonth } from 'date-fns';
+import { subMonths } from 'date-fns';
+import { parseISO } from 'date-fns';
 import { he } from 'date-fns/locale/he'; 
 import { enUS } from 'date-fns/locale/en-US'; 
 
