@@ -73,12 +73,14 @@ export function TabsTrigger({
 export function TabsContent({
   value,
   children,
+  className,
 }: {
   value: string;
   children: ReactNode;
+  className?: string;
 }) {
   const context = useContext(TabsContext);
   if (!context) throw new Error("TabsContent must be used within Tabs");
 
-  return context.value === value ? <div style={{ marginTop: 24 }}>{children}</div> : null;
+  return context.value === value ? <div className={className} style={{ marginTop: 24 }}>{children}</div> : null;
 }

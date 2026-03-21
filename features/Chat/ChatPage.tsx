@@ -5,7 +5,7 @@ import { useAppContext, ChatMessageItem } from '../../contexts/AppContext';
 import { useUserSettings } from '../../contexts/UserSettingsContext';
 
 import { Button } from '../../src/components/ui/Button';
-import { Textarea } from '../../src/components/ui/Textarea';
+import { Textarea } from '../../components/ui/Textarea';
 import { ChatMessage } from './ChatMessage';
 import { FilePreview } from './FilePreview';
 
@@ -122,19 +122,21 @@ export function ChatPage() {
     } else {
         const assistantMessage: ChatMessageItem = { 
             role: "assistant", 
-            content: response.message, 
+            content: response.message || '', 
             timestamp: new Date().toISOString(),
         };
         setMessages(prev => [...prev, assistantMessage]);
-        recordTokenUsage(response.provider, response.modelId, response.usage.incomingTokens, response.usage.outgoingTokens, response.cost);
-        setCurrentConversationCost(prev => prev + response.cost);
-        setCurrentConversationTokens(prev => ({
-            incoming: prev.incoming + response.usage.incomingTokens,
-            outgoing: prev.outgoing + response.usage.outgoingTokens,
-        }));
+        if (response.usage && response.cost) {
+            recordTokenUsage(response.provider || '', response.modelId || '', response.usage.incomingTokens || 0, response.usage.outgoingTokens || 0, response.cost);
+            setCurrentConversationCost(prev => prev + response.cost);
+            setCurrentConversationTokens(prev => ({
+                incoming: prev.incoming + (response.usage?.incomingTokens || 0),
+                outgoing: prev.outgoing + (response.usage?.outgoingTokens || 0),
+            }));
+        }
 
         if (continuousConversation) {
-            speak(response.message, () => {
+            speak(response.message || '', () => {
                 if (continuousConversation && !isListening) {
                     startListening();
                 }
@@ -353,12 +355,12 @@ export function ChatPage() {
                     <div className="flex-1 relative">
                         <Textarea
                             value={input}
-                            onChange={(e) => setInput(e.target.value)}
+                            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setInput(e.target.value)}
                             placeholder={isListening ? (lang === 'he' ? "מאזין..." : "Listening...") : promptBarPlaceholderText}
                             disabled={isLoading}
                             className="chatbot-ui-input-bar-textarea"
                             rows={1}
-                            onKeyDown={(e) => {
+                            onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
                                 if (e.key === 'Enter' && !e.shiftKey && !isLoading) {
                                     e.preventDefault();
                                     handleSubmit(e);
