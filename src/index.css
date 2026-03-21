@@ -8,10 +8,10 @@
 :root {
   /* Light Theme - Regular */
   --bg-primary: #ffffff;
-  --bg-secondary: #f8fafc;
-  --bg-tertiary: #f1f5f9;
-  --text-primary: #0f172a;
-  --text-secondary: #475569;
+  --bg-user-message-new: #3b82f6;
+  --bg-bot-message-new: #f1f5f9;
+  --text-normal-new: #0f172a;
+  --border-bot-message-new: #e2e8f0;
   --text-tertiary: #64748b;
   --text-placeholder-new: #94a3b8;
   --border: #e2e8f0;
@@ -70,10 +70,10 @@
 /* Dark Theme */
 [data-theme="dark"] {
   --bg-primary: #0f172a;
-  --bg-secondary: #1e293b;
-  --bg-tertiary: #334155;
-  --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1;
+  --bg-user-message-new: #2563eb;
+  --bg-bot-message-new: #1e293b;
+  --text-normal-new: #f8fafc;
+  --border-bot-message-new: #334155;
   --text-tertiary: #94a3b8;
   --text-placeholder-new: #64748b;
   --border: #334155;
