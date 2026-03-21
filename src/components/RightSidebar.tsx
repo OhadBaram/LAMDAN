@@ -68,12 +68,21 @@ export function RightSidebar({ isOpen, onClose }: RightSidebarProps) {
         boxShadow: isOpen ? 'var(--shadow-2xl)' : 'none'
       }}>
         {/* Header */}
-        <div className="p-4 border-b flex items-center justify-between card-modern" style={{ borderColor: 'var(--border)', borderRadius: '0', borderTop: 'none', borderLeft: 'none', borderRight: 'none' }}>
+        <div className="p-4 border-b flex items-center justify-between card-modern" style={{ 
+          borderColor: 'var(--border)', 
+          borderRadius: '0', 
+          borderTop: 'none', 
+          borderLeft: 'none', 
+          borderRight: 'none',
+          background: 'var(--bg-secondary)',
+          boxShadow: 'var(--shadow-sm)'
+        }}>
           <div className="flex items-center gap-2">
             {isPro && (
-              <div className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold" style={{
+              <div className="flex items-center gap-1 px-3 py-1 rounded-full text-xs font-bold" style={{
                 background: 'var(--gradient-accent)',
-                color: 'white'
+                color: 'white',
+                boxShadow: 'var(--shadow-sm)'
               }}>
                 <Crown size={12} />
                 PRO
@@ -85,9 +94,10 @@ export function RightSidebar({ isOpen, onClose }: RightSidebarProps) {
             onClick={onClose}
             className="lg:hidden btn-modern p-2"
             style={{ 
-              background: 'var(--bg-secondary)',
+              background: 'var(--bg-primary)',
               color: 'var(--text-secondary)',
-              borderRadius: 'var(--radius-lg)'
+              borderRadius: 'var(--radius-lg)',
+              border: '1px solid var(--border)'
             }}
           >
             <ChevronLeft size={20} />
@@ -95,67 +105,69 @@ export function RightSidebar({ isOpen, onClose }: RightSidebarProps) {
         </div>
 
         {/* Main Menu */}
-        <div className="flex-1 overflow-y-auto p-3">
+        <div className="flex-1 overflow-y-auto p-4 space-y-6">
           {/* Top Actions */}
-          <div className="space-y-2 mb-6">
+          <div className="space-y-2">
             {menuItems.map((item) => (
               <button
                 key={item.id}
-                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 hover:scale-[1.02] card-modern"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-2xl transition-all duration-300 hover:scale-[1.02] card-modern group"
                 style={{
                   background: activeSection === item.id ? 'var(--accent-light)' : 'var(--bg-secondary)',
                   color: activeSection === item.id ? 'var(--accent)' : 'var(--text-primary)',
-                  border: '1px solid var(--border)',
-                  borderRadius: 'var(--radius-xl)',
+                  border: '1px solid',
+                  borderColor: activeSection === item.id ? 'var(--accent)' : 'var(--border)',
                   boxShadow: activeSection === item.id ? 'var(--shadow-glow)' : 'var(--shadow-sm)'
                 }}
                 onClick={() => setActiveSection(item.id)}
               >
-                <div className={`p-2 rounded-lg ${
+                <div className={`p-2.5 rounded-xl transition-colors duration-300 ${
                   activeSection === item.id 
                     ? 'bg-blue-500 text-white' 
-                    : 'bg-gray-100'
+                    : 'bg-white border border-gray-100 group-hover:bg-gray-50'
                 }`}>
                   {React.cloneElement(item.icon as React.ReactElement, {
-                    size: 16,
+                    size: 18,
                     color: activeSection === item.id ? 'white' : 'var(--text-secondary)'
                   })}
                 </div>
                 <div className="flex-1 text-right">
-                  <div className="font-medium text-sm">{item.title}</div>
+                  <div className="font-bold text-sm tracking-tight">{item.title}</div>
+                  <div className="text-[10px] opacity-60 font-medium">{item.description}</div>
                 </div>
               </button>
             ))}
           </div>
 
           {/* Gems Section */}
-          <div className="mb-6">
-            <h3 className="text-xs font-semibold mb-3 px-3" style={{ color: 'var(--text-tertiary)' }}>
+          <div className="space-y-3">
+            <h3 className="text-[11px] font-bold uppercase tracking-wider px-2 flex items-center gap-2" style={{ color: 'var(--text-tertiary)' }}>
+              <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
               Gems
             </h3>
-            <div className="space-y-1">
+            <div className="grid grid-cols-1 gap-2">
               {gemTools.map((tool) => (
                 <button
                   key={tool.id}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 hover:scale-[1.02]"
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 hover:bg-white hover:shadow-sm border border-transparent hover:border-gray-100 group"
                   style={{
                     background: activeSection === tool.id ? 'var(--accent-light)' : 'transparent',
-                    color: activeSection === tool.id ? 'var(--accent)' : 'var(--text-primary)'
+                    color: activeSection === tool.id ? 'var(--accent)' : 'var(--text-primary)',
                   }}
                   onClick={() => setActiveSection(tool.id)}
                 >
-                  <div className={`p-1.5 rounded-lg ${
+                  <div className={`p-2 rounded-lg transition-all duration-200 ${
                     activeSection === tool.id 
-                      ? 'bg-blue-100' 
-                      : 'bg-gray-100'
+                      ? 'bg-blue-500 text-white' 
+                      : 'bg-gray-50 group-hover:bg-white'
                   }`}>
                     {React.cloneElement(tool.icon as React.ReactElement, {
                       size: 14,
-                      color: activeSection === tool.id ? 'var(--accent)' : 'var(--text-secondary)'
+                      color: activeSection === tool.id ? 'white' : 'var(--text-secondary)'
                     })}
                   </div>
                   <div className="flex-1 text-right">
-                    <div className="text-sm">{tool.title}</div>
+                    <div className="text-xs font-bold">{tool.title}</div>
                   </div>
                 </button>
               ))}
@@ -163,12 +175,15 @@ export function RightSidebar({ isOpen, onClose }: RightSidebarProps) {
           </div>
 
           {/* Recent Chats */}
-          <div className="mb-6">
-            <h3 className="text-xs font-semibold mb-3 px-3 flex items-center justify-between" style={{ color: 'var(--text-tertiary)' }}>
-              <span>שיחות אחרונות</span>
-              <button className="text-xs" style={{ color: 'var(--accent)' }}>הצג הכל</button>
+          <div className="space-y-3">
+            <h3 className="text-[11px] font-bold uppercase tracking-wider px-2 flex items-center justify-between" style={{ color: 'var(--text-tertiary)' }}>
+              <span className="flex items-center gap-2">
+                <div className="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                שיחות אחרונות
+              </span>
+              <button className="text-[10px] font-bold hover:underline" style={{ color: 'var(--accent)' }}>הצג הכל</button>
             </h3>
-            <div className="space-y-1">
+            <div className="space-y-2">
               {[
                 { title: 'פגישת צוות שבועית', time: '10:30' },
                 { title: 'רעיונות למוצר חדש', time: 'אתמול' },
@@ -176,15 +191,18 @@ export function RightSidebar({ isOpen, onClose }: RightSidebarProps) {
               ].map((chat, index) => (
                 <button
                   key={index}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 hover:bg-gray-100"
-                  style={{ color: 'var(--text-primary)' }}
+                  className="w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 hover:bg-white hover:shadow-md border border-gray-50 group"
+                  style={{ 
+                    background: 'var(--bg-secondary)',
+                    color: 'var(--text-primary)' 
+                  }}
                 >
-                  <div className="p-1.5 rounded-lg bg-gray-100">
+                  <div className="p-2 rounded-lg bg-white border border-gray-100">
                     <Clock size={14} style={{ color: 'var(--text-tertiary)' }} />
                   </div>
                   <div className="flex-1 text-right min-w-0">
-                    <div className="text-sm truncate">{chat.title}</div>
-                    <div className="text-xs" style={{ color: 'var(--text-tertiary)' }}>{chat.time}</div>
+                    <div className="text-xs font-bold truncate">{chat.title}</div>
+                    <div className="text-[10px] opacity-50 font-medium">{chat.time}</div>
                   </div>
                 </button>
               ))}
@@ -193,52 +211,50 @@ export function RightSidebar({ isOpen, onClose }: RightSidebarProps) {
         </div>
 
         {/* Bottom Section */}
-        <div className="p-3 border-t" style={{ borderColor: 'var(--border)' }}>
-          <div className="space-y-1">
-            {bottomMenu.map((item) => (
+        <div className="p-4 border-t space-y-4" style={{ borderColor: 'var(--border)', background: 'var(--bg-secondary)' }}>
+          <div className="grid grid-cols-2 gap-2">
+            {bottomMenu.slice(0, 4).map((item) => (
               <button
                 key={item.id}
-                className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 hover:scale-[1.02]"
+                className="flex flex-col items-center justify-center gap-2 p-3 rounded-2xl transition-all duration-200 hover:bg-white hover:shadow-sm border border-transparent hover:border-gray-100"
                 style={{
-                  background: activeSection === item.id ? 'var(--accent-light)' : 'transparent',
+                  background: activeSection === item.id ? 'var(--accent-light)' : 'var(--bg-primary)',
                   color: activeSection === item.id ? 'var(--accent)' : 'var(--text-primary)'
                 }}
                 onClick={() => setActiveSection(item.id)}
               >
-                <div className={`p-1.5 rounded-lg ${
-                  activeSection === item.id 
-                    ? 'bg-blue-100' 
-                    : 'bg-gray-100'
+                <div className={`p-2 rounded-xl ${
+                  activeSection === item.id ? 'bg-blue-500 text-white' : 'bg-gray-50'
                 }`}>
                   {React.cloneElement(item.icon as React.ReactElement, {
-                    size: 14,
-                    color: activeSection === item.id ? 'var(--accent)' : 'var(--text-secondary)'
+                    size: 16,
+                    color: activeSection === item.id ? 'white' : 'var(--text-secondary)'
                   })}
                 </div>
-                <div className="flex-1 text-right">
-                  <div className="text-sm">{item.title}</div>
-                </div>
+                <span className="text-[10px] font-bold">{item.title}</span>
               </button>
             ))}
           </div>
 
-          {/* User Info */}
-          <div className="mt-4 pt-4 border-t" style={{ borderColor: 'var(--border)' }}>
-            <div className="flex items-center gap-3 px-3">
-              <div className="w-8 h-8 rounded-full flex items-center justify-center" style={{
+          {/* User Info Card */}
+          <div className="p-3 rounded-2xl border bg-white shadow-sm flex items-center gap-3 group transition-all duration-300 hover:shadow-md" style={{ borderColor: 'var(--border)' }}>
+            <div className="relative">
+              <div className="w-10 h-10 rounded-full flex items-center justify-center font-black text-sm" style={{
                 background: 'var(--gradient-accent)',
-                color: 'white'
+                color: 'white',
+                boxShadow: 'var(--shadow-sm)'
               }}>
-                <span className="text-xs font-bold">א</span>
+                א
               </div>
-              <div className="flex-1 text-right">
-                <div className="text-sm font-medium" style={{ color: 'var(--text-primary)' }}>אור משתמש</div>
-                <div className="text-xs" style={{ color: 'var(--text-tertiary)' }}>or@example.com</div>
-              </div>
-              <button className="p-1.5 rounded-lg hover:bg-gray-100">
-                <LogOut size={16} style={{ color: 'var(--text-tertiary)' }} />
-              </button>
+              <div className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-500 border-2 border-white"></div>
             </div>
+            <div className="flex-1 text-right overflow-hidden">
+              <div className="text-xs font-black truncate" style={{ color: 'var(--text-primary)' }}>אור משתמש</div>
+              <div className="text-[10px] font-bold truncate opacity-50">or@example.com</div>
+            </div>
+            <button className="p-2 rounded-xl hover:bg-red-50 hover:text-red-500 transition-colors duration-200 text-gray-400">
+              <LogOut size={16} />
+            </button>
           </div>
         </div>
       </div>
