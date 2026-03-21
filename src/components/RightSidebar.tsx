@@ -68,7 +68,7 @@ export function RightSidebar({ isOpen, onClose }: RightSidebarProps) {
         boxShadow: isOpen ? 'var(--shadow-2xl)' : 'none'
       }}>
         {/* Header */}
-        <div className="p-4 border-b flex items-center justify-between" style={{ borderColor: 'var(--border)' }}>
+        <div className="p-4 border-b flex items-center justify-between card-modern" style={{ borderColor: 'var(--border)', borderRadius: '0', borderTop: 'none', borderLeft: 'none', borderRight: 'none' }}>
           <div className="flex items-center gap-2">
             {isPro && (
               <div className="flex items-center gap-1 px-2 py-1 rounded-full text-xs font-bold" style={{
@@ -83,8 +83,12 @@ export function RightSidebar({ isOpen, onClose }: RightSidebarProps) {
           
           <button 
             onClick={onClose}
-            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
-            style={{ color: 'var(--text-secondary)' }}
+            className="lg:hidden btn-modern p-2"
+            style={{ 
+              background: 'var(--bg-secondary)',
+              color: 'var(--text-secondary)',
+              borderRadius: 'var(--radius-lg)'
+            }}
           >
             <ChevronLeft size={20} />
           </button>
@@ -93,25 +97,28 @@ export function RightSidebar({ isOpen, onClose }: RightSidebarProps) {
         {/* Main Menu */}
         <div className="flex-1 overflow-y-auto p-3">
           {/* Top Actions */}
-          <div className="space-y-1 mb-6">
+          <div className="space-y-2 mb-6">
             {menuItems.map((item) => (
               <button
                 key={item.id}
-                className="w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 hover:scale-[1.02]"
+                className="w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 hover:scale-[1.02] card-modern"
                 style={{
-                  background: activeSection === item.id ? 'var(--accent-light)' : 'transparent',
-                  color: activeSection === item.id ? 'var(--accent)' : 'var(--text-primary)'
+                  background: activeSection === item.id ? 'var(--accent-light)' : 'var(--bg-secondary)',
+                  color: activeSection === item.id ? 'var(--accent)' : 'var(--text-primary)',
+                  border: '1px solid var(--border)',
+                  borderRadius: 'var(--radius-xl)',
+                  boxShadow: activeSection === item.id ? 'var(--shadow-glow)' : 'var(--shadow-sm)'
                 }}
                 onClick={() => setActiveSection(item.id)}
               >
                 <div className={`p-2 rounded-lg ${
                   activeSection === item.id 
-                    ? 'bg-blue-100' 
+                    ? 'bg-blue-500 text-white' 
                     : 'bg-gray-100'
                 }`}>
                   {React.cloneElement(item.icon as React.ReactElement, {
                     size: 16,
-                    color: activeSection === item.id ? 'var(--accent)' : 'var(--text-secondary)'
+                    color: activeSection === item.id ? 'white' : 'var(--text-secondary)'
                   })}
                 </div>
                 <div className="flex-1 text-right">
