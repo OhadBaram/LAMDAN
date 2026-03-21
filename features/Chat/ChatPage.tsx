@@ -415,7 +415,6 @@ export function ChatPage() {
                             opacity: (isLoading || (!input.trim() && !transcript.trim() && attachedFiles.length === 0)) ? 0.5 : 1,
                             cursor: (isLoading || (!input.trim() && !transcript.trim() && attachedFiles.length === 0)) ? 'not-allowed' : 'pointer'
                         }}
-                    >
                         aria-label={lang === 'he' ? "שלח" : "Send"}
                     >
                         {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <Send className="w-5 h-5"/>}
