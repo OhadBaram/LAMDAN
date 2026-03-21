@@ -45,9 +45,11 @@ export function ChatSidebar() {
   );
 
   return (
-    <div className="w-80 h-full flex flex-col" style={{ 
+    <div className="w-80 h-full flex flex-col card-modern" style={{ 
       background: 'var(--bg-secondary)', 
-      borderLeft: '1px solid var(--border)' 
+      borderLeft: '1px solid var(--border)',
+      borderRadius: '0',
+      boxShadow: 'var(--shadow-lg)'
     }}>
       {/* Header */}
       <div className="p-4 border-b" style={{ borderColor: 'var(--border)' }}>
@@ -55,13 +57,15 @@ export function ChatSidebar() {
           <h2 className="text-lg font-semibold" style={{ color: 'var(--text-primary)' }}>
             היסטוריית שיחות
           </h2>
-          <button className="btn-modern" style={{ 
+          <button className="btn-modern flex items-center gap-2" style={{ 
             background: 'var(--gradient-accent)', 
             color: 'white',
-            padding: '0.5rem',
-            borderRadius: 'var(--radius-full)'
+            padding: '0.5rem 1rem',
+            borderRadius: 'var(--radius-full)',
+            boxShadow: 'var(--shadow)'
           }}>
             <Plus size={20} />
+            <span className="text-sm font-medium">צ'אט חדש</span>
           </button>
         </div>
         
@@ -132,11 +136,13 @@ export function ChatSidebar() {
       </div>
 
       {/* Footer */}
-      <div className="p-4 border-t" style={{ borderColor: 'var(--border)' }}>
+      <div className="p-4 border-t card-modern" style={{ borderColor: 'var(--border)', borderRadius: '0', borderBottom: 'none', borderLeft: 'none', borderRight: 'none' }}>
         <button className="btn-modern w-full flex items-center justify-center gap-2" style={{
-          background: 'var(--bg-tertiary)',
-          color: 'var(--text-primary)',
-          padding: 'var(--spacing-sm)'
+          background: 'var(--gradient-accent)',
+          color: 'white',
+          padding: 'var(--spacing-sm) var(--spacing)',
+          borderRadius: 'var(--radius-full)',
+          boxShadow: 'var(--shadow)'
         }}>
           <Settings size={16} />
           <span className="text-sm">הגדרות</span>
