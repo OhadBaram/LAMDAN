@@ -11,11 +11,13 @@ import { SpacesPage } from "../features/Spaces/SpacesPage";
 import { ThemeSelector } from "./components/ThemeSelector";
 import { ChatSidebar } from "./components/ChatSidebar";
 import { ModernHomeScreen } from "./components/ModernHomeScreen";
+import { RightSidebar } from "./components/RightSidebar";
 import { MessageSquare, Brain as BrainIcon, Trophy, Gauge, Database, Layers, Settings as SettingsIcon, Menu, X } from 'lucide-react';
 
 export default function Home() {
   const [activeTab, setActiveTab] = useState('home');
   const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [rightSidebarOpen, setRightSidebarOpen] = useState(false);
 
   const tabs = [
     { value: 'home', label: 'בית', icon: MessageSquare },
@@ -43,6 +45,26 @@ export default function Home() {
       >
         {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
       </button>
+
+      {/* Right Sidebar Toggle */}
+      <button
+        onClick={() => setRightSidebarOpen(!rightSidebarOpen)}
+        className="fixed top-4 left-20 z-40 btn-modern lg:hidden"
+        style={{
+          background: 'var(--bg-secondary)',
+          color: 'var(--text-primary)',
+          padding: '0.5rem',
+          borderRadius: 'var(--radius-full)'
+        }}
+      >
+        {rightSidebarOpen ? <X size={20} /> : <Menu size={20} />}
+      </button>
+
+      {/* Right Sidebar */}
+      <RightSidebar 
+        isOpen={rightSidebarOpen} 
+        onClose={() => setRightSidebarOpen(false)} 
+      />
 
       {/* Theme Selector */}
       <div className="fixed top-4 left-4 z-40">

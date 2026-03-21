@@ -1,11 +1,11 @@
 
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Paperclip, X, Plus, Sparkles, Send, Loader2, Mic, MicOff, Palette, Brain as BrainIcon, MessageSquare } from "lucide-react"; 
+import { Paperclip, X, Plus, Sparkles, Send, Loader2, Mic, MicOff, Palette, Brain as BrainIcon, MessageSquare, Crown, Image as ImageIcon, ArrowRight } from "lucide-react"; 
 import { useAppContext, ChatMessageItem } from '../../contexts/AppContext';
 import { useUserSettings } from '../../contexts/UserSettingsContext';
 
 import { Button } from '../../src/components/ui/Button';
-import { Textarea } from '../../components/ui/Textarea';
+import { Textarea } from '../../src/components/ui/Textarea';
 import { ChatMessage } from './ChatMessage';
 import { FilePreview } from './FilePreview';
 
@@ -214,71 +214,139 @@ export function ChatPage() {
               style={{ backgroundColor: 'var(--bg-primary)' }}
             >
                 {messages.length === 0 && !isLoading && (
-                    <div className="flex flex-col items-center justify-center h-full text-center max-w-2xl mx-auto">
-                         <div className="mb-8">
-                            <div className="w-24 h-24 rounded-full flex items-center justify-center mb-6 pulse" style={{
+                    <div className="flex flex-col items-center justify-center h-full text-center max-w-3xl mx-auto px-4">
+                         {/* PRO Badge */}
+                         <div className="flex items-center gap-2 mb-6">
+                            <div className="flex items-center gap-1 px-3 py-1.5 rounded-full text-xs font-bold" style={{
                                 background: 'var(--gradient-accent)',
-                                boxShadow: 'var(--shadow-lg)'
+                                color: 'white'
                             }}>
-                                <MessageSquare className="w-12 h-12 text-white" />
+                                <Crown size={14} />
+                                PRO
                             </div>
-                            <h1 className="text-4xl md:text-5xl font-bold mb-4" style={{
+                        </div>
+
+                        {/* Gemini-style greeting */}
+                        <div className="mb-8">
+                            <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
+                                {lang === 'he' ? `שלום ${userProfile?.userName || 'אור'}` : `Hello ${userProfile?.userName || 'User'}`}
+                                <span className="inline-block ml-2">✨</span>
+                            </h1>
+                            <h2 className="text-2xl md:text-3xl font-bold" style={{
                                 background: 'var(--gradient-primary)',
                                 WebkitBackgroundClip: 'text',
                                 backgroundClip: 'text',
                                 color: 'transparent'
                             }}>
-                                {lang === 'he' ? `שלום, ${userProfile?.userName || 'משתמש'}!` : `Hello, ${userProfile?.userName || 'User'}!`}
-                            </h1>
+                                {lang === 'he' ? 'ממה להתחיל?' : 'What shall we start with?'}
+                            </h2>
                         </div>
-                        <p className="text-xl mb-8" style={{ color: 'var(--text-secondary)' }}>
-                            {lang === 'he' ? 'איך אוכל לעזור לך היום?' : 'How can I help you today?'}
-                        </p>
+
+                        {/* Gemini-style input bar */}
+                        <div className="w-full max-w-2xl mb-6">
+                            <div className="card-modern p-4" style={{ borderRadius: 'var(--radius-3xl)' }}>
+                                {/* Input area */}
+                                <div className="flex items-center gap-3 mb-4">
+                                    <div className="flex items-center gap-2 px-3 py-2 rounded-full border" style={{ 
+                                        borderColor: 'var(--border)',
+                                        background: 'var(--bg-tertiary)'
+                                    }}>
+                                        <Mic size={16} style={{ color: 'var(--text-secondary)' }} />
+                                        <span className="text-sm" style={{ color: 'var(--text-secondary)' }}>
+                                            {lang === 'he' ? 'Pro' : 'Pro'}
+                                        </span>
+                                    </div>
+                                    
+                                    <input
+                                        type="text"
+                                        value={input}
+                                        onChange={(e) => setInput(e.target.value)}
+                                        placeholder={lang === 'he' ? `יש לך שאלה ל-Gemini?` : 'Ask Gemini anything'}
+                                        className="flex-1 bg-transparent border-none outline-none text-lg"
+                                        style={{ color: 'var(--text-primary)' }}
+                                        onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                                            if (e.key === 'Enter' && !e.shiftKey && !isLoading && input.trim()) {
+                                                e.preventDefault();
+                                                handleSubmit(e);
+                                            }
+                                        }}
+                                    />
+                                    
+                                    <div className="flex items-center gap-2">
+                                        <button className="p-2 rounded-full hover:bg-gray-100 transition-colors" style={{ color: 'var(--text-tertiary)' }}>
+                                            <ImageIcon size={18} />
+                                        </button>
+                                        <button className="p-2 rounded-full hover:bg-gray-100 transition-colors" style={{ color: 'var(--text-tertiary)' }}>
+                                            <Plus size={18} />
+                                        </button>
+                                    </div>
+                                </div>
+
+                                {/* Bottom row with model selector and send */}
+                                <div className="flex items-center justify-between">
+                                    <div className="flex items-center gap-2">
+                                        <button className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm border hover:bg-gray-50 transition-colors" style={{ 
+                                            borderColor: 'var(--border)',
+                                            color: 'var(--text-secondary)'
+                                        }}>
+                                            <Sparkles size={14} />
+                                            {lang === 'he' ? '2.5 Flash' : '2.5 Flash'}
+                                        </button>
+                                    </div>
+
+                                    <button 
+                                        onClick={() => input.trim() && handleSubmit()}
+                                        disabled={!input.trim() || isLoading}
+                                        className="p-3 rounded-full transition-all duration-200"
+                                        style={{
+                                            background: input.trim() ? 'var(--gradient-accent)' : 'var(--bg-tertiary)',
+                                            color: input.trim() ? 'white' : 'var(--text-tertiary)',
+                                            opacity: input.trim() ? 1 : 0.5,
+                                            cursor: input.trim() ? 'pointer' : 'not-allowed'
+                                        }}
+                                    >
+                                        {isLoading ? <Loader2 className="h-5 w-5 animate-spin" /> : <ArrowRight className="w-5 h-5" />}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                         
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 w-full max-w-md">
+                        {/* Gemini-style pill buttons */}
+                        <div className="flex flex-wrap justify-center gap-2 max-w-2xl">
                             <button 
-                                onClick={() => setInput(lang === 'he' ? "עזור לי לכתוב אימייל מקצועי" : "Help me write a professional email")}
-                                className="card-modern text-left p-4 hover:scale-105 transition-transform cursor-pointer"
+                                onClick={() => setInput(lang === 'he' ? "עזור לי לתכנן טיול" : "Help me plan a trip")}
+                                className="px-4 py-2 rounded-full text-sm border hover:bg-gray-50 transition-all duration-200 hover:scale-105"
+                                style={{ borderColor: 'var(--border)', color: 'var(--text-primary)' }}
                             >
-                                <div className="font-medium mb-1" style={{ color: 'var(--text-primary)' }}>
-                                    {lang === 'he' ? '✉️ אימייל מקצועי' : '✉️ Professional Email'}
-                                </div>
-                                <div className="text-sm" style={{ color: 'var(--text-tertiary)' }}>
-                                    {lang === 'he' ? 'כתיבת אימייל עסקי' : 'Business email writing'}
-                                </div>
+                                {lang === 'he' ? '✈️ עזור לי לתכנן טיול' : '✈️ Help me plan a trip'}
                             </button>
                             <button 
-                                onClick={() => setInput(lang === 'he' ? "הסבר לי מושג מורכב" : "Explain a complex concept")}
-                                className="card-modern text-left p-4 hover:scale-105 transition-transform cursor-pointer"
+                                onClick={() => setInput(lang === 'he' ? "אני רוצה לתכנן משהו" : "I want to plan something")}
+                                className="px-4 py-2 rounded-full text-sm border hover:bg-gray-50 transition-all duration-200 hover:scale-105"
+                                style={{ borderColor: 'var(--border)', color: 'var(--text-primary)' }}
                             >
-                                <div className="font-medium mb-1" style={{ color: 'var(--text-primary)' }}>
-                                    {lang === 'he' ? '🧠 הסבר מושגים' : '🧠 Explain Concepts'}
-                                </div>
-                                <div className="text-sm" style={{ color: 'var(--text-tertiary)' }}>
-                                    {lang === 'he' ? 'הסברים ברורים' : 'Clear explanations'}
-                                </div>
+                                {lang === 'he' ? '📅 אני רוצה לתכנן משהו' : '📅 I want to plan something'}
                             </button>
                             <button 
-                                onClick={() => setInput(lang === 'he' ? "רעיונות לפרויקט חדש" : "Ideas for a new project")}
-                                className="card-modern text-left p-4 hover:scale-105 transition-transform cursor-pointer"
+                                onClick={() => setInput(lang === 'he' ? "צור תמונה" : "Create an image")}
+                                className="px-4 py-2 rounded-full text-sm border hover:bg-gray-50 transition-all duration-200 hover:scale-105"
+                                style={{ borderColor: 'var(--border)', color: 'var(--text-primary)' }}
                             >
-                                <div className="font-medium mb-1" style={{ color: 'var(--text-primary)' }}>
-                                    {lang === 'he' ? '💡 רעיונות יצירתיים' : '💡 Creative Ideas'}
-                                </div>
-                                <div className="text-sm" style={{ color: 'var(--text-tertiary)' }}>
-                                    {lang === 'he' ? 'בריינסטורמינג פרויקטים' : 'Project brainstorming'}
-                                </div>
+                                {lang === 'he' ? '🎨 צור תמונה' : '🎨 Create an image'}
                             </button>
                             <button 
-                                onClick={() => setInput(lang === 'he' ? "תרגום טקסט" : "Translate text")}
-                                className="card-modern text-left p-4 hover:scale-105 transition-transform cursor-pointer"
+                                onClick={() => setInput(lang === 'he' ? "צור תזמורת" : "Create a playlist")}
+                                className="px-4 py-2 rounded-full text-sm border hover:bg-gray-50 transition-all duration-200 hover:scale-105"
+                                style={{ borderColor: 'var(--border)', color: 'var(--text-primary)' }}
                             >
-                                <div className="font-medium mb-1" style={{ color: 'var(--text-primary)' }}>
-                                    {lang === 'he' ? '🌐 תרגום' : '🌐 Translation'}
-                                </div>
-                                <div className="text-sm" style={{ color: 'var(--text-tertiary)' }}>
-                                    {lang === 'he' ? 'תרגום בין שפות' : 'Language translation'}
-                                </div>
+                                {lang === 'he' ? '🎵 צור תזמורת' : '🎵 Create a playlist'}
+                            </button>
+                            <button 
+                                onClick={() => setInput(lang === 'he' ? "תן לי סיכום" : "Give me a summary")}
+                                className="px-4 py-2 rounded-full text-sm border hover:bg-gray-50 transition-all duration-200 hover:scale-105"
+                                style={{ borderColor: 'var(--border)', color: 'var(--text-primary)' }}
+                            >
+                                {lang === 'he' ? '📝 תן לי סיכום' : '📝 Give me a summary'}
                             </button>
                         </div>
                     </div>
