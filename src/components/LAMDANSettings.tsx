@@ -4,7 +4,7 @@ import {
   Clock, Database, User, Settings as SettingsIcon, Bell, Moon, Globe
 } from 'lucide-react';
 
-export function GeminiSettings() {
+export function LAMDANSettings() {
   const [personalContextEnabled, setPersonalContextEnabled] = useState(true);
   const [appActivityEnabled, setAppActivityEnabled] = useState(true);
 
@@ -16,7 +16,7 @@ export function GeminiSettings() {
       content: (
         <div className="space-y-6">
           <p className="text-sm" style={{ color: 'var(--text-secondary)' }}>
-            אפשר ל-Gemini למצוא תשובות מותאמות אישית לבקשות על ידי לימוד התחומים העדיפים שלך לדוגמה, כדי לשאול את Gemini איך להכין עוגה, צריך רק לומר לו לאפשר.
+            אפשר ל-LAMDAN למצוא תשובות מותאמות אישית לבקשות על ידי לימוד התחומים העדיפים שלך לדוגמה, כדי לשאול את LAMDAN איך להכין עוגה, צריך רק לומר לו לאפשר.
           </p>
           
           {/* Toggle 1 */}
@@ -31,7 +31,7 @@ export function GeminiSettings() {
                 </span>
               </div>
               <p className="text-xs mr-8" style={{ color: 'var(--text-secondary)' }}>
-                Gemini זוכר מידע חשוב כדי לתת לך תשובות טובות יותר, בהתאם להעדפות שלך. אפשר למחוק זיכרון או להפסיק לשמור בכל עת.
+                LAMDAN זוכר מידע חשוב כדי לתת לך תשובות טובות יותר, בהתאם להעדפות שלך. אפשר למחוק זיכרון או להפסיק לשמור בכל עת.
               </p>
               <div className="flex gap-3 mt-2 mr-8">
                 <button className="text-xs font-medium" style={{ color: 'var(--accent)' }}>
@@ -68,7 +68,7 @@ export function GeminiSettings() {
                 </span>
               </div>
               <p className="text-xs mr-8" style={{ color: 'var(--text-secondary)' }}>
-                Gemini שומר את הפעילות באפליקציה לצורך התאמת השירות לצרכיך ושיפור המוצר. אפשר לצפות ולמחוק את הפעילות, כולל תכנים ש-Gemini שומר לגביהם.
+                LAMDAN שומר את הפעילות באפליקציה לצורך התאמת השירות לצרכיך ושיפור המוצר. אפשר לצפות ולמחוק את הפעילות, כולל תכנים ש-LAMDAN שומר לגביהם.
               </p>
               <div className="flex gap-3 mt-2 mr-8">
                 <button className="text-xs font-medium" style={{ color: 'var(--accent)' }}>
@@ -145,7 +145,7 @@ export function GeminiSettings() {
               ניהול מידע אישי
             </h4>
             <p className="text-xs mb-3" style={{ color: 'var(--text-secondary)' }}>
-              Gemini שומר מידע כדי לתת לך תשובות טובות יותר. אפשר לצפות ולמחוק את המידא.
+              LAMDAN שומר מידע כדי לתת לך תשובות טובות יותר. אפשר לצפות ולמחוק את המידא.
             </p>
             <div className="flex gap-2">
               <button className="btn-modern text-sm px-4 py-2 rounded-lg" style={{
@@ -223,7 +223,7 @@ export function GeminiSettings() {
         {/* Footer */}
         <div className="mt-8 p-4 rounded-xl border text-center" style={{ borderColor: 'var(--border)', background: 'var(--bg-secondary)' }}>
           <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
-            Gemini מופעל על ידי Google AI. העדפות והמידע האישי שלך מוגנים.
+            LAMDAN מופעל על ידי Google AI. העדפות והמידע האישי שלך מוגנים.
           </p>
           <div className="flex justify-center gap-4 mt-2">
             <button className="text-xs" style={{ color: 'var(--accent)' }}>מדיניות פרטיות</button>

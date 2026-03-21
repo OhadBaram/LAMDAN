@@ -226,7 +226,7 @@ export function ChatPage() {
                             </div>
                         </div>
 
-                        {/* Gemini-style greeting */}
+                        {/* LAMDAN-style greeting */}
                         <div className="mb-8">
                             <h1 className="text-3xl md:text-4xl font-bold mb-2" style={{ color: 'var(--text-primary)' }}>
                                 {lang === 'he' ? `שלום ${userProfile?.userName || 'אור'}` : `Hello ${userProfile?.userName || 'User'}`}
@@ -242,7 +242,7 @@ export function ChatPage() {
                             </h2>
                         </div>
 
-                        {/* Gemini-style input bar */}
+                        {/* LAMDAN-style input bar */}
                         <div className="w-full max-w-2xl mb-6">
                             <div className="card-modern p-4" style={{ borderRadius: 'var(--radius-3xl)' }}>
                                 {/* Input area */}
@@ -261,7 +261,7 @@ export function ChatPage() {
                                         type="text"
                                         value={input}
                                         onChange={(e) => setInput(e.target.value)}
-                                        placeholder={lang === 'he' ? `יש לך שאלה ל-Gemini?` : 'Ask Gemini anything'}
+                                        placeholder={lang === 'he' ? `יש לך שאלה ל-LAMDAN?` : 'Ask LAMDAN anything'}
                                         className="flex-1 bg-transparent border-none outline-none text-lg"
                                         style={{ color: 'var(--text-primary)' }}
                                         onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -311,7 +311,7 @@ export function ChatPage() {
                             </div>
                         </div>
                         
-                        {/* Gemini-style pill buttons */}
+                        {/* LAMDAN-style pill buttons */}
                         <div className="flex flex-wrap justify-center gap-2 max-w-2xl">
                             <button 
                                 onClick={() => setInput(lang === 'he' ? "עזור לי לתכנן טיול" : "Help me plan a trip")}

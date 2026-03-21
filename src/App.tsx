@@ -6,7 +6,7 @@ import { ArenaPage } from "../features/Arena/ArenaPage";
 import { CockpitPage } from "../features/Cockpit/CockpitPage";
 import { KnowledgeBasePage } from "../features/KnowledgeBase/KnowledgeBasePage";
 import { OnboardingWizard } from "../features/Onboarding/OnboardingWizard";
-import { GeminiSettings } from "./components/GeminiSettings";
+import { LAMDANSettings } from "./components/LAMDANSettings";
 import { SpacesPage } from "../features/Spaces/SpacesPage";
 import { ThemeSelector } from "./components/ThemeSelector";
 import { ChatSidebar } from "./components/ChatSidebar";
@@ -32,7 +32,7 @@ export default function Home() {
 
   return (
     <div dir="rtl" className="min-h-screen flex page-transition" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
-      {/* Gemini Header */}
+      {/* LAMDAN Header */}
       <div className="fixed top-0 right-0 left-0 z-50 flex items-center justify-between px-4 py-3" style={{ 
         background: 'var(--bg-primary)',
         borderBottom: '1px solid var(--border)'
@@ -48,7 +48,7 @@ export default function Home() {
           </button>
         </div>
 
-        {/* Gemini Logo */}
+        {/* LAMDAN Logo */}
         <div className="flex items-center gap-2">
           <span className="text-xl font-bold" style={{ 
             background: 'var(--gradient-primary)',
@@ -56,7 +56,7 @@ export default function Home() {
             backgroundClip: 'text',
             color: 'transparent'
           }}>
-            Gemini
+            LAMDAN
           </span>
           <Sparkles size={20} style={{ color: 'var(--accent)' }} />
         </div>
@@ -163,7 +163,7 @@ export default function Home() {
             </TabsContent>
             
             <TabsContent value="settings" className="h-full fade-in">
-              <GeminiSettings />
+              <LAMDANSettings />
             </TabsContent>
           </Tabs>
         </div>
