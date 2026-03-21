@@ -68,104 +68,85 @@ export default function Home() {
         </div>
       </div>
 
-      {/* Right Sidebar Toggle */}
-      <button
-        onClick={() => setRightSidebarOpen(!rightSidebarOpen)}
-        className="fixed top-20 left-4 z-40 btn-modern lg:hidden"
-        style={{
-          background: 'var(--bg-secondary)',
-          color: 'var(--text-primary)',
-          padding: '0.5rem',
-          borderRadius: 'var(--radius-full)'
-        }}
-      >
-        {rightSidebarOpen ? <X size={20} /> : <Menu size={20} />}
-      </button>
-
-      {/* Right Sidebar */}
-      <RightSidebar 
-        isOpen={rightSidebarOpen} 
-        onClose={() => setRightSidebarOpen(false)} 
-      />
-
-      {/* Left Sidebar */}
-      <div className={`fixed lg:relative lg:translate-x-0 transition-transform duration-300 z-30 h-full ${
-        sidebarOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'
-      }`}>
-        <ChatSidebar />
-      </div>
-
-      {/* Mobile Sidebar Backdrop */}
-      {sidebarOpen && (
-        <div
-          className="lg:hidden fixed inset-0 bg-black bg-opacity-50 z-20"
-          onClick={() => setSidebarOpen(false)}
+      {/* Main Content Wrapper */}
+      <div className="flex-1 flex flex-row min-w-0 pt-16">
+        {/* Right Sidebar */}
+        <RightSidebar 
+          isOpen={rightSidebarOpen} 
+          onClose={() => setRightSidebarOpen(false)} 
         />
-      )}
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Top Navigation */}
-        <div className="sticky top-0 z-30 fade-in" style={{ background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border)' }}>
-          <div className="max-w-6xl mx-auto px-4 py-4">
-            <Tabs value={activeTab} onValueChange={setActiveTab}>
-              <TabsList className="tabs-modern w-full">
-                <div className="flex flex-wrap gap-2 justify-end w-full">
-                  {tabs.map((tab) => {
-                    const Icon = tab.icon;
-                    return (
-                      <TabsTrigger 
-                        key={tab.value}
-                        value={tab.value} 
-                        className="tab-modern flex items-center gap-2 px-3 py-2"
-                      >
-                        <Icon className="w-4 h-4" />
-                        <span className="hidden sm:inline">{tab.label}</span>
-                        <span className="sm:hidden">{tab.label.charAt(0)}</span>
-                      </TabsTrigger>
-                    );
-                  })}
-                </div>
-              </TabsList>
-            </Tabs>
-          </div>
+        {/* Left Sidebar */}
+        <div className={`fixed lg:relative lg:translate-x-0 transition-transform duration-300 z-30 h-full ${
+          sidebarOpen ? 'translate-x-0' : 'translate-x-full lg:translate-x-0'
+        }`}>
+          <ChatSidebar />
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 overflow-hidden">
-          <Tabs value={activeTab} onValueChange={setActiveTab}>
-            <TabsContent value="home" className="h-full fade-in">
-              <ModernHomeScreen />
-            </TabsContent>
-            
-            <TabsContent value="chat" className="h-full fade-in">
-              <ChatPage />
-            </TabsContent>
-            
-            <TabsContent value="agentarena" className="h-full fade-in">
-              <AgentArenaPage />
-            </TabsContent>
-            
-            <TabsContent value="arena" className="h-full fade-in">
-              <ArenaPage />
-            </TabsContent>
-            
-            <TabsContent value="cockpit" className="h-full fade-in">
-              <CockpitPage />
-            </TabsContent>
-            
-            <TabsContent value="knowledge" className="h-full fade-in">
-              <KnowledgeBasePage />
-            </TabsContent>
-            
-            <TabsContent value="spaces" className="h-full fade-in">
-              <SpacesPage />
-            </TabsContent>
-            
-            <TabsContent value="settings" className="h-full fade-in">
-              <LAMDANSettings />
-            </TabsContent>
-          </Tabs>
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Top Navigation */}
+          <div className="sticky top-0 z-30 fade-in" style={{ background: 'var(--bg-secondary)', borderBottom: '1px solid var(--border)' }}>
+            <div className="max-w-6xl mx-auto px-4 py-4">
+              <Tabs value={activeTab} onValueChange={setActiveTab}>
+                <TabsList className="tabs-modern w-full">
+                  <div className="flex flex-wrap gap-2 justify-end w-full">
+                    {tabs.map((tab) => {
+                      const Icon = tab.icon;
+                      return (
+                        <TabsTrigger 
+                          key={tab.value}
+                          value={tab.value} 
+                          className="tab-modern flex items-center gap-2 px-4 py-3 font-semibold text-sm"
+                        >
+                          <Icon className="w-4 h-4" />
+                          <span className="hidden sm:inline">{tab.label}</span>
+                          <span className="sm:hidden">{tab.label.charAt(0)}</span>
+                        </TabsTrigger>
+                      );
+                    })}
+                  </div>
+                </TabsList>
+              </Tabs>
+            </div>
+          </div>
+
+          {/* Page Content */}
+          <div className="flex-1 overflow-hidden">
+            <Tabs value={activeTab} onValueChange={setActiveTab}>
+              <TabsContent value="home" className="h-full fade-in">
+                <ModernHomeScreen />
+              </TabsContent>
+              
+              <TabsContent value="chat" className="h-full fade-in">
+                <ChatPage />
+              </TabsContent>
+              
+              <TabsContent value="agentarena" className="h-full fade-in">
+                <AgentArenaPage />
+              </TabsContent>
+              
+              <TabsContent value="arena" className="h-full fade-in">
+                <ArenaPage />
+              </TabsContent>
+              
+              <TabsContent value="cockpit" className="h-full fade-in">
+                <CockpitPage />
+              </TabsContent>
+              
+              <TabsContent value="knowledge" className="h-full fade-in">
+                <KnowledgeBasePage />
+              </TabsContent>
+              
+              <TabsContent value="spaces" className="h-full fade-in">
+                <SpacesPage />
+              </TabsContent>
+              
+              <TabsContent value="settings" className="h-full fade-in">
+                <LAMDANSettings />
+              </TabsContent>
+            </Tabs>
+          </div>
         </div>
       </div>
     </div>
