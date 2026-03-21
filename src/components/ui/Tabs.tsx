@@ -24,13 +24,13 @@ export function Tabs({
 
 export function TabsList({
   children,
-  style,
+  className,
 }: {
   children: ReactNode;
-  style?: React.CSSProperties;
+  className?: string;
 }) {
   return (
-    <div style={{ display: "flex", gap: 8, ...style }}>
+    <div className={className}>
       {children}
     </div>
   );
@@ -39,9 +39,11 @@ export function TabsList({
 export function TabsTrigger({
   value,
   children,
+  className,
 }: {
   value: string;
   children: ReactNode;
+  className?: string;
 }) {
   const context = useContext(TabsContext);
   if (!context) throw new Error("TabsTrigger must be used within Tabs");
@@ -52,13 +54,12 @@ export function TabsTrigger({
   return (
     <button
       onClick={() => setValue(value)}
+      data-state={active ? "active" : "inactive"}
+      className={className}
       style={{
         padding: "8px 16px",
         border: "none",
         borderRadius: "8px",
-        background: active ? "#1976d2" : "#e0e0e0",
-        color: active ? "#fff" : "#333",
-        fontWeight: active ? "bold" : "normal",
         cursor: "pointer",
         fontSize: "1rem",
         transition: "background 0.2s",
