@@ -6,7 +6,7 @@ import { ArenaPage } from "../features/Arena/ArenaPage";
 import { CockpitPage } from "../features/Cockpit/CockpitPage";
 import { KnowledgeBasePage } from "../features/KnowledgeBase/KnowledgeBasePage";
 import { OnboardingWizard } from "../features/Onboarding/OnboardingWizard";
-import { SettingsPage } from "../features/Settings/SettingsPage";
+import { GeminiSettings } from "./components/GeminiSettings";
 import { SpacesPage } from "../features/Spaces/SpacesPage";
 import { ThemeSelector } from "./components/ThemeSelector";
 import { ChatSidebar } from "./components/ChatSidebar";
@@ -163,7 +163,7 @@ export default function Home() {
             </TabsContent>
             
             <TabsContent value="settings" className="h-full fade-in">
-              <SettingsPage />
+              <GeminiSettings />
             </TabsContent>
           </Tabs>
         </div>
