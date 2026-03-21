@@ -32,12 +32,12 @@ export function RightSidebar({ isOpen, onClose }: RightSidebarProps) {
 
   const gemTools = [
     { id: 'gems', title: 'Gems', icon: <Crown size={18} />, isHeader: true },
-    { id: 'brainstorm', title: 'כנמח פיתוחים', icon: <Zap size={18} /> },
-    { id: 'cook', title: 'נונה רחבח', icon: <Database size={18} /> },
+    { id: 'brainstorm', title: 'כותב פיתוחים', icon: <Zap size={18} /> },
+    { id: 'cook', title: 'נונה רחמן', icon: <Database size={18} /> },
     { id: 'write', title: 'לחופר הסופר', icon: <FileText size={18} /> },
     { id: 'learn', title: 'מלמד רעיונות', icon: <Sparkles size={18} /> },
-    { id: 'edit', title: 'מוגהר באנגלית', icon: <Type size={18} /> },
-    { id: 'program', title: 'אוטומט על לחיצות מידע', icon: <Code size={18} /> },
+    { id: 'edit', title: 'עורך באנגלית', icon: <Type size={18} /> },
+    { id: 'program', title: 'ממתג תוכן ומידע', icon: <Code size={18} /> },
     { id: 'images', title: 'מחולל תמונות', icon: <Image size={18} /> }
   ];
 
