@@ -42,17 +42,18 @@ export function LAMDANSettings() {
                 </button>
               </div>
             </div>
-            <button
-              onClick={() => setPersonalContextEnabled(!personalContextEnabled)}
-              className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${
-                personalContextEnabled ? 'bg-blue-500' : 'bg-gray-300'
+          <button
+            onClick={() => setPersonalContextEnabled(!personalContextEnabled)}
+            className={`relative w-14 h-8 rounded-full transition-all duration-300 ${
+              personalContextEnabled ? 'bg-blue-500 shadow-lg shadow-blue-500/30' : 'bg-gray-300'
+            }`}
+            style={{ boxShadow: personalContextEnabled ? '0 0 15px rgba(59, 130, 246, 0.5)' : 'none' }}
+          >
+            <div
+              className={`absolute top-1 w-6 h-6 bg-white rounded-full shadow-md transition-transform duration-300 ${
+                personalContextEnabled ? 'translate-x-6' : 'translate-x-1'
               }`}
-            >
-              <div
-                className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200 ${
-                  personalContextEnabled ? 'translate-x-6' : 'translate-x-1'
-                }`}
-              />
+            />
             </button>
           </div>
 
@@ -78,12 +79,13 @@ export function LAMDANSettings() {
             </div>
             <button
               onClick={() => setAppActivityEnabled(!appActivityEnabled)}
-              className={`relative w-12 h-6 rounded-full transition-colors duration-200 ${
-                appActivityEnabled ? 'bg-blue-500' : 'bg-gray-300'
+              className={`relative w-14 h-8 rounded-full transition-all duration-300 ${
+                appActivityEnabled ? 'bg-blue-500 shadow-lg shadow-blue-500/30' : 'bg-gray-300'
               }`}
+              style={{ boxShadow: appActivityEnabled ? '0 0 15px rgba(59, 130, 246, 0.5)' : 'none' }}
             >
               <div
-                className={`absolute top-1 w-4 h-4 bg-white rounded-full shadow transition-transform duration-200 ${
+                className={`absolute top-1 w-6 h-6 bg-white rounded-full shadow-md transition-transform duration-300 ${
                   appActivityEnabled ? 'translate-x-6' : 'translate-x-1'
                 }`}
               />
@@ -200,7 +202,12 @@ export function LAMDANSettings() {
         {/* Settings Sections */}
         <div className="space-y-6">
           {settingsSections.map((section) => (
-            <div key={section.id} className="card-modern" style={{ borderRadius: 'var(--radius-xl)' }}>
+            <div key={section.id} className="card-modern p-6" style={{ 
+              borderRadius: 'var(--radius-2xl)',
+              background: 'var(--bg-secondary)',
+              border: '1px solid var(--border)',
+              boxShadow: 'var(--shadow)'
+            }}>
               <div className="flex items-center gap-3 mb-4 pb-3 border-b" style={{ borderColor: 'var(--border)' }}>
                 <div className="p-1.5 rounded-lg" style={{ background: 'var(--accent-light)' }}>
                   {React.cloneElement(section.icon as React.ReactElement, { 
@@ -221,7 +228,12 @@ export function LAMDANSettings() {
         </div>
 
         {/* Footer */}
-        <div className="mt-8 p-4 rounded-xl border text-center" style={{ borderColor: 'var(--border)', background: 'var(--bg-secondary)' }}>
+        <div className="mt-8 p-6 rounded-2xl border text-center card-modern" style={{ 
+          borderColor: 'var(--border)', 
+          background: 'var(--bg-secondary)',
+          borderRadius: 'var(--radius-2xl)',
+          boxShadow: 'var(--shadow-sm)'
+        }}>
           <p className="text-xs" style={{ color: 'var(--text-tertiary)' }}>
             LAMDAN מופעל על ידי Google AI. העדפות והמידע האישי שלך מוגנים.
           </p>
