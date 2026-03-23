@@ -167,12 +167,12 @@ export function LAMDANSettings() {
             </div>
           </div>
           
-          <button className="w-full flex items-center justify-between p-3 rounded-lg border hover:bg-gray-50 transition-colors" style={{ borderColor: 'var(--border)' }}>
+          <button className="w-full flex items-center justify-between p-3 rounded-lg border hover:bg-white/5 transition-colors" style={{ borderColor: 'var(--border)' }}>
             <span className="text-sm" style={{ color: 'var(--text-primary)' }}>מדיניות פרטיות</span>
             <ExternalLink size={14} style={{ color: 'var(--text-tertiary)' }} />
           </button>
           
-          <button className="w-full flex items-center justify-between p-3 rounded-lg border hover:bg-gray-50 transition-colors" style={{ borderColor: 'var(--border)' }}>
+          <button className="w-full flex items-center justify-between p-3 rounded-lg border hover:bg-white/5 transition-colors" style={{ borderColor: 'var(--border)' }}>
             <span className="text-sm" style={{ color: 'var(--text-primary)' }}>תנאי שימוש</span>
             <ExternalLink size={14} style={{ color: 'var(--text-tertiary)' }} />
           </button>
