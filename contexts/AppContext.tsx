@@ -75,14 +75,14 @@ export const PROVIDER_INFO: {[key: string]: {name: string, site: string, apiKeyU
 // LLMPromptPart types remain, they are used by OpenAI/Anthropic parts
 type LLMPromptPartText = { type: "text"; text: string };
 type LLMPromptPartImageUrl = { type: "image_url"; image_url: { url: string } };
-// type LLMPromptPartInlineData = { inline_data: { mime_type: string; data: string } }; // This is effectively a Gemini Part
+// type LLMPromptPartInlineData = { inline_data: { mime_type: string; data: string } }; // This is effectively a LAMDAN Part
 type LLMPromptPartImageSource = { type: "image"; source: { type: "base64"; media_type: string; data: string } };
 
 // General LLMPromptPart, for providers not using Google SDK's Part/Content structure directly in this intermediate step
 type OldLLMPromptPart =
   | LLMPromptPartText
   | LLMPromptPartImageUrl
-  // | LLMPromptPartInlineData // Covered by Gemini Part
+  // | LLMPromptPartInlineData // Covered by LAMDAN Part
   | LLMPromptPartImageSource;
 
 
