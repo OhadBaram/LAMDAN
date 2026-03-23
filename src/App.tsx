@@ -42,7 +42,7 @@ export default function Home() {
           {/* Mobile Menu Toggle */}
           <button
             onClick={() => setSidebarOpen(!sidebarOpen)}
-            className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+            className="lg:hidden p-2 rounded-lg hover:bg-white/10 transition-colors"
             style={{ color: 'var(--text-primary)' }}
           >
             {sidebarOpen ? <X size={20} /> : <Menu size={20} />}
