@@ -124,7 +124,7 @@ export function RightSidebar({ isOpen, onClose }: RightSidebarProps) {
                 <div className={`p-2.5 rounded-xl transition-colors duration-300 ${
                   activeSection === item.id 
                     ? 'bg-blue-500 text-white' 
-                    : 'bg-gray-100/50 border border-gray-200/50 group-hover:bg-gray-100'
+                    : 'bg-white/10 border border-white/20 group-hover:bg-white/20'
                 }`}>
                   {React.cloneElement(item.icon as React.ReactElement, {
                     size: 18,
@@ -159,7 +159,7 @@ export function RightSidebar({ isOpen, onClose }: RightSidebarProps) {
                   <div className={`p-2 rounded-lg transition-all duration-200 ${
                     activeSection === tool.id 
                       ? 'bg-blue-500 text-white' 
-                      : 'bg-gray-100/30 group-hover:bg-gray-100/50'
+                      : 'bg-white/10 group-hover:bg-white/20'
                   }`}>
                     {React.cloneElement(tool.icon as React.ReactElement, {
                       size: 14,
@@ -197,7 +197,7 @@ export function RightSidebar({ isOpen, onClose }: RightSidebarProps) {
                     color: 'var(--text-primary)' 
                   }}
                 >
-                  <div className="p-2 rounded-lg bg-gray-100/20 border border-gray-200/20">
+                  <div className="p-2 rounded-lg bg-white/10 border border-white/10">
                     <Clock size={14} style={{ color: 'var(--text-tertiary)' }} />
                   </div>
                   <div className="flex-1 text-right min-w-0">
@@ -224,7 +224,7 @@ export function RightSidebar({ isOpen, onClose }: RightSidebarProps) {
                 onClick={() => setActiveSection(item.id)}
               >
                 <div className={`p-2 rounded-xl ${
-                  activeSection === item.id ? 'bg-blue-500 text-white' : 'bg-gray-100/30'
+                  activeSection === item.id ? 'bg-blue-500 text-white' : 'bg-white/10'
                 }`}>
                   {React.cloneElement(item.icon as React.ReactElement, {
                     size: 16,
@@ -237,7 +237,7 @@ export function RightSidebar({ isOpen, onClose }: RightSidebarProps) {
           </div>
 
           {/* User Info Card */}
-          <div className="p-3 rounded-2xl border bg-gray-100/20 shadow-sm flex items-center gap-3 group transition-all duration-300 hover:shadow-md" style={{ borderColor: 'var(--border)' }}>
+          <div className="p-3 rounded-2xl border bg-white/10 shadow-sm flex items-center gap-3 group transition-all duration-300 hover:shadow-md" style={{ borderColor: 'var(--border)' }}>
             <div className="relative">
               <div className="w-10 h-10 rounded-full flex items-center justify-center font-black text-sm" style={{
                 background: 'var(--gradient-accent)',
@@ -246,7 +246,7 @@ export function RightSidebar({ isOpen, onClose }: RightSidebarProps) {
               }}>
                 א
               </div>
-              <div className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-500 border-2 border-gray-200"></div>
+              <div className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-500 border-2 border-gray-400"></div>
             </div>
             <div className="flex-1 text-right overflow-hidden">
               <div className="text-xs font-black truncate" style={{ color: 'var(--text-primary)' }}>אור משתמש</div>
