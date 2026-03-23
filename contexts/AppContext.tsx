@@ -37,7 +37,7 @@ export const KNOWN_MODELS_PRICING: {[key: string]: {input: number, output: numbe
     'gpt-4o': { input: 5.00, output: 15.00, provider: 'openai', contextWindow: 128000 },
     'gpt-4-turbo': { input: 10.00, output: 30.00, provider: 'openai', contextWindow: 128000 },
     'gpt-3.5-turbo': { input: 0.50, output: 1.50, provider: 'openai', contextWindow: 16385, isFreeTier: true, note: "Often has free credits for new accounts or very low cost." },
-    // Google Gemini - Prices per 1M tokens (characters for images)
+    // Google LAMDAN - Prices per 1M tokens (characters for images)
     // Add 'gemini-2.5-flash-preview-04-17' if specific pricing is known, otherwise it might fall back or use a similar model's pricing.
     // For now, existing Google models are kept for pricing lookup based on modelConfig.modelId.
     'gemini-2.5-flash-preview-04-17': { input: 0.35, output: 1.05, provider: 'google', contextWindow: 1000000, isFreeTier: true, note: "Preview model with potentially free/low cost access." },
@@ -276,7 +276,7 @@ export const InvokeLLM = async ({ modelConfig, prompt, systemPrompt, conversatio
         } catch (sdkError: any) {
             console.error("Google GenAI SDK Error:", sdkError);
             const detail = sdkError.message || "Unknown SDK error";
-            return { error: `Google GenAI SDK Error: ${detail}` };
+            return { error: `Google LAMDAN SDK Error: ${detail}` };
         }
 
     } else if (provider === 'anthropic') {
