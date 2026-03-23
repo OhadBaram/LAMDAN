@@ -31,14 +31,14 @@ export function RightSidebar({ isOpen, onClose }: RightSidebarProps) {
   ];
 
   const gemTools = [
-    { id: 'gems', title: 'Gems', icon: <Crown size={18} />, isHeader: true },
-    { id: 'brainstorm', title: 'כותב פיתוחים', icon: <Zap size={18} /> },
-    { id: 'cook', title: 'נונה רחמן', icon: <Database size={18} /> },
-    { id: 'write', title: 'לחופר הסופר', icon: <FileText size={18} /> },
-    { id: 'learn', title: 'מלמד רעיונות', icon: <Sparkles size={18} /> },
-    { id: 'edit', title: 'עורך באנגלית', icon: <Type size={18} /> },
-    { id: 'program', title: 'ממתג תוכן ומידע', icon: <Code size={18} /> },
-    { id: 'images', title: 'מחולל תמונות', icon: <Image size={18} /> }
+    { id: 'gems', title: 'LAMDAN', icon: <Crown size={18} />, isHeader: true },
+    { id: 'brainstorm', title: 'סיעור מוחות', icon: <Zap size={18} /> },
+    { id: 'cook', title: 'מתכונים', icon: <Database size={18} /> },
+    { id: 'write', title: 'כתיבת תוכן', icon: <FileText size={18} /> },
+    { id: 'learn', title: 'למידה', icon: <Sparkles size={18} /> },
+    { id: 'edit', title: 'עריכה', icon: <Type size={18} /> },
+    { id: 'program', title: 'תכנות', icon: <Code size={18} /> },
+    { id: 'images', title: 'תמונות', icon: <Image size={18} /> }
   ];
 
   const bottomMenu = [
@@ -124,7 +124,7 @@ export function RightSidebar({ isOpen, onClose }: RightSidebarProps) {
                 <div className={`p-2.5 rounded-xl transition-colors duration-300 ${
                   activeSection === item.id 
                     ? 'bg-blue-500 text-white' 
-                    : 'bg-white border border-gray-100 group-hover:bg-gray-50'
+                    : 'bg-gray-100/50 border border-gray-200/50 group-hover:bg-gray-100'
                 }`}>
                   {React.cloneElement(item.icon as React.ReactElement, {
                     size: 18,
@@ -143,13 +143,13 @@ export function RightSidebar({ isOpen, onClose }: RightSidebarProps) {
           <div className="space-y-3">
             <h3 className="text-[11px] font-bold uppercase tracking-wider px-2 flex items-center gap-2" style={{ color: 'var(--text-tertiary)' }}>
               <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
-              Gems
+              LAMDAN
             </h3>
             <div className="grid grid-cols-1 gap-2">
               {gemTools.map((tool) => (
                 <button
                   key={tool.id}
-                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 hover:bg-white hover:shadow-sm border border-transparent hover:border-gray-100 group"
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl transition-all duration-200 hover:bg-white/10 border border-transparent group"
                   style={{
                     background: activeSection === tool.id ? 'var(--accent-light)' : 'transparent',
                     color: activeSection === tool.id ? 'var(--accent)' : 'var(--text-primary)',
@@ -159,7 +159,7 @@ export function RightSidebar({ isOpen, onClose }: RightSidebarProps) {
                   <div className={`p-2 rounded-lg transition-all duration-200 ${
                     activeSection === tool.id 
                       ? 'bg-blue-500 text-white' 
-                      : 'bg-gray-50 group-hover:bg-white'
+                      : 'bg-gray-100/30 group-hover:bg-gray-100/50'
                   }`}>
                     {React.cloneElement(tool.icon as React.ReactElement, {
                       size: 14,
