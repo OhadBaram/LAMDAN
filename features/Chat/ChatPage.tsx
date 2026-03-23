@@ -273,10 +273,10 @@ export function ChatPage() {
                                     />
                                     
                                     <div className="flex items-center gap-2">
-                                        <button className="p-2 rounded-full hover:bg-gray-100 transition-colors" style={{ color: 'var(--text-tertiary)' }}>
+                                        <button className="p-2 rounded-full hover:bg-white/10 transition-colors" style={{ color: 'var(--text-tertiary)' }}>
                                             <ImageIcon size={18} />
                                         </button>
-                                        <button className="p-2 rounded-full hover:bg-gray-100 transition-colors" style={{ color: 'var(--text-tertiary)' }}>
+                                        <button className="p-2 rounded-full hover:bg-white/10 transition-colors" style={{ color: 'var(--text-tertiary)' }}>
                                             <Plus size={18} />
                                         </button>
                                     </div>
@@ -285,7 +285,7 @@ export function ChatPage() {
                                 {/* Bottom row with model selector and send */}
                                 <div className="flex items-center justify-between">
                                     <div className="flex items-center gap-2">
-                                        <button className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm border hover:bg-gray-50 transition-colors" style={{ 
+                                        <button className="flex items-center gap-2 px-3 py-1.5 rounded-full text-sm border hover:bg-white/10 transition-colors" style={{ 
                                             borderColor: 'var(--border)',
                                             color: 'var(--text-secondary)'
                                         }}>
@@ -315,35 +315,35 @@ export function ChatPage() {
                         <div className="flex flex-wrap justify-center gap-2 max-w-2xl">
                             <button 
                                 onClick={() => setInput(lang === 'he' ? "עזור לי לתכנן טיול" : "Help me plan a trip")}
-                                className="px-4 py-2 rounded-full text-sm border hover:bg-gray-50 transition-all duration-200 hover:scale-105"
+                                className="px-4 py-2 rounded-full text-sm border hover:bg-white/10 transition-all duration-200 hover:scale-105"
                                 style={{ borderColor: 'var(--border)', color: 'var(--text-primary)' }}
                             >
                                 {lang === 'he' ? '✈️ עזור לי לתכנן טיול' : '✈️ Help me plan a trip'}
                             </button>
                             <button 
                                 onClick={() => setInput(lang === 'he' ? "אני רוצה לתכנן משהו" : "I want to plan something")}
-                                className="px-4 py-2 rounded-full text-sm border hover:bg-gray-50 transition-all duration-200 hover:scale-105"
+                                className="px-4 py-2 rounded-full text-sm border hover:bg-white/10 transition-all duration-200 hover:scale-105"
                                 style={{ borderColor: 'var(--border)', color: 'var(--text-primary)' }}
                             >
                                 {lang === 'he' ? '📅 אני רוצה לתכנן משהו' : '📅 I want to plan something'}
                             </button>
                             <button 
                                 onClick={() => setInput(lang === 'he' ? "צור תמונה" : "Create an image")}
-                                className="px-4 py-2 rounded-full text-sm border hover:bg-gray-50 transition-all duration-200 hover:scale-105"
+                                className="px-4 py-2 rounded-full text-sm border hover:bg-white/10 transition-all duration-200 hover:scale-105"
                                 style={{ borderColor: 'var(--border)', color: 'var(--text-primary)' }}
                             >
                                 {lang === 'he' ? '🎨 צור תמונה' : '🎨 Create an image'}
                             </button>
                             <button 
                                 onClick={() => setInput(lang === 'he' ? "צור תזמורת" : "Create a playlist")}
-                                className="px-4 py-2 rounded-full text-sm border hover:bg-gray-50 transition-all duration-200 hover:scale-105"
+                                className="px-4 py-2 rounded-full text-sm border hover:bg-white/10 transition-all duration-200 hover:scale-105"
                                 style={{ borderColor: 'var(--border)', color: 'var(--text-primary)' }}
                             >
                                 {lang === 'he' ? '🎵 צור תזמורת' : '🎵 Create a playlist'}
                             </button>
                             <button 
                                 onClick={() => setInput(lang === 'he' ? "תן לי סיכום" : "Give me a summary")}
-                                className="px-4 py-2 rounded-full text-sm border hover:bg-gray-50 transition-all duration-200 hover:scale-105"
+                                className="px-4 py-2 rounded-full text-sm border hover:bg-white/10 transition-all duration-200 hover:scale-105"
                                 style={{ borderColor: 'var(--border)', color: 'var(--text-primary)' }}
                             >
                                 {lang === 'he' ? '📝 תן לי סיכום' : '📝 Give me a summary'}
