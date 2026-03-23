@@ -118,13 +118,13 @@ export function ChatSidebar() {
               
               <div className="flex gap-1 mr-2">
                 <button 
-                  className="p-1.5 rounded-lg hover:bg-opacity-10 hover:bg-black transition-colors"
+                  className="p-1.5 rounded-lg hover:bg-white/10 transition-colors"
                   style={{ color: 'var(--text-tertiary)' }}
                 >
                   <Edit3 size={14} />
                 </button>
                 <button 
-                  className="p-1.5 rounded-lg hover:bg-red-500 hover:bg-opacity-10 transition-colors"
+                  className="p-1.5 rounded-lg hover:bg-red-500/20 transition-colors"
                   style={{ color: 'var(--text-tertiary)' }}
                 >
                   <Trash2 size={14} />
