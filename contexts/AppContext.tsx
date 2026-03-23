@@ -61,7 +61,7 @@ export const KNOWN_MODELS_PRICING: {[key: string]: {input: number, output: numbe
 
 export const PROVIDER_INFO: {[key: string]: {name: string, site: string, apiKeyUrl: string, videoUrl?: string, defaultModel: string, requiresEndpoint?: boolean, note?: string}} = {
     openai: { name: 'OpenAI', site: 'https://openai.com/product', apiKeyUrl: 'https://platform.openai.com/api-keys', videoUrl: 'https://www.youtube.com/watch?v=kYqRtjDBci8', defaultModel: 'gpt-3.5-turbo' },
-    google: { name: 'Google (Gemini)', site: 'https://ai.google.dev/', apiKeyUrl: 'https://aistudio.google.com/app/apikey', videoUrl: 'https://www.youtube.com/watch?v=Như thế nào để có API Key của Gemini AI Studio', defaultModel: 'gemini-2.5-flash-preview-04-17' }, // Updated default model
+    google: { name: 'Google (LAMDAN)', site: 'https://ai.google.dev/', apiKeyUrl: 'https://aistudio.google.com/app/apikey', videoUrl: 'https://www.youtube.com/watch?v=Như thế nào để có API Key của Gemini AI Studio', defaultModel: 'gemini-2.5-flash-preview-04-17' }, // Updated default model
     anthropic: { name: 'Anthropic (Claude)', site: 'https://www.anthropic.com/product', apiKeyUrl: 'https://console.anthropic.com/settings/keys', videoUrl: 'https://www.youtube.com/watch?v=S0y6nN1S7eI', defaultModel: 'claude-3-haiku-20240307' },
     microsoft: { name: 'Microsoft (Azure AI / Copilot)', site: 'https://azure.microsoft.com/en-us/products/ai-services/openai-service', apiKeyUrl: 'https://portal.azure.com/', videoUrl: 'https://www.youtube.com/watch?v=YOUR_AZURE_KEY_VIDEO_ID', defaultModel: 'azure-gpt-4o', requiresEndpoint: true },
     perplexity: { name: 'Perplexity AI', site: 'https://perplexity.ai/', apiKeyUrl: 'https://docs.perplexity.ai/reference/post_chat_completions', videoUrl: 'https://www.youtube.com/watch?v=YOUR_PERPLEXITY_KEY_VIDEO_ID', defaultModel: 'llama-3-sonar-small-32k-online' },
@@ -209,17 +209,17 @@ export const InvokeLLM = async ({ modelConfig, prompt, systemPrompt, conversatio
     } else if (provider === 'google') {
         try {
             if (!apiKey) { // API key from user settings, not process.env
-                return { error: `API Key not configured for Google Gemini model "${modelConfig.name}".` };
+                return { error: `API Key not configured for LAMDAN model "${modelConfig.name}".` };
             }
             const ai = new GoogleGenAI({ apiKey: apiKey }); // Use API key from modelConfig
             
             const sdkModelName = modelId || 'gemini-2.5-flash-preview-04-17'; // Use configured modelId or default
 
-            const geminiApiContents: Content[] = [];
+            const lamaApiContents: Content[] = [];
 
             // Conversation History
             conversationHistory.forEach(msg => {
-                geminiApiContents.push({
+                lamaApiContents.push({
                     role: msg.role === 'user' ? 'user' : 'model',
                     parts: [{ text: msg.content }]
                 });
@@ -247,7 +247,7 @@ export const InvokeLLM = async ({ modelConfig, prompt, systemPrompt, conversatio
                 }
             }
 
-            geminiApiContents.push({ role: "user", parts: currentUserMessagePartsSDK });
+            lamaApiContents.push({ role: "user", parts: currentUserMessagePartsSDK });
 
             const sdkRequestConfig: any = {
                 temperature: (modelConfig as any).temperature || 0.7,
@@ -259,7 +259,7 @@ export const InvokeLLM = async ({ modelConfig, prompt, systemPrompt, conversatio
 
             const sdkResponse: GenerateContentResponse = await ai.models.generateContent({
                 model: sdkModelName,
-                contents: geminiApiContents,
+                contents: lamaApiContents,
                 config: sdkRequestConfig
             });
 
@@ -270,7 +270,7 @@ export const InvokeLLM = async ({ modelConfig, prompt, systemPrompt, conversatio
                 usage.outgoingTokens = sdkResponse.usageMetadata.promptTokenCount || 0;
             } else {
                 usage.incomingTokens = messageContent.length / 4; // Estimate
-                usage.outgoingTokens = geminiApiContents.reduce((sum, content) => sum + content.parts.reduce((partSum, part) => partSum + ( (part as any).text?.length || (part as any).inlineData?.data?.length/1.37 || 0), 0),0) / 4; // Rougher estimate
+                usage.outgoingTokens = lamaApiContents.reduce((sum, content) => sum + content.parts.reduce((partSum, part) => partSum + ( (part as any).text?.length || (part as any).inlineData?.data?.length/1.37 || 0), 0),0) / 4; // Rougher estimate
             }
 
         } catch (sdkError: any) {
