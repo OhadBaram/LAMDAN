@@ -139,7 +139,7 @@ export function RightSidebar({ isOpen, onClose }: RightSidebarProps) {
             ))}
           </div>
 
-          {/* Gems Section */}
+          {/* LAMDAN Tools Section */}
           <div className="space-y-3">
             <h3 className="text-[11px] font-bold uppercase tracking-wider px-2 flex items-center gap-2" style={{ color: 'var(--text-tertiary)' }}>
               <div className="w-1.5 h-1.5 rounded-full bg-blue-500"></div>
