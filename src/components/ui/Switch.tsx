@@ -41,7 +41,8 @@ export const Switch: React.FC<SwitchProps> = (props) => {
       <span
         aria-hidden="true"
         className={`${isChecked ? 'translate-x-5' : 'translate-x-0'}
-                    pointer-events-none inline-block h-5 w-5 rounded-full bg-white shadow-lg transform ring-0 transition ease-in-out duration-200`}
+                    pointer-events-none inline-block h-5 w-5 rounded-full shadow-lg transform ring-0 transition ease-in-out duration-200`}
+        style={{ background: 'var(--bg-primary)' }}
       />
     </input>
   );
