@@ -31,7 +31,7 @@ export default function Home() {
   ];
 
   return (
-    <div dir="rtl" className="min-h-screen flex page-transition" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
+    <div dir="rtl" data-theme="dark" className="min-h-screen flex page-transition" style={{ background: 'var(--bg-primary)', color: 'var(--text-primary)' }}>
       {/* LAMDAN Header */}
       <div className="fixed top-0 right-0 left-0 z-[100] flex items-center justify-between px-4 py-3" style={{ 
         background: 'var(--bg-primary)',

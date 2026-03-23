@@ -90,7 +90,7 @@ export function OnboardingWizard({ onComplete }: { onComplete: () => void }) {
         validationSuccess: { he: "האימות הצליח! מעביר אותך לאפליקציה...", en: "Validation successful! Taking you to the app..." },
         validationErrorMsg: { he: "שגיאת אימות:", en: "Validation Error:" },
         videoGuide: { he: "מדריך וידאו לקבלת מפתח", en: "Video Guide for API Key"},
-        googleProviderNote: { he: "עבור Google Gemini, מפתח ה-API נטען אוטומטית. אין צורך להזין אותו כאן.", en: "For Google Gemini, the API key is automatically loaded. No need to enter it here."},
+        googleProviderNote: { he: "עבור LAMDAN, מפתח ה-API נטען אוטומטית. אין צורך להזין אותו כאן.", en: "For LAMDAN, the API key is automatically loaded. No need to enter it here."},
         back: { he: "חזור", en: "Back"},
         skipOnboarding: {he: "דלג על ההגדרה הראשונית", en: "Skip Initial Setup"},
     };

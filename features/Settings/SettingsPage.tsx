@@ -495,7 +495,7 @@ function ApiSettingsSection() {
             onChange({ ...(costs || {input:0, output:0}), [type]: isNaN(numValue) ? undefined : numValue });
         };
 
-        const isGoogleTiered = provider === 'google' && modelId && modelId.includes('gemini-1.5-pro');
+        const isGoogleTiered = provider === 'google' && modelId && modelId.includes('lamdan-1.5-pro');
 
         return (
             <div className="mt-2 text-sm">
@@ -506,7 +506,7 @@ function ApiSettingsSection() {
                 </Button>
                 {isOpen && (
                     <div className="p-3 border border-[var(--border)] rounded-lg bg-[var(--bg-primary)] space-y-2">
-                        {isGoogleTiered && <p className="text-xs text-yellow-500">{lang === 'he' ? 'לתמחור מדורג של Gemini 1.5 Pro, עיין בתיעוד הרשמי והזן את המחיר הרלוונטי ביותר עבורך או השאר ריק לשימוש בתמחור ברירת מחדל.' : 'For Gemini 1.5 Pro tiered pricing, consult official docs and enter the most relevant rate, or leave blank for default.'}</p>}
+                        {isGoogleTiered && <p className="text-xs text-yellow-500">{lang === 'he' ? 'לתמחור מדורג של LAMDAN Pro, עיין בתיעוד הרשמי והזן את המחיר הרלוונטי ביותר עבורך או השאר ריק לשימוש בתמחור ברירת מחדל.' : 'For LAMDAN Pro tiered pricing, consult official docs and enter the most relevant rate, or leave blank for default.'}</p>}
                         <div>
                             <Label htmlFor="inputCost" className="text-xs">{lang === 'he' ? 'עלות קלט (Input)' : 'Input Cost'}</Label>
                             <Input id="inputCost" type="number" step="0.01" value={costs?.input ?? ''} onChange={e => handleCostChange('input', e.target.value)} placeholder={knownPricing?.input?.toFixed(2) || "e.g., 0.50"} className="text-xs p-1.5 h-auto" />
