@@ -45,7 +45,7 @@ export function LAMDANSettings() {
           <button
             onClick={() => setPersonalContextEnabled(!personalContextEnabled)}
             className={`relative w-14 h-8 rounded-full transition-all duration-300 ${
-              personalContextEnabled ? 'bg-blue-500 shadow-lg shadow-blue-500/30' : 'bg-gray-300'
+              personalContextEnabled ? 'bg-blue-500 shadow-lg shadow-blue-500/30' : 'bg-gray-500/50'
             }`}
             style={{ boxShadow: personalContextEnabled ? '0 0 15px rgba(59, 130, 246, 0.5)' : 'none' }}
           >
@@ -80,7 +80,7 @@ export function LAMDANSettings() {
             <button
               onClick={() => setAppActivityEnabled(!appActivityEnabled)}
               className={`relative w-14 h-8 rounded-full transition-all duration-300 ${
-                appActivityEnabled ? 'bg-blue-500 shadow-lg shadow-blue-500/30' : 'bg-gray-300'
+                appActivityEnabled ? 'bg-blue-500 shadow-lg shadow-blue-500/30' : 'bg-gray-500/50'
               }`}
               style={{ boxShadow: appActivityEnabled ? '0 0 15px rgba(59, 130, 246, 0.5)' : 'none' }}
             >
