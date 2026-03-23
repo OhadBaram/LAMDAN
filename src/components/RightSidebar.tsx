@@ -191,13 +191,13 @@ export function RightSidebar({ isOpen, onClose }: RightSidebarProps) {
               ].map((chat, index) => (
                 <button
                   key={index}
-                  className="w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 hover:bg-white hover:shadow-md border border-gray-50 group"
+                  className="w-full flex items-center gap-3 px-3 py-3 rounded-xl transition-all duration-200 hover:bg-white/10 border border-transparent group"
                   style={{ 
                     background: 'var(--bg-secondary)',
                     color: 'var(--text-primary)' 
                   }}
                 >
-                  <div className="p-2 rounded-lg bg-white border border-gray-100">
+                  <div className="p-2 rounded-lg bg-gray-100/20 border border-gray-200/20">
                     <Clock size={14} style={{ color: 'var(--text-tertiary)' }} />
                   </div>
                   <div className="flex-1 text-right min-w-0">
@@ -216,7 +216,7 @@ export function RightSidebar({ isOpen, onClose }: RightSidebarProps) {
             {bottomMenu.slice(0, 4).map((item) => (
               <button
                 key={item.id}
-                className="flex flex-col items-center justify-center gap-2 p-3 rounded-2xl transition-all duration-200 hover:bg-white hover:shadow-sm border border-transparent hover:border-gray-100"
+                className="flex flex-col items-center justify-center gap-2 p-3 rounded-2xl transition-all duration-200 hover:bg-white/10 border border-transparent"
                 style={{
                   background: activeSection === item.id ? 'var(--accent-light)' : 'var(--bg-primary)',
                   color: activeSection === item.id ? 'var(--accent)' : 'var(--text-primary)'
@@ -224,7 +224,7 @@ export function RightSidebar({ isOpen, onClose }: RightSidebarProps) {
                 onClick={() => setActiveSection(item.id)}
               >
                 <div className={`p-2 rounded-xl ${
-                  activeSection === item.id ? 'bg-blue-500 text-white' : 'bg-gray-50'
+                  activeSection === item.id ? 'bg-blue-500 text-white' : 'bg-gray-100/30'
                 }`}>
                   {React.cloneElement(item.icon as React.ReactElement, {
                     size: 16,
@@ -237,7 +237,7 @@ export function RightSidebar({ isOpen, onClose }: RightSidebarProps) {
           </div>
 
           {/* User Info Card */}
-          <div className="p-3 rounded-2xl border bg-white shadow-sm flex items-center gap-3 group transition-all duration-300 hover:shadow-md" style={{ borderColor: 'var(--border)' }}>
+          <div className="p-3 rounded-2xl border bg-gray-100/20 shadow-sm flex items-center gap-3 group transition-all duration-300 hover:shadow-md" style={{ borderColor: 'var(--border)' }}>
             <div className="relative">
               <div className="w-10 h-10 rounded-full flex items-center justify-center font-black text-sm" style={{
                 background: 'var(--gradient-accent)',
@@ -246,13 +246,13 @@ export function RightSidebar({ isOpen, onClose }: RightSidebarProps) {
               }}>
                 א
               </div>
-              <div className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-500 border-2 border-white"></div>
+              <div className="absolute bottom-0 right-0 w-3 h-3 rounded-full bg-green-500 border-2 border-gray-200"></div>
             </div>
             <div className="flex-1 text-right overflow-hidden">
               <div className="text-xs font-black truncate" style={{ color: 'var(--text-primary)' }}>אור משתמש</div>
               <div className="text-[10px] font-bold truncate opacity-50">or@example.com</div>
             </div>
-            <button className="p-2 rounded-xl hover:bg-red-50 hover:text-red-500 transition-colors duration-200 text-gray-400">
+            <button className="p-2 rounded-xl hover:bg-red-500/10 hover:text-red-500 transition-colors duration-200 text-gray-400">
               <LogOut size={16} />
             </button>
           </div>
